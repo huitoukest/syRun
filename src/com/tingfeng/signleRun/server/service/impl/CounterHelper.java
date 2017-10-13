@@ -1,4 +1,4 @@
-package com.tingfeng.signleRun.service.impl;
+package com.tingfeng.signleRun.server.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,10 +59,11 @@ public class CounterHelper {
 	}
 	
 	
-	public synchronized void addCounter(Counter counter){
+	public synchronized long addCounter(Counter counter){
 		if(null != counter && counter.expireTime > System.currentTimeMillis()){
 			counterMap.put(counter.key, counter);
 		}
+		return counter.value;
 	}
 	
 	public synchronized long addCounterValue(String key,long value){

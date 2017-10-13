@@ -1,4 +1,4 @@
-package com.tingfeng.signleRun.controller;
+package com.tingfeng.signleRun.server;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -10,8 +10,7 @@ import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 
 import com.tingfeng.signleRun.common.ConfigEntity;
-
-import handler.SignleRunSeverHandler;
+import com.tingfeng.signleRun.server.handler.SignleRunSeverHandler;
 
 public class SignleRunTCPServer {
 	private static boolean isInited = false;
@@ -30,15 +29,15 @@ public class SignleRunTCPServer {
 	        //包括记录过滤器和编解码过滤器。其中TextLineCodecFactory是mina自带的文本解编码器  
 	        //acceptor.getFilterChain().addLast("logger", new LoggingFilter());  
 	        acceptor.getFilterChain().addLast("codec",  
-	                new ProtocolCodecFilter(new TextLineCodecFactory(Charset.forName("UTF-8"))));  
+	                new ProtocolCodecFilter(new TextLineCodecFactory(Charset.forName("UTF-8"))));
 	        //配置事务处理Handler，将请求转由TimeServerHandler处理。  
 	        acceptor.setHandler(new SignleRunSeverHandler());
-	        //配置Buffer的缓冲区大小  
+	        //配置Buffer的缓冲区大小
 	        acceptor.getSessionConfig().setReadBufferSize(1024);
 	        //设置等待时间，每隔IdleTime将调用一次handler.sessionIdle()方法  
 	        acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, 10); 
-	        //绑定端口  
-	        acceptor.bind(new InetSocketAddress(ConfigEntity.SERVER_IP,PORT));   
+	        //绑定端口
+	        acceptor.bind(new InetSocketAddress(ConfigEntity.SERVER_IP,PORT));
     	}
     }
 }

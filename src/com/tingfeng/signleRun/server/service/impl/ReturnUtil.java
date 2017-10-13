@@ -1,4 +1,4 @@
-package com.tingfeng.signleRun.service.impl;
+package com.tingfeng.signleRun.server.service.impl;
 
 public class ReturnUtil {
 	public static final String SUCCESS = "success";

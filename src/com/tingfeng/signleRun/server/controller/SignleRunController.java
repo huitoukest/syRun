@@ -1,8 +1,8 @@
-package com.tingfeng.signleRun.controller;
+package com.tingfeng.signleRun.server.controller;
 import java.io.IOException;
 import com.tingfeng.signleRun.bean.Counter;
-import com.tingfeng.signleRun.service.impl.CounterHelper;
-import com.tingfeng.signleRun.service.impl.ReturnUtil;
+import com.tingfeng.signleRun.server.service.impl.CounterHelper;
+import com.tingfeng.signleRun.server.service.impl.ReturnUtil;
 
 public class SignleRunController {	
 	private static CounterHelper counterHelper =  CounterHelper.getSigleInstance();	

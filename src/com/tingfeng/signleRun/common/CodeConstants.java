@@ -5,6 +5,7 @@ public class CodeConstants {
 	public interface RquestKey {
 		public static String TYPE = "type";
 		public static String PARAMS = "params";
+		public static String ID = "id";//每条消息的唯一识别码
 	}
 	
 	public interface RquestType {

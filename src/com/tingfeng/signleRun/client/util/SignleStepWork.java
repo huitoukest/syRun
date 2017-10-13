@@ -1,9 +1,8 @@
-package com.tingfeng.signleRun.util;
+package com.tingfeng.signleRun.client.util;
 
-import com.tingfeng.signleRun.bean.FrequencyBean;
+import com.tingfeng.signleRun.client.bean.FrequencyBean;
 
 /**
- * redis任务
  *
  * @param <T>
  */

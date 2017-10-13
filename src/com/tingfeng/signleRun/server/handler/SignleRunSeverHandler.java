@@ -1,4 +1,4 @@
-package handler;
+package com.tingfeng.signleRun.server.handler;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,67 +12,13 @@ import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.alibaba.fastjson.JSONObject;
-import com.tingfeng.signleRun.bean.CounterRequest;
-import com.tingfeng.signleRun.common.CodeConstants;
-import com.tingfeng.signleRun.util.SignleRunClientUtil;
-import com.tingfeng.signleRun.util.SignleRunServerUtil;
+import com.tingfeng.signleRun.server.util.SignleRunServerUtil;
 
 public class SignleRunSeverHandler  extends IoHandlerAdapter{
 	private static Logger logger = LoggerFactory.getLogger(SignleRunSeverHandler.class);  
     
 	public static final Map<Long, IoSession> minaSessionMap = new ConcurrentHashMap<>();
-    //public static final CharsetDecoder decoder = (Charset.forName("UTF-8")).newDecoder();
-    
-    static {
-    	/*new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				while (true) {
-					try {
-						Thread.sleep(10000 * 1000);
-					} catch (InterruptedException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				Set<Long> keys =  minaSessionMap.keySet();
-				for(Long sessionId : keys){
-					IoSession session = minaSessionMap.get(sessionId);
-					if(null != session){
-						String strToClient = "Hello，我是Server，我的时间戳是"+System.currentTimeMillis();
-						 byte[] res = null;
-						try {
-							res = strToClient.getBytes("UTF-8");
-						} catch (UnsupportedEncodingException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-				            // 组织IoBuffer数据包的方法：本方法才可以正确地让客户端UDP收到byte数组
-				            IoBuffer buf = IoBuffer.wrap(res);     
-				            // 向客户端写数据
-							
-				            WriteFuture future = session.write(new String(res));
-				            future.addListener(new IoFutureListener<WriteFuture>() {
-
-								@Override
-								public void operationComplete(WriteFuture future) {
-									if( future.isWritten() )
-						            {
-										logger.warn("send sucess ！");
-						            }else{
-						            	logger.warn("[IMCORE]回复给客户端的数据发送失败！");
-						            }
-								}
-							});
-					}
-				}
-				
-			}//end while
-		  }
-		}).start();;*/
-    }
-    
+	
     @Override
 	public void sessionCreated(IoSession session) throws Exception {
 		super.sessionCreated(session);
@@ -82,7 +28,7 @@ public class SignleRunSeverHandler  extends IoHandlerAdapter{
 	public void sessionOpened(IoSession session) throws Exception {
 		super.sessionOpened(session);
 		minaSessionMap.put(session.getId(), session);
-		session.write(CodeConstants.Result.SUCCESS);
+		//session.write(CodeConstants.Result.SUCCESS);
 	}
 
 	@Override

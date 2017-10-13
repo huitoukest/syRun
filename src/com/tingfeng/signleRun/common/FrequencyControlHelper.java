@@ -3,9 +3,11 @@ package com.tingfeng.signleRun.common;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import com.tingfeng.signleRun.bean.FrequencyBean;
-import com.tingfeng.signleRun.util.SignleRunClientUtil;
-import com.tingfeng.signleRun.util.SingeStepException;
+
+import com.tingfeng.signleRun.client.bean.FrequencyBean;
+import com.tingfeng.signleRun.client.util.SignleRunClientUtil;
+import com.tingfeng.signleRun.client.util.SingeStepException;
+import com.tingfeng.signleRun.common.ex.OutTimeException;
 
 
 public class FrequencyControlHelper {
@@ -25,8 +27,9 @@ public class FrequencyControlHelper {
 	 * @throws T 
 	 * @throws IOException 
 	 * @throws InterruptedException 
+	 * @throws OutTimeException 
 	 */
-	public <T extends Exception> void startDoWork(T e,String key) throws T, IOException, InterruptedException{
+	public <T extends Exception> void startDoWork(T e,String key) throws T, IOException, InterruptedException, OutTimeException{
 		
 		for(int i= 0 ;i < this.frequencyBeans.size();i++){
 			FrequencyBean fb = this.frequencyBeans.get(i);
@@ -50,8 +53,9 @@ public class FrequencyControlHelper {
 	 * @param key redis中保存频率信息的数据唯一性的Key ,如hsh:ticketUse:15236524123L
 	 * @throws IOException 
 	 * @throws InterruptedException 
+	 * @throws OutTimeException 
 	 */
-	public void endDoWork(String key) throws IOException, InterruptedException{
+	public void endDoWork(String key) throws IOException, InterruptedException, OutTimeException{
 		for(int i= 0 ;i < this.frequencyBeans.size();i++){
 			SignleRunClientUtil.addCounterValue(key, -1);
 		}

@@ -1,13 +1,13 @@
-package com.tingfeng.signleRun.util;
+package com.tingfeng.signleRun.server.util;
 
 import java.io.IOException;
 import com.alibaba.fastjson.JSONObject;
 import com.tingfeng.signleRun.bean.CounterRequest;
 import com.tingfeng.signleRun.common.CodeConstants;
-import com.tingfeng.signleRun.controller.SignleRunController;
+import com.tingfeng.signleRun.server.controller.SignleRunController;
 
 public class SignleRunServerUtil {
-	public static SignleRunController signleRunController = new SignleRunController();
+	public static final SignleRunController signleRunController = new SignleRunController();
     
 
     public static String doServerWork(String str) throws IOException {
@@ -31,7 +31,7 @@ public class SignleRunServerUtil {
     	String key = counterRequest.key;
     	long value = counterRequest.value;
     	long expireTime = counterRequest.expireTime;
-    	String result = "fail";
+    	String result = CodeConstants.Result.FAIL;
     	String method = counterRequest.getMethod();
     	switch(method){
     	case "initCounter":{

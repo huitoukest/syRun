@@ -1,6 +1,5 @@
-package com.tingfeng.signleRun.util;
+package com.tingfeng.signleRun.client.util;
 /**
- * redis并发报错
  *
  */
 public class SingeStepException extends Exception {

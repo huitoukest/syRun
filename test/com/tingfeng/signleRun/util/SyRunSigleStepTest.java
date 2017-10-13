@@ -13,19 +13,24 @@ import java.util.concurrent.Future;
 
 import org.junit.Test;
 
-import com.tingfeng.signleRun.bean.FrequencyBean;
+import com.tingfeng.signleRun.client.SignleRunTCPClient;
+import com.tingfeng.signleRun.client.bean.FrequencyBean;
+import com.tingfeng.signleRun.client.util.SignleRunClientUtil;
+import com.tingfeng.signleRun.client.util.SignleStepWork;
+import com.tingfeng.signleRun.common.ex.OutTimeException;
 
 
 public class SyRunSigleStepTest{
 	
 	static int counter = 0;
 	
-	public static void main(String[] args) throws IOException, InterruptedException {
+	public static void main(String[] args) throws IOException, InterruptedException, OutTimeException {
 		new SyRunSigleStepTest().testSingleStep();
+		//new SyRunSigleStepTest().testAddStep();
 	}
 	@Test
-	public void testSingleStep() throws IOException, InterruptedException{
-		int threadPoolSize = 100;
+	public void testSingleStep() throws IOException, InterruptedException, OutTimeException{
+		int threadPoolSize = 2000;
 		//开启一个线程池，指定线程池的大小
         ExecutorService service = Executors.newFixedThreadPool(threadPoolSize);
         //指定方法完成的执行器
@@ -39,10 +44,10 @@ public class SyRunSigleStepTest{
         try{
         	 for (int i=0;i<threadPoolSize;i++) {
 	         //提交任务，提交后会默认启动Callable接口中的call方法
-	         completion.submit(new Callable<List<Map<String,Object>>>() {				
+	         completion.submit(new Callable<List<Map<String,Object>>>() {			
 				@Override
 				public List<Map<String, Object>> call() throws Exception {
-					int  k = SignleRunClientUtil.doSingeStepWork(new SignleStepWork<Integer>() {
+					int  k = SignleRunClientUtil.doSingeStepWorkByCounter(new SignleStepWork<Integer>() {
 						@Override
 						public Integer doWork(FrequencyBean frequencyBean) {
 							//synchronized (countMap) {
@@ -52,7 +57,7 @@ public class SyRunSigleStepTest{
 							//}
 							return  countMap.get("count");
 						}
-					}, key, new FrequencyBean(1000*1200L,1),2);	
+					}, key, new FrequencyBean(1000*1200L,1),10);
 					return null;
 				}
 			});
@@ -64,9 +69,9 @@ public class SyRunSigleStepTest{
                     Future<List<Map<String, Object>>> a = completion.take();
                     a.get();//等待任务执行结束，然后获得返回的结果
                 } catch (InterruptedException e) {
-                    e.getStackTrace().toString();
+                    e.printStackTrace();
                 } catch (ExecutionException e) {
-                    e.getStackTrace().toString();
+                	e.printStackTrace();
                 }
             }
         } finally {
@@ -79,8 +84,8 @@ public class SyRunSigleStepTest{
 	
 	
 	@Test
-	public void testAddStep() throws IOException, InterruptedException{
-		int threadPoolSize = 1000;
+	public void testAddStep() throws IOException, InterruptedException, OutTimeException{
+		int threadPoolSize = 100;
 		//开启一个线程池，指定线程池的大小
         ExecutorService service = Executors.newFixedThreadPool(threadPoolSize);
         //指定方法完成的执行器
@@ -96,14 +101,11 @@ public class SyRunSigleStepTest{
 	         completion.submit(new Callable<String>() {
 				@Override
 				public String call() throws Exception {
-					 long re1  = SignleRunClientUtil.addCounterValue("redis:hsh:test:count0", 1);
-					 Thread.sleep(20);
-					 long re2  = SignleRunClientUtil.addCounterValue("redis:hsh:test:count0", -1);
-					 
-					 /*long re1  = counter = counter + 1;
-					 Thread.sleep(20);
-					 long re2  = counter = counter - 1;*/
-					 System.out.println("re1:" + re1 + " ,re2:" + re2);
+					for(int i = 0 ;i < 1000 ; i++) { 
+						long re1  = SignleRunClientUtil.addCounterValue("redis:hsh:test:count0", 1);
+						long re2  = SignleRunClientUtil.addCounterValue("redis:hsh:test:count0", -1);
+						System.out.println("re1:" + re1 + " ,re2:" + re2);
+					}
 					 return "";
 				}				
 	        	
@@ -116,13 +118,14 @@ public class SyRunSigleStepTest{
                     Future<String> a = completion.take();
                     a.get();//等待任务执行结束，然后获得返回的结果
                 } catch (InterruptedException e) {
-                    e.getStackTrace().toString();
+                    e.printStackTrace();
                 } catch (ExecutionException e) {
-                    e.getStackTrace().toString();
+                    e.printStackTrace();
                 }
             }
         } finally {
             service.shutdown();
+            SignleRunTCPClient.closeConnect();
         }
         long end = System.currentTimeMillis();
         System.out.println("\n\ncount:"+countMap.get("count"));

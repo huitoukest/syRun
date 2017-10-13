@@ -1,5 +1,8 @@
-package handler;
+package com.tingfeng.signleRun.client.handler;
 
+import java.util.concurrent.TimeUnit;
+
+import org.apache.mina.core.future.ReadFuture;
 import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
@@ -7,9 +10,14 @@ import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tingfeng.signleRun.client.SignleRunTCPClient;
+import com.tingfeng.signleRun.common.ex.OutTimeException;
+
 public class SignleRunClientHandler extends IoHandlerAdapter {
 	
 	private static final  SignleRunClientHandler signleRunClientHandler = new SignleRunClientHandler();
+	
+	private SignleRunClientHandler() {}
 	
 	public static SignleRunClientHandler getSigleInstance(){
 		return signleRunClientHandler;
@@ -18,13 +26,13 @@ public class SignleRunClientHandler extends IoHandlerAdapter {
 	private static String reMsg = "";
 	
 	private static Logger logger = LoggerFactory.getLogger(SignleRunClientHandler.class);  	
-	public static IoSession minaSession = null;
+	//public static IoSession minaSession = null;
 	
 	//当一个客端端连结进入时
 	@Override
 	public void sessionOpened(IoSession session) throws Exception {
-		minaSession = session;
-		System.out.println("incomming client :"+session.getRemoteAddress());
+		//minaSession = session;
+		System.out.println("incomming client :" + session.getRemoteAddress());
 		//session.write("我来啦........");
 		//session.closeOnFlush();
 	}
@@ -32,7 +40,7 @@ public class SignleRunClientHandler extends IoHandlerAdapter {
 	@Override
 	public void sessionClosed(IoSession session) {
 		System.out.println("one Clinet Disconnect !");
-		minaSession = null;
+		//minaSession = null;
 	}
 	//当客户端发送的消息到达时:
 	@Override
@@ -71,14 +79,14 @@ public class SignleRunClientHandler extends IoHandlerAdapter {
 		reMsg = msg;
 	}
 	
-	public synchronized static String sendMessage(String msg) throws InterruptedException{
-		return sendMessage(minaSession,msg);
+	public  static String sendMessage(String msg) throws InterruptedException, OutTimeException{
+		return sendMessage(SignleRunTCPClient.getSession(),msg);
     }
 	
-	public synchronized static String sendMessage(IoSession session,String msg) throws InterruptedException{
-		reMsg = null;
+	public  static String sendMessage(IoSession session,String msg) throws InterruptedException, OutTimeException{
+		String returnMsg = "";
 		WriteFuture future =null;
-		int sleepInteval = 5;//每x毫秒检查一次
+		/*int sleepInteval = 5;//每x毫秒检查一次
 		int sleepCount = 0;
 		if(session == null){	
 			while (null == session) {
@@ -91,10 +99,10 @@ public class SignleRunClientHandler extends IoHandlerAdapter {
 				}
 			}
 			
-		}
-			if(session != null){
-		    	future = session.write(msg);		    	
-		    	future.awaitUninterruptibly();
+		}*/
+		    /*if(session != null){*/
+	    	future = session.write(msg); 
+	    	returnMsg = readReturnMsg(future,session);
 		       /* if (future.getException() != null) {
 		            System.out.println(future.getException().getMessage());
 		        } else if (future.isWritten()) {
@@ -140,7 +148,7 @@ public class SignleRunClientHandler extends IoHandlerAdapter {
 				});*/
 	            //readF.awaitUninterruptibly();
 	            
-		        sleepInteval = 2;//每x毫秒检查一次
+		        /*sleepInteval = 2;//每x毫秒检查一次
 				sleepCount = 0;
 				while (null == reMsg) {
 					sleepCount ++ ;
@@ -149,8 +157,23 @@ public class SignleRunClientHandler extends IoHandlerAdapter {
 						System.out.println("waiting for server result msg...");
 					}
 				}
-			}
-		return reMsg;
+			}*/
+	    //System.out.print("send msg is :" + msg );
+	    //System.out.println("\t returnMsg is :" + returnMsg);         
+		return returnMsg;
     }
+	
+	public static String readReturnMsg(WriteFuture future,IoSession session) throws OutTimeException {
+		future.awaitUninterruptibly();
+ 	    String returnMsg = "";
+		// 接收
+        ReadFuture readFuture = session.read();
+        if (readFuture.awaitUninterruptibly(300, TimeUnit.SECONDS)) {
+        	returnMsg = (String) readFuture.getMessage();
+        } else {
+           throw new OutTimeException("返回等待消息连接超时!");
+        }
+        return returnMsg;
+	} 
 	
 }

@@ -1,4 +1,4 @@
-package com.tingfeng.signleRun.util;
+package com.tingfeng.signleRun.server.util;
 
 import java.util.Map;
 import com.tingfeng.signleRun.bean.Counter;

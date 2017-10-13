@@ -1,4 +1,4 @@
-package com.tingfeng.signleRun.bean;
+package com.tingfeng.signleRun.client.bean;
 
 /**
  * 频率信息bean
