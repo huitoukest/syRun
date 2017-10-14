@@ -1,14 +1,13 @@
 package com.tingfeng.signleRun.server.controller;
 import java.io.IOException;
 import com.tingfeng.signleRun.bean.CounterBean;
-import com.tingfeng.signleRun.server.service.impl.CounterHelper;
+import com.tingfeng.signleRun.server.service.impl.CounterService;
 import com.tingfeng.signleRun.server.service.impl.ReturnUtil;
 
-public class SignleRunController {
-	private static CounterHelper counterHelper =  CounterHelper.getSigleInstance();	
-	public  SignleRunController(){}
+public class CounterController {
+	private static CounterService counterHelper =  CounterService.getSigleInstance();	
+	public  CounterController(){}
 	/**
-	 * 
 	 * @param key 计数器的key
 	 * @param value 初始化的值,为null时默认变为0
 	 * @param expireTime 过期时间
@@ -17,35 +16,25 @@ public class SignleRunController {
 	 * @return
 	 * @throws IOException
 	 */
-
     public  String initCounter(final String key,final long value,final long expireTime) throws IOException{
-    	return ReturnUtil.getReturnMsg(new Runnable() {
-			@Override
-			public void run() {
-				CounterBean counter = new CounterBean(value, key, expireTime);
-		    	 counterHelper.addCounter(counter);
-			}
-		});
+    	return ReturnUtil.getCounterReturnMsg(() -> {
+    		 CounterBean counter = new CounterBean(value, key, expireTime);
+	    	 counterHelper.addCounter(counter);
+    	});
     }
     
 
     public  String setCounterValue(final String key,final long value) throws IOException{
-    	return ReturnUtil.getReturnMsg(new Runnable() {
-			@Override
-			public void run() {
+    	return ReturnUtil.getCounterReturnMsg(() -> {
 		    	 counterHelper.setCounterValue(key, value);
-			}
-		});
+			});
     }
     
 
     public String setCounterExpireTime(final String key,final long expireTime) throws IOException{
-    	return ReturnUtil.getReturnMsg(new Runnable() {		
-			@Override
-			public void run() {
+    	return ReturnUtil.getCounterReturnMsg(() -> {
 		    	 counterHelper.setCounterExpireTime(key, expireTime);
-			}
-		});
+			});
     }
     
     public  String getCounterExpireTime(final String key) throws IOException{

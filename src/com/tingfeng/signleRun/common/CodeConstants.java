@@ -37,8 +37,7 @@ public class CodeConstants {
 	public interface SynLock {
 		public static String METHOD = "method";
 		public static String KEY = "key";
-		public static String VALUE = "value";
-		public static String EXPIRETIME = "expireTime";
+		public static String MAXWAITTIME = "maxWaitTime";
 	}
 	
 	public interface Result {

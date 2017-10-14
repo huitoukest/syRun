@@ -16,14 +16,14 @@ import com.tingfeng.signleRun.bean.CounterBean;
  *	1. 后期考虑将System.currentMills更换为高性能的取时间计数器
  *  2. 定时移除过期counter,并且每次取数前检查是否过期
  */
-public class CounterHelper {
-	private static CounterHelper counterHelper = new CounterHelper();
+public class CounterService {
+	private static CounterService counterHelper = new CounterService();
 	private Map<String, CounterBean>  counterMap = new HashMap<>(5000);
 	private  int threadPoolSize = 1;
 	private  long counterExpireRemoveInteval = 5 * 1000;//每5秒钟循环一次counter过期移出器;
 	private List<String> counterKeys = new ArrayList<>(5000);
 	
-	private CounterHelper(){
+	private CounterService(){
 		startRemoveExpiredCounter();	
 	}
 	/**
@@ -31,9 +31,9 @@ public class CounterHelper {
 	 */
 	public void startRemoveExpiredCounter(){
 		ExecutorService service = Executors.newFixedThreadPool(threadPoolSize);//此线程仅仅作为一个补充移除功能
-        service.submit(new Callable<CounterHelper>() {
+        service.submit(new Callable<CounterService>() {
 			@Override
-			public CounterHelper call() throws Exception {
+			public CounterService call() throws Exception {
 				while(true){
 					counterKeys.clear();
 					Iterator<Map.Entry<String, CounterBean>> it = null;
@@ -54,7 +54,7 @@ public class CounterHelper {
 		});
 	}
 	
-	public synchronized static CounterHelper getSigleInstance(){
+	public synchronized static CounterService getSigleInstance(){
 		return counterHelper;
 	}
 	

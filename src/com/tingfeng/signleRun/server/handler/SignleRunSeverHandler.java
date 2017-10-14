@@ -95,7 +95,7 @@ public class SignleRunSeverHandler  extends IoHandlerAdapter{
 			String result = SignleRunServerUtil.doServerWork(str);
 			sendMessage(session,result);
 		} catch (Exception e) {
-			
+			e.printStackTrace();
 		}
     	if (str.trim().equalsIgnoreCase("quit")) {
             session.closeOnFlush();

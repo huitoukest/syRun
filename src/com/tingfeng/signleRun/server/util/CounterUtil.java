@@ -2,7 +2,6 @@ package com.tingfeng.signleRun.server.util;
 
 import java.util.Map;
 import com.tingfeng.signleRun.bean.CounterParam;
-import com.tingfeng.signleRun.bean.CounterParam;
 
 public class CounterUtil {
 	/**

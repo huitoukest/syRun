@@ -1,20 +1,36 @@
 package com.tingfeng.signleRun.server.service.impl;
 
+import java.util.concurrent.Callable;
+
+import com.tingfeng.signleRun.common.CodeConstants;
+
 public class ReturnUtil {
-	public static final String SUCCESS = "success";
-	public static final String FAIL = "fail";
 	
-	/**
+	/*
+	 * @see CodeConstants.Result
 	 * @return success or fail
 	 */
-	public static String getReturnMsg(Runnable runnable){		
+	public static String getCounterReturnMsg(Runnable run){	
 		try {
-			runnable.run();
-		} catch (Exception e) {
+			run.run();
+		}catch (Exception e) {
 			e.printStackTrace();
-			return FAIL;
+			return CodeConstants.Result.FAIL;
 		}	
-		return SUCCESS;
+		return CodeConstants.Result.SUCCESS;
 		
+	} 
+	
+	/**@call 返回CodeConstants.Result定义结果
+	 * @see CodeConstants.Result
+	 * @return success or fail or CodeConstants.Result.OVERTIME
+	 */
+	public static String getSyLockReturnMsg(Callable<String> call){		
+		try {
+			return call.call();
+		}catch (Exception e) {
+			e.printStackTrace();
+			return CodeConstants.Result.FAIL;
+		}	
 	} 
 }

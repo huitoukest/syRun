@@ -19,17 +19,17 @@ import com.tingfeng.signleRun.client.bean.FrequencyBean;
 import com.tingfeng.signleRun.client.util.SignleRunClientUtil;
 import com.tingfeng.signleRun.common.FrequencyControlHelper;
 import com.tingfeng.signleRun.common.ex.OutTimeException;
-import com.tingfeng.signleRun.server.controller.SignleRunController;
+import com.tingfeng.signleRun.server.controller.CounterController;
 
 
 public class SyRunSyLockTest{
 	
 	static int counter = 0;
-	SignleRunController signleRunController = null;
+	CounterController signleRunController = null;
 	
 	@Before
 	public void intit() {
-		this.signleRunController = new SignleRunController();
+		this.signleRunController = new CounterController();
 	}
 	
 	

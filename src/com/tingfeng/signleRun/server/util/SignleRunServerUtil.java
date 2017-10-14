@@ -4,10 +4,10 @@ import java.io.IOException;
 import com.alibaba.fastjson.JSONObject;
 import com.tingfeng.signleRun.bean.CounterParam;
 import com.tingfeng.signleRun.common.CodeConstants;
-import com.tingfeng.signleRun.server.controller.SignleRunController;
+import com.tingfeng.signleRun.server.controller.CounterController;
 
 public class SignleRunServerUtil {
-	public static final SignleRunController signleRunController = new SignleRunController();
+	public static final CounterController signleRunController = new CounterController();
     
 
     public static String doServerWork(String str) throws IOException {
