@@ -1,7 +1,8 @@
 package com.tingfeng.signleRun.server.util;
 
 import java.util.Map;
-import com.tingfeng.signleRun.bean.Counter;
+import com.tingfeng.signleRun.bean.CounterParam;
+import com.tingfeng.signleRun.bean.CounterParam;
 
 public class CounterUtil {
 	/**
@@ -10,11 +11,11 @@ public class CounterUtil {
 	 * @param counterMap
 	 * @return
 	 */
-	public static  Counter getInitCounterIfNull(String key,Map<String, Counter>  counterMap){
-		Counter counter = counterMap.get(key);
+	public static  CounterParam getInitCounterIfNull(String key,Map<String, CounterParam>  counterMap){
+		CounterParam counter = counterMap.get(key);
 		if(null == counter)
 		{
-			counter = new Counter(key);
+			counter = new CounterParam(key);
 		}
 		return counter;
 	}

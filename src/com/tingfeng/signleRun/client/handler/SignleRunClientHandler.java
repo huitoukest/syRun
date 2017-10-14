@@ -44,7 +44,7 @@ public class SignleRunClientHandler extends IoHandlerAdapter {
 	}
 	//当客户端发送的消息到达时:
 	@Override
-	public void messageReceived(IoSession session, Object message)
+	public synchronized void messageReceived(IoSession session, Object message)
 	throws Exception {
 		//我们己设定了服务器解析消息的规则是一行一行读取,这里就可转为String:
 		String s=(String)message;
@@ -82,8 +82,16 @@ public class SignleRunClientHandler extends IoHandlerAdapter {
 	public  static String sendMessage(String msg) throws InterruptedException, OutTimeException{
 		return sendMessage(SignleRunTCPClient.getSession(),msg);
     }
-	
-	public  static String sendMessage(IoSession session,String msg) throws InterruptedException, OutTimeException{
+	/**
+	 * 目前必须使发送的消息和接收的消息互斥才能保证有序,以后考虑
+	 * 通过多线程/唯一id辨识消息唯一性
+	 * @param session
+	 * @param msg
+	 * @return
+	 * @throws InterruptedException
+	 * @throws OutTimeException
+	 */
+	public  synchronized static String sendMessage(IoSession session,String msg) throws InterruptedException, OutTimeException{
 		String returnMsg = "";
 		WriteFuture future =null;
 		/*int sleepInteval = 5;//每x毫秒检查一次

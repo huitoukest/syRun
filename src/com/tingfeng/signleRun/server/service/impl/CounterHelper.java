@@ -9,7 +9,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.tingfeng.signleRun.bean.Counter;
+import com.tingfeng.signleRun.bean.CounterBean;
 
 /**
  * 
@@ -18,7 +18,7 @@ import com.tingfeng.signleRun.bean.Counter;
  */
 public class CounterHelper {
 	private static CounterHelper counterHelper = new CounterHelper();
-	private Map<String, Counter>  counterMap = new HashMap<>(5000);
+	private Map<String, CounterBean>  counterMap = new HashMap<>(5000);
 	private  int threadPoolSize = 1;
 	private  long counterExpireRemoveInteval = 5 * 1000;//每5秒钟循环一次counter过期移出器;
 	private List<String> counterKeys = new ArrayList<>(5000);
@@ -36,10 +36,10 @@ public class CounterHelper {
 			public CounterHelper call() throws Exception {
 				while(true){
 					counterKeys.clear();
-					Iterator<Map.Entry<String, Counter>> it = null;
+					Iterator<Map.Entry<String, CounterBean>> it = null;
 						it = counterMap.entrySet().iterator();
 					  while (it.hasNext()) {//得到超时的key
-						  Map.Entry<String, Counter> entry = it.next();
+						  Map.Entry<String, CounterBean> entry = it.next();
 						  if(System.currentTimeMillis() > entry.getValue().expireTime){
 							  counterKeys.add(entry.getKey());
 						  }
@@ -59,7 +59,7 @@ public class CounterHelper {
 	}
 	
 	
-	public synchronized long addCounter(Counter counter){
+	public synchronized long addCounter(CounterBean counter){
 		if(null != counter && counter.expireTime > System.currentTimeMillis()){
 			counterMap.put(counter.key, counter);
 		}
@@ -67,7 +67,7 @@ public class CounterHelper {
 	}
 	
 	public synchronized long addCounterValue(String key,long value){
-		Counter counter = counterMap.get(key);
+		CounterBean counter = counterMap.get(key);
 		if(null == counter || counter.expireTime < System.currentTimeMillis()){
 			return  this.setCounterValue(key, value);
 		}else{
@@ -82,16 +82,16 @@ public class CounterHelper {
 		}
 	}
 	
-	public synchronized void removeCounter(Counter counter){
+	public synchronized void removeCounter(CounterBean counter){
 		if(null != counter){
 			counterMap.remove(counter.key);
 		}
 	}
 	
 	public synchronized long setCounterValue(String key,long value){
-		Counter counter = counterMap.get(key);
+		CounterBean counter = counterMap.get(key);
 		if(null == counter || counter.expireTime < System.currentTimeMillis()){
-			counter = new Counter(key);
+			counter = new CounterBean(key);
 			counterMap.put(key, counter);
 		}	
 		counter.value = value;
@@ -103,7 +103,7 @@ public class CounterHelper {
 	 * @param newKey
 	 */
 	public synchronized boolean replaceCounterKey(String oldKey,String newKey){
-		Counter counter = counterMap.get(oldKey);
+		CounterBean counter = counterMap.get(oldKey);
 		if(null != counter && counter.expireTime > System.currentTimeMillis()){
 			counterMap.remove(oldKey);
 			counterMap.put(newKey, counter);
@@ -112,8 +112,8 @@ public class CounterHelper {
 		return false;
 	}
 	
-	public synchronized Counter getCounter(String key){
-		Counter counter = counterMap.get(key);
+	public synchronized CounterBean getCounter(String key){
+		CounterBean counter = counterMap.get(key);
 		if(null == counter || counter.expireTime < System.currentTimeMillis()){
 			return null;
 		}
@@ -122,7 +122,7 @@ public class CounterHelper {
 	
 
 	public synchronized long getCounterValue(String key){
-		Counter counter = counterMap.get(key);
+		CounterBean counter = counterMap.get(key);
 		if(counter == null || counter.expireTime < System.currentTimeMillis())
 		{
 			return 0;
@@ -131,7 +131,7 @@ public class CounterHelper {
 	}
 	
 	public synchronized long getCounterExpireTime(String key){
-		Counter counter = counterMap.get(key);
+		CounterBean counter = counterMap.get(key);
 		if(null == counter || counter.expireTime < System.currentTimeMillis()){
 			return 0;
 		}
@@ -139,9 +139,9 @@ public class CounterHelper {
 	}
 	
 	public synchronized void setCounterExpireTime(String key,long expireTime){
-		Counter counter = counterMap.get(key);
+		CounterBean counter = counterMap.get(key);
 		if(null == counter){
-			counter = new Counter(key);
+			counter = new CounterBean(key);
 			counterMap.put(key, counter);
 		}
 		counter.expireTime = expireTime;

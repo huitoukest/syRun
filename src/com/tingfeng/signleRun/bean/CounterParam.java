@@ -1,6 +1,6 @@
 package com.tingfeng.signleRun.bean;
 
-public class Counter {
+public class CounterParam extends BaseRequestParam{
 	/**
 	 * 10分钟
 	 */
@@ -22,7 +22,7 @@ public class Counter {
 	 * 
 	 * @param key
 	 */
-	public Counter (String key){
+	public CounterParam (String key){
 		this.key = key;
 	}
 	/**
@@ -31,12 +31,24 @@ public class Counter {
 	 * @param key
 	 * @param expireTime
 	 */
-	public Counter(long value, String key, long expireTime) {
+	public CounterParam(long value, String key, long expireTime) {
 		super();
 		this.value = value;
 		this.key = key;
 		this.expireTime = expireTime;
 	}
 	
-	
-}	
+	/**
+	 * 
+	 * @param value
+	 * @param key
+	 * @param expireTime
+	 */
+	public CounterParam(String method,long value, String key, long expireTime) {
+		super();
+		setMethod(method);
+		this.value = value;
+		this.key = key;
+		this.expireTime = expireTime;
+	}
+}

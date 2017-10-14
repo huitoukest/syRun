@@ -33,24 +33,7 @@ public class SignleRunTCPClient {
 	 public static synchronized void init() throws IOException, InterruptedException{	
 		 if(!isInited){				
 				initClientConnect();		
-	    	}
-		/* new Thread(new Runnable() {
-			public void run() {
-				if(!isInited){				
-					initClientConnect();		
-		    	}
-			}
-		}).start();*/	
-		/* do {
-			 if(connector != null) {
-				 System.out.println("isDisposing" + connector.isDisposing());
-				 System.out.println("isDisposed" + connector.isDisposed());
-				 System.out.println("isActive" + connector.isActive());
-			 }//else {
-				 Thread.sleep(500);
-			 //}
-		 }while(true);*/
-		 
+	    	} 
 	}
 	
 	

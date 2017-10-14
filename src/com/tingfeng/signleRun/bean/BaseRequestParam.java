@@ -3,7 +3,7 @@ package com.tingfeng.signleRun.bean;
  * 通用的请求参数
  *
  */
-public class BaseRequest {
+public class BaseRequestParam {
 	
 	protected String method = "";
 

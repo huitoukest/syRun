@@ -1,12 +1,12 @@
 package com.tingfeng.signleRun.server.controller;
 import java.io.IOException;
-import com.tingfeng.signleRun.bean.Counter;
+import com.tingfeng.signleRun.bean.CounterBean;
 import com.tingfeng.signleRun.server.service.impl.CounterHelper;
 import com.tingfeng.signleRun.server.service.impl.ReturnUtil;
 
-public class SignleRunController {	
+public class SignleRunController {
 	private static CounterHelper counterHelper =  CounterHelper.getSigleInstance();	
-	public SignleRunController(){}	
+	public  SignleRunController(){}
 	/**
 	 * 
 	 * @param key 计数器的key
@@ -22,7 +22,7 @@ public class SignleRunController {
     	return ReturnUtil.getReturnMsg(new Runnable() {
 			@Override
 			public void run() {
-				 Counter counter = new Counter(value, key, expireTime);
+				CounterBean counter = new CounterBean(value, key, expireTime);
 		    	 counterHelper.addCounter(counter);
 			}
 		});

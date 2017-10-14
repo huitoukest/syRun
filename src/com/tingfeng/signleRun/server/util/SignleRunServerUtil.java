@@ -2,7 +2,7 @@ package com.tingfeng.signleRun.server.util;
 
 import java.io.IOException;
 import com.alibaba.fastjson.JSONObject;
-import com.tingfeng.signleRun.bean.CounterRequest;
+import com.tingfeng.signleRun.bean.CounterParam;
 import com.tingfeng.signleRun.common.CodeConstants;
 import com.tingfeng.signleRun.server.controller.SignleRunController;
 
@@ -17,7 +17,7 @@ public class SignleRunServerUtil {
 		switch (type) {
 		case CodeConstants.RquestType.COUNTER:
 			 {
-				 CounterRequest counterRequest = jsonObject.getObject(CodeConstants.RquestKey.PARAMS, CounterRequest.class);
+				 CounterParam counterRequest = jsonObject.getObject(CodeConstants.RquestKey.PARAMS, CounterParam.class);
 				 result = doCounter(counterRequest);
 				 break;
 			 }
@@ -27,7 +27,7 @@ public class SignleRunServerUtil {
 		return result;
 	}
 	
-    public static String doCounter(CounterRequest counterRequest) throws IOException{
+    public static String doCounter(CounterParam counterRequest) throws IOException{
     	String key = counterRequest.key;
     	long value = counterRequest.value;
     	long expireTime = counterRequest.expireTime;

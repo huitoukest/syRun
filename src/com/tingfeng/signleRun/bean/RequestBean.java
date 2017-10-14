@@ -1,6 +1,6 @@
 package com.tingfeng.signleRun.bean;
 
-public class RequestBean<T extends BaseRequest> {
+public class RequestBean<T extends BaseRequestParam> {
 	/**
 	 * 请求的类型
 	 */
@@ -13,6 +13,7 @@ public class RequestBean<T extends BaseRequest> {
 	 * 请求参数
 	 */
 	public T params;
+	
 
 	public String getId() {
 		return id;

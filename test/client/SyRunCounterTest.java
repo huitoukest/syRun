@@ -1,4 +1,4 @@
-package com.tingfeng.signleRun.util;
+package client;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -16,21 +16,16 @@ import org.junit.Test;
 import com.tingfeng.signleRun.client.SignleRunTCPClient;
 import com.tingfeng.signleRun.client.bean.FrequencyBean;
 import com.tingfeng.signleRun.client.util.SignleRunClientUtil;
-import com.tingfeng.signleRun.client.util.SignleStepWork;
+import com.tingfeng.signleRun.common.FrequencyControlHelper;
 import com.tingfeng.signleRun.common.ex.OutTimeException;
 
 
-public class SyRunSigleStepTest{
+public class SyRunCounterTest{
 	
 	static int counter = 0;
-	
-	public static void main(String[] args) throws IOException, InterruptedException, OutTimeException {
-		new SyRunSigleStepTest().testSingleStep();
-		//new SyRunSigleStepTest().testAddStep();
-	}
 	@Test
 	public void testSingleStep() throws IOException, InterruptedException, OutTimeException{
-		int threadPoolSize = 2000;
+		int threadPoolSize = 200;
 		//开启一个线程池，指定线程池的大小
         ExecutorService service = Executors.newFixedThreadPool(threadPoolSize);
         //指定方法完成的执行器
@@ -47,17 +42,48 @@ public class SyRunSigleStepTest{
 	         completion.submit(new Callable<List<Map<String,Object>>>() {			
 				@Override
 				public List<Map<String, Object>> call() throws Exception {
-					int  k = SignleRunClientUtil.doSingeStepWorkByCounter(new SignleStepWork<Integer>() {
-						@Override
-						public Integer doWork(FrequencyBean frequencyBean) {
-							//synchronized (countMap) {
-								int cc  = countMap.get("count");
-								countMap.put("count", cc+1);
-								System.out.println(cc + 1);
-							//}
-							return  countMap.get("count");
-						}
-					}, key, new FrequencyBean(1000*1200L,1),10);
+					int  k = SignleRunClientUtil.doSingeStepWorkByCounter(
+							new FrequencyControlHelper(new FrequencyBean(1000*1200L,1)) {
+								@Override
+								public  Integer doWork() {
+									//synchronized (countMap) {
+									for(int i = 0 ;i < 20 ; i++) { 
+										if(i % 5 ==0) {
+											try {
+												Thread.sleep(1);
+											} catch (InterruptedException e) {
+												e.printStackTrace();
+											}
+										}
+										int cc  = countMap.get("count");
+										countMap.put("count", cc+1);
+										System.out.println(cc + 1);
+									}
+									Integer value = null;
+									try {
+										value = countMap.get("count");
+									}catch (Exception e) {
+										e.printStackTrace();
+									}
+									return  value;
+								}
+
+								@Override
+								public long getExpireTime(String key) throws Exception {
+									return SignleRunClientUtil.getCounterExpireTime(key);
+								}
+
+								@Override
+								public long addCounterValue(String key, int value) throws Exception {
+									return SignleRunClientUtil.addCounterValue(key, value);									
+								}
+
+								@Override
+								public String setExpireTime(String key, long expireTime) throws Exception {
+									return SignleRunClientUtil.setCounterExpireTime(key, expireTime);		
+								}
+						
+					}, key,300);
 					return null;
 				}
 			});
@@ -78,6 +104,7 @@ public class SyRunSigleStepTest{
             service.shutdown();
         }
         long end = System.currentTimeMillis();
+        System.out.println("\n\n SignleRunClientUtil count:"+ SignleRunClientUtil.getCounterValue(key));
         System.out.println("\n\ncount:"+countMap.get("count"));
         System.out.println("\nuseTime:"+(end - start));
 	}
@@ -102,7 +129,10 @@ public class SyRunSigleStepTest{
 				@Override
 				public String call() throws Exception {
 					for(int i = 0 ;i < 1000 ; i++) { 
-						long re1  = SignleRunClientUtil.addCounterValue("redis:hsh:test:count0", 1);
+						long re1  = SignleRunClientUtil.addCounterValue("redis:hsh:test:count0", 2);
+						if(i % 5 ==0) {
+							Thread.sleep(1);
+						}
 						long re2  = SignleRunClientUtil.addCounterValue("redis:hsh:test:count0", -1);
 						System.out.println("re1:" + re1 + " ,re2:" + re2);
 					}
@@ -128,7 +158,7 @@ public class SyRunSigleStepTest{
             SignleRunTCPClient.closeConnect();
         }
         long end = System.currentTimeMillis();
-        System.out.println("\n\ncount:"+countMap.get("count"));
+        System.out.println("\n\ncount:"+ SignleRunClientUtil.getCounterValue("redis:hsh:test:count0"));
         System.out.println("\nuseTime:"+(end - start));
 	}
 }

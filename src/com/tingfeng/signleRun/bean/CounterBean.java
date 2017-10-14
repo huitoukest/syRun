@@ -1,6 +1,6 @@
 package com.tingfeng.signleRun.bean;
 
-public class CounterRequest extends BaseRequest{
+public class CounterBean {
 	/**
 	 * 10分钟
 	 */
@@ -22,7 +22,7 @@ public class CounterRequest extends BaseRequest{
 	 * 
 	 * @param key
 	 */
-	public CounterRequest (String key){
+	public CounterBean (String key){
 		this.key = key;
 	}
 	/**
@@ -31,24 +31,12 @@ public class CounterRequest extends BaseRequest{
 	 * @param key
 	 * @param expireTime
 	 */
-	public CounterRequest(long value, String key, long expireTime) {
+	public CounterBean(long value, String key, long expireTime) {
 		super();
 		this.value = value;
 		this.key = key;
 		this.expireTime = expireTime;
 	}
 	
-	/**
-	 * 
-	 * @param value
-	 * @param key
-	 * @param expireTime
-	 */
-	public CounterRequest(String method,long value, String key, long expireTime) {
-		super();
-		setMethod(method);
-		this.value = value;
-		this.key = key;
-		this.expireTime = expireTime;
-	}
-}
+	
+}	
