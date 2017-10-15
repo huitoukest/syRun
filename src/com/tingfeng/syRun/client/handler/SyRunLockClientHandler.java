@@ -88,7 +88,7 @@ public class SyRunLockClientHandler extends IoHandlerAdapter {
 	 * 目前必须使发送的消息和接收的消息互斥才能保证有序,以后考虑
 	 * 通过多线程/唯一id辨识消息唯一性
 	 * @param session
-	 * @param msg
+	 * @param requestBean
 	 * @return
 	 * @throws InterruptedException
 	 * @throws OutTimeException
@@ -109,8 +109,18 @@ public class SyRunLockClientHandler extends IoHandlerAdapter {
  	    String returnMsg = "";
 		// 接收
         ReadFuture readFuture = session.read();
-        if (readFuture.awaitUninterruptibly(300, TimeUnit.SECONDS)) {
-        	returnMsg = (String) readFuture.getMessage();
+        if (readFuture.awaitUninterruptibly(600, TimeUnit.SECONDS)) {
+        	do {
+				returnMsg = (String) readFuture.getMessage();
+				if(null == returnMsg){
+					try {
+						future.awaitUninterruptibly();
+						Thread.sleep(5);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}while(null == returnMsg);
         } else {
            throw new OutTimeException("返回等待消息连接超时!");
         }

@@ -41,7 +41,8 @@ public class SyRunSyLockTest{
 					for(int idx = 0 ;idx < 2 ; idx++) {
 						SyLockParam syLockParam = new SyLockParam();
 						syLockParam.setKey(key);
-						SyLockResponse response = JSONObject.parseObject(SyRunClientUtil.lockSyLock(key), SyLockResponse.class);					
+						String result = SyRunClientUtil.lockSyLock(key);
+						SyLockResponse response = JSONObject.parseObject(result, SyLockResponse.class);
 						String lockId = response.getLockId();
 						syLockParam.setLockId(lockId);
 						Integer re1 = countMap.get("count");

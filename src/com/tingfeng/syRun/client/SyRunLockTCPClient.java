@@ -21,7 +21,7 @@ public class SyRunLockTCPClient {
 	private static NioSocketConnector connector = null;
 	public static final ThreadLocal<SyRunLockTCPClient> syLockClient = new ThreadLocal<>();
 	
-	public void initClientConnect() {
+	public synchronized void initClientConnect() {
 		// Create TCP/IP connector.
 		connector = new NioSocketConnector();
 		// 创建接收数据的过滤器
@@ -50,7 +50,7 @@ public class SyRunLockTCPClient {
 		syLockClient.set(this);
 	}
 	 
-	 public void closeConnect() throws IOException{
+	 public synchronized void closeConnect() throws IOException{
 		 
 		//session.getCloseFuture().awaitUninterruptibly();
 		 if(session != null) {
@@ -63,7 +63,7 @@ public class SyRunLockTCPClient {
 		 syLockClient.remove();
 	}
 	
-	public IoSession getSession(){	
+	public synchronized IoSession getSession(){
 		return session;
 	}
 	
