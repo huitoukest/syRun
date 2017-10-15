@@ -14,12 +14,12 @@ import java.util.concurrent.Future;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.tingfeng.signleRun.client.SignleRunTCPClient;
-import com.tingfeng.signleRun.client.bean.FrequencyBean;
-import com.tingfeng.signleRun.client.util.SignleRunClientUtil;
-import com.tingfeng.signleRun.common.FrequencyControlHelper;
-import com.tingfeng.signleRun.common.ex.OutTimeException;
-import com.tingfeng.signleRun.server.controller.CounterController;
+import com.tingfeng.syRun.client.SyRunCounterTCPClient;
+import com.tingfeng.syRun.client.bean.FrequencyBean;
+import com.tingfeng.syRun.client.util.SyRunClientUtil;
+import com.tingfeng.syRun.common.FrequencyControlHelper;
+import com.tingfeng.syRun.common.ex.OutTimeException;
+import com.tingfeng.syRun.server.controller.CounterController;
 
 
 public class SyRunCounterTest{
@@ -50,8 +50,8 @@ public class SyRunCounterTest{
 	         completion.submit(new Callable<List<Map<String,Object>>>() {			
 				@Override
 				public List<Map<String, Object>> call() throws Exception {
-					int  k = SignleRunClientUtil.doSingeStepWorkByCounter(
-							new FrequencyControlHelper(new FrequencyBean(1000*1200L,1)) {
+					int  k = SyRunClientUtil.doSingeStepWorkByCounter(
+							new FrequencyControlHelper<Integer>(new FrequencyBean(1000*1200L,1)) {
 								@Override
 								public  Integer doWork() {
 									//synchronized (countMap) {
@@ -159,7 +159,7 @@ public class SyRunCounterTest{
             }
         } finally {
             service.shutdown();
-            SignleRunTCPClient.closeConnect();
+            SyRunCounterTCPClient.closeConnect();
         }
         long end = System.currentTimeMillis();
         System.out.println("\n\ncount:"+ signleRunController.getCounterValue("redis:hsh:test:count0"));

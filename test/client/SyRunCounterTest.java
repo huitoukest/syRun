@@ -13,11 +13,11 @@ import java.util.concurrent.Future;
 
 import org.junit.Test;
 
-import com.tingfeng.signleRun.client.SignleRunTCPClient;
-import com.tingfeng.signleRun.client.bean.FrequencyBean;
-import com.tingfeng.signleRun.client.util.SignleRunClientUtil;
-import com.tingfeng.signleRun.common.FrequencyControlHelper;
-import com.tingfeng.signleRun.common.ex.OutTimeException;
+import com.tingfeng.syRun.client.SyRunCounterTCPClient;
+import com.tingfeng.syRun.client.bean.FrequencyBean;
+import com.tingfeng.syRun.client.util.SyRunClientUtil;
+import com.tingfeng.syRun.common.FrequencyControlHelper;
+import com.tingfeng.syRun.common.ex.OutTimeException;
 
 
 public class SyRunCounterTest{
@@ -32,7 +32,7 @@ public class SyRunCounterTest{
          ExecutorCompletionService<List<Map<String, Object>>> completion = new ExecutorCompletionService<List<Map<String, Object>>>(
                 service);
          final String key = System.currentTimeMillis()+"";
-         SignleRunClientUtil.initCounter(key, 0,System.currentTimeMillis() + 1000 * 60 * 10);
+         SyRunClientUtil.initCounter(key, 0,System.currentTimeMillis() + 1000 * 60 * 10);
          final Map<String ,Integer> countMap = new HashMap<String ,Integer>();
         countMap.put("count", 0);
         long start = System.currentTimeMillis();
@@ -42,8 +42,8 @@ public class SyRunCounterTest{
 	         completion.submit(new Callable<List<Map<String,Object>>>() {			
 				@Override
 				public List<Map<String, Object>> call() throws Exception {
-					int  k = SignleRunClientUtil.doSingeStepWorkByCounter(
-							new FrequencyControlHelper(new FrequencyBean(1000*1200L,1)) {
+					int  k = SyRunClientUtil.doSingeStepWorkByCounter(
+							new FrequencyControlHelper<Integer>(new FrequencyBean(1000*1200L,1)) {
 								@Override
 								public  Integer doWork() {
 									//synchronized (countMap) {
@@ -70,17 +70,17 @@ public class SyRunCounterTest{
 
 								@Override
 								public long getExpireTime(String key) throws Exception {
-									return SignleRunClientUtil.getCounterExpireTime(key);
+									return SyRunClientUtil.getCounterExpireTime(key);
 								}
 
 								@Override
 								public long addCounterValue(String key, int value) throws Exception {
-									return SignleRunClientUtil.addCounterValue(key, value);									
+									return SyRunClientUtil.addCounterValue(key, value);									
 								}
 
 								@Override
 								public String setExpireTime(String key, long expireTime) throws Exception {
-									return SignleRunClientUtil.setCounterExpireTime(key, expireTime);		
+									return SyRunClientUtil.setCounterExpireTime(key, expireTime);		
 								}
 						
 					}, key,300);
@@ -104,7 +104,7 @@ public class SyRunCounterTest{
             service.shutdown();
         }
         long end = System.currentTimeMillis();
-        System.out.println("\n\n SignleRunClientUtil count:"+ SignleRunClientUtil.getCounterValue(key));
+        System.out.println("\n\n SignleRunClientUtil count:"+ SyRunClientUtil.getCounterValue(key));
         System.out.println("\n\ncount:"+countMap.get("count"));
         System.out.println("\nuseTime:"+(end - start));
 	}
@@ -118,7 +118,7 @@ public class SyRunCounterTest{
         //指定方法完成的执行器
          ExecutorCompletionService<String> completion = new ExecutorCompletionService<String>(
                 service);
-         SignleRunClientUtil.initCounter("redis:hsh:test:count0", 0,System.currentTimeMillis() + 1000 * 60 * 10);
+         SyRunClientUtil.initCounter("redis:hsh:test:count0", 0,System.currentTimeMillis() + 1000 * 60 * 10);
          final Map<String ,Integer> countMap = new HashMap<String ,Integer>();
         countMap.put("count", 0);
         long start = System.currentTimeMillis();
@@ -129,11 +129,11 @@ public class SyRunCounterTest{
 				@Override
 				public String call() throws Exception {
 					for(int i = 0 ;i < 1000 ; i++) { 
-						long re1  = SignleRunClientUtil.addCounterValue("redis:hsh:test:count0", 2);
+						long re1  = SyRunClientUtil.addCounterValue("redis:hsh:test:count0", 2);
 						if(i % 5 ==0) {
 							Thread.sleep(1);
 						}
-						long re2  = SignleRunClientUtil.addCounterValue("redis:hsh:test:count0", -1);
+						long re2  = SyRunClientUtil.addCounterValue("redis:hsh:test:count0", -1);
 						System.out.println("re1:" + re1 + " ,re2:" + re2);
 					}
 					 return "";
@@ -155,10 +155,10 @@ public class SyRunCounterTest{
             }
         } finally {
             service.shutdown();
-            SignleRunTCPClient.closeConnect();
+            SyRunCounterTCPClient.closeConnect();
         }
         long end = System.currentTimeMillis();
-        System.out.println("\n\ncount:"+ SignleRunClientUtil.getCounterValue("redis:hsh:test:count0"));
+        System.out.println("\n\ncount:"+ SyRunClientUtil.getCounterValue("redis:hsh:test:count0"));
         System.out.println("\nuseTime:"+(end - start));
 	}
 }

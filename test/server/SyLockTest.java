@@ -11,9 +11,11 @@ import java.util.concurrent.Future;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.tingfeng.signleRun.bean.SyLockParam;
-import com.tingfeng.signleRun.common.util.IdWorker;
-import com.tingfeng.signleRun.server.controller.SyLockController;
+import com.alibaba.fastjson.JSONObject;
+import com.tingfeng.syRun.bean.SyLockParam;
+import com.tingfeng.syRun.bean.SyLockResponse;
+import com.tingfeng.syRun.common.util.IdWorker;
+import com.tingfeng.syRun.server.controller.SyLockController;
 
 public class SyLockTest {
 	private SyLockController syLockController = null;
@@ -25,7 +27,7 @@ public class SyLockTest {
 	
 	@Test
 	public void testSyLock() {
-		int threadPoolSize = 10;
+		int threadPoolSize = 100;
 		//开启一个线程池，指定线程池的大小
         ExecutorService service = Executors.newFixedThreadPool(threadPoolSize);
         //指定方法完成的执行器
@@ -39,10 +41,11 @@ public class SyLockTest {
         	 for (int i=0;i<threadPoolSize;i++) {
 	         //提交任务，提交后会默认启动Callable接口中的call方法
 	         completion.submit(() -> {
-					for(int idx = 0 ;idx < 10 ; idx++) {
+					for(int idx = 0 ;idx < 100 ; idx++) {
 						SyLockParam syLockParam = new SyLockParam();
 						syLockParam.setKey(key);
-						String lockId = syLockController.lockSyLock(IdWorker.getUUID() + "", syLockParam);
+						SyLockResponse response = JSONObject.parseObject(syLockController.lockSyLock(IdWorker.getUUID() + "", syLockParam), SyLockResponse.class);					
+						String lockId = response.getLockId();
 						syLockParam.setLockId(lockId);
 						Integer re1 = countMap.get("count");
 						re1  = re1 + 2;
