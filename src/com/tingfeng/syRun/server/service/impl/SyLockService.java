@@ -10,9 +10,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.tingfeng.syRun.bean.SyLockParam;
-import com.tingfeng.syRun.bean.SyLockResponse;
+import com.tingfeng.syRun.common.ResponseStatus;
+import com.tingfeng.syRun.common.bean.request.SyLockParam;
 import com.tingfeng.syRun.common.CodeConstants;
+import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import com.tingfeng.syRun.common.util.IdWorker;
 /**
  * 
@@ -32,7 +33,7 @@ public class SyLockService {
 	private static final int threadPoolSize = 1000;
 	private static final ExecutorService servicePool = Executors.newFixedThreadPool(threadPoolSize);//此线程仅仅作为一个补充移除功能
 	//指定方法完成的执行器
-	private static final ExecutorCompletionService<SyLockResponse> completion
+	private static final ExecutorCompletionService<ResponseBean> completion
 														= new ExecutorCompletionService<>(servicePool);
 	/**
 	 * 锁状态的Map,,key是当前key,value是存放当前加锁的锁id
@@ -51,23 +52,23 @@ public class SyLockService {
 		return syLockService;
 	}
 
-	public SyLockResponse lockSyLock(String id,final SyLockParam syLockParam) {
-		final SyLockResponse response = new SyLockResponse();
-		response.setLockId(IdWorker.getUUID() + "");
-		response.setResult(CodeConstants.Result.FAIL);
+	public ResponseBean lockSyLock(String id,final SyLockParam syLockParam) {
+		final ResponseBean response = new ResponseBean();
+		response.setData(IdWorker.getUUID() + "");
+		response.setStatus(ResponseStatus.FAIL.getValue());
 		
-		Future<SyLockResponse> future = completion.submit(() ->{
+		Future<ResponseBean> future = completion.submit(() ->{
 			String key = syLockParam.getKey();						
 				String lockId = null;
 				boolean isSleep = false;
-				String oldLockId = response.getLockId();
+				String oldLockId = response.getData();
 				do {
 					
 					synchronized (key) {
 						lockId = lockStatusMap.get(key);
 						if(null == lockId) {
-							response.setResult(CodeConstants.Result.SUCCESS);
-							lockStatusMap.put(key, response.getLockId());
+							response.setStatus(ResponseStatus.SUCCESS.getValue());
+							lockStatusMap.put(key, response.getData());
 						}else {
 							isSleep = true;
 						}
@@ -110,17 +111,17 @@ public class SyLockService {
 	 * @param syLockParam
 	 * @return
 	 */
-	public SyLockResponse unlockSyLock(String id,final SyLockParam syLockParam) {
-		SyLockResponse response = new SyLockResponse();
-		response.setLockId(IdWorker.maxWorkerId + "");
-		response.setResult(CodeConstants.Result.SUCCESS);
-		response.setLockId(syLockParam.getLockId());
+	public ResponseBean unlockSyLock(String id,final SyLockParam syLockParam) {
+		ResponseBean response = new ResponseBean();
+		response.setId(id);
+		response.setStatus(ResponseStatus.SUCCESS.getValue());
+		response.setData(syLockParam.getLockId());
 		
 		String key = syLockParam.getKey();
 		synchronized (key) {
 			String	lockId = lockStatusMap.get(key);
 			if(lockId == null || !lockId.equals(syLockParam.getLockId())) {
-				response.setResult(CodeConstants.Result.FAIL);
+				response.setStatus(ResponseStatus.FAIL.getValue());
 			}else {
 				lockStatusMap.remove(syLockParam.getKey());
 			}

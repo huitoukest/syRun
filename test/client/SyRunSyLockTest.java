@@ -11,9 +11,7 @@ import java.util.concurrent.Future;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.alibaba.fastjson.JSONObject;
-import com.tingfeng.syRun.bean.SyLockParam;
-import com.tingfeng.syRun.bean.SyLockResponse;
+import com.tingfeng.syRun.common.bean.request.SyLockParam;
 import com.tingfeng.syRun.client.util.SyRunClientUtil;
 
 
@@ -41,9 +39,7 @@ public class SyRunSyLockTest{
 					for(int idx = 0 ;idx < 2 ; idx++) {
 						SyLockParam syLockParam = new SyLockParam();
 						syLockParam.setKey(key);
-						String result = SyRunClientUtil.lockSyLock(key);
-						SyLockResponse response = JSONObject.parseObject(result, SyLockResponse.class);
-						String lockId = response.getLockId();
+						String lockId = SyRunClientUtil.getLock(key);
 						syLockParam.setLockId(lockId);
 						Integer re1 = countMap.get("count");
 						re1  = re1 + 2;
@@ -53,7 +49,7 @@ public class SyRunSyLockTest{
 						Integer re2  = re1 - 1;
 						countMap.put("count", re2);
 						System.out.println("re1:" + re1 + " ,re2:" + re2);
-						SyRunClientUtil.unlockSyLock(key, lockId);
+						SyRunClientUtil.releaseLock(key, lockId);
 					}
 					 return "";
 				});

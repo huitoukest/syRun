@@ -2,9 +2,13 @@ package com.tingfeng.syRun.server.util;
 
 import java.io.IOException;
 import com.alibaba.fastjson.JSONObject;
-import com.tingfeng.syRun.bean.CounterParam;
-import com.tingfeng.syRun.bean.RequestBean;
-import com.tingfeng.syRun.bean.SyLockParam;
+import com.tingfeng.syRun.client.util.MsgType;
+import com.tingfeng.syRun.common.RequestType;
+import com.tingfeng.syRun.common.ResponseStatus;
+import com.tingfeng.syRun.common.bean.request.CounterParam;
+import com.tingfeng.syRun.common.bean.request.RequestBean;
+import com.tingfeng.syRun.common.bean.response.ResponseBean;
+import com.tingfeng.syRun.common.bean.request.SyLockParam;
 import com.tingfeng.syRun.common.CodeConstants;
 import com.tingfeng.syRun.server.controller.CounterController;
 import com.tingfeng.syRun.server.controller.SyLockController;
@@ -16,33 +20,37 @@ public class SignleRunServerUtil {
     public static String doServerWork(String str) throws IOException {
 		JSONObject jsonObject = JSONObject.parseObject(str);
 		int type = jsonObject.getIntValue(CodeConstants.RquestKey.TYPE);
+		String id = jsonObject.getString(CodeConstants.RquestKey.ID);
+		ResponseBean responseBean = new ResponseBean();
+		responseBean.setId(id);
 		String result = null;
-		switch (type) {
-		case CodeConstants.RquestType.COUNTER:
-			 {
-				 CounterParam counterRequest = jsonObject.getObject(CodeConstants.RquestKey.PARAMS, CounterParam.class);
-				 result = doCounter(counterRequest);
-				 break;
-			 }
-		case CodeConstants.RquestType.SYNLOCK:
+		try {
+			if(type == MsgType.COUNTER.getValue())
 			{
+				CounterParam counterRequest = jsonObject.getObject(CodeConstants.RquestKey.PARAMS, CounterParam.class);
+				result = doCounter(counterRequest);
+			}else if(type == MsgType.LOCK.getValue()){
 				SyLockParam requestParam = jsonObject.getObject(CodeConstants.RquestKey.PARAMS, SyLockParam.class);
 				RequestBean<SyLockParam> requestBean = new RequestBean<>();
 				requestBean.setId(jsonObject.getString(CodeConstants.RquestKey.ID));
 				requestBean.setType(type);
 				requestBean.setParams(requestParam);
 				result = doSyLock(requestBean);
-				break;
 			}
-		default:
-			break;
-		}		
-		return result;
+			responseBean.setStatus(ResponseStatus.SUCCESS.getValue());
+		}catch (Exception e){
+			e.printStackTrace();
+			responseBean.setStatus(ResponseStatus.FAIL.getValue());
+			responseBean.setErrorMsg(e.getCause().toString());
+		}
+		responseBean.setData(result);
+
+		return JSONObject.toJSONString(responseBean);
 	}
 	
     
     private static String doSyLock(RequestBean<SyLockParam> requestBean) {
-    	String result = CodeConstants.Result.FAIL;
+    	String result = "";
     	//String key = requestBean.getParams().getKey();
     	String method = requestBean.getParams().getMethod();
     	String id = requestBean.getId();
@@ -64,7 +72,7 @@ public class SignleRunServerUtil {
     	String key = counterRequest.key;
     	long value = counterRequest.value;
     	long expireTime = counterRequest.expireTime;
-    	String result = CodeConstants.Result.FAIL;
+    	String result = "";
     	String method = counterRequest.getMethod();
     	switch(method){
     	case "initCounter":{

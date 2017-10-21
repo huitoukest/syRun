@@ -1,7 +1,7 @@
 package com.tingfeng.syRun.server.controller;
 import java.io.IOException;
 
-import com.tingfeng.syRun.bean.CounterBean;
+import com.tingfeng.syRun.server.bean.CounterBean;
 import com.tingfeng.syRun.server.service.impl.CounterService;
 import com.tingfeng.syRun.server.service.impl.ReturnUtil;
 
@@ -12,8 +12,6 @@ public class CounterController {
 	 * @param key 计数器的key
 	 * @param value 初始化的值,为null时默认变为0
 	 * @param expireTime 过期时间
-	 * @param request
-	 * @param response
 	 * @return
 	 * @throws IOException
 	 */
@@ -44,8 +42,6 @@ public class CounterController {
     /**
      * 
      * @param key
-     * @param request
-     * @param response
      * @return
      * @throws IOException
      */
@@ -53,11 +49,7 @@ public class CounterController {
     	return counterHelper.getCounterValue(key) + "";
     }
     /**
-     * 
      * @param key
-     * @param addValue if null ,convert to 0
-     * @param request
-     * @param response
      * @return return the value
      * @throws IOException
      */

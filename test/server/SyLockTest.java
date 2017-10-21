@@ -8,12 +8,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import com.tingfeng.syRun.common.RequestUtil;
+import com.tingfeng.syRun.common.ResponseStatus;
+import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.alibaba.fastjson.JSONObject;
-import com.tingfeng.syRun.bean.SyLockParam;
-import com.tingfeng.syRun.bean.SyLockResponse;
+import com.tingfeng.syRun.common.bean.request.SyLockParam;
 import com.tingfeng.syRun.common.util.IdWorker;
 import com.tingfeng.syRun.server.controller.SyLockController;
 
@@ -44,8 +46,8 @@ public class SyLockTest {
 					for(int idx = 0 ;idx < 100 ; idx++) {
 						SyLockParam syLockParam = new SyLockParam();
 						syLockParam.setKey(key);
-						SyLockResponse response = JSONObject.parseObject(syLockController.lockSyLock(IdWorker.getUUID() + "", syLockParam), SyLockResponse.class);					
-						String lockId = response.getLockId();
+						ResponseBean response = JSONObject.parseObject(syLockController.lockSyLock(RequestUtil.getSychronizedMsgId(), syLockParam), ResponseBean.class);
+						String lockId = response.getData();
 						syLockParam.setLockId(lockId);
 						Integer re1 = countMap.get("count");
 						re1  = re1 + 2;

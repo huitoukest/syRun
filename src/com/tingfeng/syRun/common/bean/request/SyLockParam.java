@@ -1,10 +1,11 @@
-package com.tingfeng.syRun.bean;
+package com.tingfeng.syRun.common.bean.request;
+
 /**
  * 
  * @author huitoukest
  * 
  */
-public class SyLockParam extends BaseRequestParam{
+public class SyLockParam extends BaseRequestParam {
     
 	/**
 	 * 同步锁的key
@@ -38,13 +39,5 @@ public class SyLockParam extends BaseRequestParam{
 	public void setLockId(String lockId) {
 		this.lockId = lockId;
 	}
-	
-	/*public SyLockBean toSyLockBean() {
-		SyLockBean syLockBean = new SyLockBean();
-		syLockBean.setKey(this.key);
-		syLockBean.setExpireTime(System.currentTimeMillis() + maxWaitTime);
-		return syLockBean;
-	}*/
-
 	
 }

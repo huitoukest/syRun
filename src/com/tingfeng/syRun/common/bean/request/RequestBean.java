@@ -1,4 +1,4 @@
-package com.tingfeng.syRun.bean;
+package com.tingfeng.syRun.common.bean.request;
 
 public class RequestBean<T extends BaseRequestParam> {
 	/**

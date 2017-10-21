@@ -11,10 +11,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import com.tingfeng.syRun.client.SyRunTCPClient;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.tingfeng.syRun.client.SyRunCounterTCPClient;
 import com.tingfeng.syRun.client.bean.FrequencyBean;
 import com.tingfeng.syRun.client.util.SyRunClientUtil;
 import com.tingfeng.syRun.common.FrequencyControlHelper;
@@ -83,8 +83,8 @@ public class SyRunCounterTest{
 								}
 
 								@Override
-								public String setExpireTime(String key, long expireTime) throws Exception {
-									return signleRunController.setCounterExpireTime(key, expireTime);		
+								public void setExpireTime(String key, long expireTime) throws Exception {
+									signleRunController.setCounterExpireTime(key, expireTime);
 								}
 						
 					}, key,150);
@@ -159,7 +159,7 @@ public class SyRunCounterTest{
             }
         } finally {
             service.shutdown();
-            SyRunCounterTCPClient.closeConnect();
+            SyRunTCPClient.closeConnect();
         }
         long end = System.currentTimeMillis();
         System.out.println("\n\ncount:"+ signleRunController.getCounterValue("redis:hsh:test:count0"));

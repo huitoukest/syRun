@@ -1,29 +1,26 @@
 package com.tingfeng.syRun.client.handler;
 
-import java.util.concurrent.TimeUnit;
-
-import org.apache.mina.core.future.ReadFuture;
-import org.apache.mina.core.future.WriteFuture;
+import com.alibaba.fastjson.JSONObject;
+import com.tingfeng.syRun.common.bean.response.ResponseBean;
+import com.tingfeng.syRun.client.util.SyRunMsgAsynchronizeUtil;
+import com.tingfeng.syRun.client.util.SyRunMsgSynchronizeUtil;
+import com.tingfeng.syRun.common.RequestUtil;
+import com.tingfeng.syRun.common.ex.OutTimeException;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 
-import com.alibaba.fastjson.JSONObject;
-import com.tingfeng.syRun.bean.RequestBean;
-import com.tingfeng.syRun.client.SyRunCounterTCPClient;
-import com.tingfeng.syRun.common.ex.OutTimeException;
 /**
- * 
+ * 异步handler
  * @author huitoukest
- *
  */
-public class SyRunCounterClientHandler extends IoHandlerAdapter {
+public class SyRunClientHandler extends IoHandlerAdapter {
+
+	private static final SyRunClientHandler signleRunClientHandler = new SyRunClientHandler();
+
+	private SyRunClientHandler() {}
 	
-	private static final  SyRunCounterClientHandler signleRunClientHandler = new SyRunCounterClientHandler();
-	
-	private SyRunCounterClientHandler() {}
-	
-	public static SyRunCounterClientHandler getSigleInstance(){
+	public static SyRunClientHandler getSigleInstance(){
 		return signleRunClientHandler;
 	}
 	
@@ -78,21 +75,26 @@ public class SyRunCounterClientHandler extends IoHandlerAdapter {
 	}
 	
 	public static void receiveMsg(String msg){
+			   ResponseBean responseBean = JSONObject.parseObject(msg,ResponseBean.class);
+			   if(RequestUtil.isAsychronizedMsg(responseBean.getId())) {
+				   SyRunMsgAsynchronizeUtil.receiveMsg(responseBean);
+			   }else {
+				   SyRunMsgSynchronizeUtil.receiveMsg(responseBean);
+			   }
 	}
 	
-	public  static String sendMessage(RequestBean<?> requestBean) throws InterruptedException, OutTimeException{
+	/*public  static String sendMessage(RequestBean<?> requestBean) throws InterruptedException, OutTimeException{
 		return sendMessage(SyRunCounterTCPClient.getSession(),requestBean);
-    }
+    }*/
 	/**
 	 * 目前必须使发送的消息和接收的消息互斥才能保证有序,以后考虑
 	 * 通过多线程/唯一id辨识消息唯一性
 	 * @param session
-	 * @param msg
 	 * @return
 	 * @throws InterruptedException
 	 * @throws OutTimeException
-	 */
-	public  synchronized static String sendMessage(IoSession session,RequestBean<?> requestBean) throws InterruptedException, OutTimeException{			
+	 * /
+	/*public static String sendMessage(IoSession session,RequestBean<?> requestBean) throws InterruptedException, OutTimeException{
 		String msg = JSONObject.toJSONString(requestBean);
 		String returnMsg = "";
 		WriteFuture future =null;
@@ -112,6 +114,6 @@ public class SyRunCounterClientHandler extends IoHandlerAdapter {
            throw new OutTimeException("返回等待消息连接超时!");
         }
         return returnMsg;
-	} 
+	} */
 	
 }

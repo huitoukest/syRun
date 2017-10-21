@@ -49,13 +49,11 @@ public abstract class FrequencyControlHelper<T> {
 	}
 	/**
 	 * 检查合格之后做你的工作
-	 * @param frequencyBean
 	 * @return
 	 */
 	public abstract  T doWork() throws Exception ;
 	/**
 	 * 根据key获取其过期时间
-	 * @param frequencyBean
 	 * @return
 	 * @throws Exception 
 	 */
@@ -73,7 +71,7 @@ public abstract class FrequencyControlHelper<T> {
 	 * @param expireTime
 	 * @return
 	 */
-	public abstract String setExpireTime(String key,long expireTime) throws Exception ;
+	public abstract void setExpireTime(String key,long expireTime) throws Exception ;
 	
 	
 	

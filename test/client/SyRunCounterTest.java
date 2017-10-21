@@ -4,16 +4,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
+import com.tingfeng.syRun.client.SyRunTCPClient;
 import org.junit.Test;
 
-import com.tingfeng.syRun.client.SyRunCounterTCPClient;
 import com.tingfeng.syRun.client.bean.FrequencyBean;
 import com.tingfeng.syRun.client.util.SyRunClientUtil;
 import com.tingfeng.syRun.common.FrequencyControlHelper;
@@ -24,7 +19,7 @@ public class SyRunCounterTest{
 	
 	static int counter = 0;
 	@Test
-	public void testSingleStep() throws IOException, InterruptedException, OutTimeException{
+	public void testSingleStep() throws IOException, InterruptedException, OutTimeException, TimeoutException, ExecutionException {
 		int threadPoolSize = 200;
 		//开启一个线程池，指定线程池的大小
         ExecutorService service = Executors.newFixedThreadPool(threadPoolSize);
@@ -79,8 +74,8 @@ public class SyRunCounterTest{
 								}
 
 								@Override
-								public String setExpireTime(String key, long expireTime) throws Exception {
-									return SyRunClientUtil.setCounterExpireTime(key, expireTime);		
+								public void setExpireTime(String key, long expireTime) throws Exception {
+									SyRunClientUtil.setCounterExpireTime(key, expireTime);
 								}
 						
 					}, key,300);
@@ -111,8 +106,8 @@ public class SyRunCounterTest{
 	
 	
 	@Test
-	public void testAddStep() throws IOException, InterruptedException, OutTimeException{
-		int threadPoolSize = 100;
+	public void testAddStep() throws IOException, InterruptedException, OutTimeException, TimeoutException, ExecutionException {
+		int threadPoolSize = 500;
 		//开启一个线程池，指定线程池的大小
         ExecutorService service = Executors.newFixedThreadPool(threadPoolSize);
         //指定方法完成的执行器
@@ -128,11 +123,8 @@ public class SyRunCounterTest{
 	         completion.submit(new Callable<String>() {
 				@Override
 				public String call() throws Exception {
-					for(int i = 0 ;i < 1000 ; i++) { 
+					for(int i = 0 ;i < 1000 ; i++) {
 						long re1  = SyRunClientUtil.addCounterValue("redis:hsh:test:count0", 2);
-						if(i % 5 ==0) {
-							Thread.sleep(1);
-						}
 						long re2  = SyRunClientUtil.addCounterValue("redis:hsh:test:count0", -1);
 						System.out.println("re1:" + re1 + " ,re2:" + re2);
 					}
@@ -155,7 +147,7 @@ public class SyRunCounterTest{
             }
         } finally {
             service.shutdown();
-            SyRunCounterTCPClient.closeConnect();
+            SyRunTCPClient.closeConnect();
         }
         long end = System.currentTimeMillis();
         System.out.println("\n\ncount:"+ SyRunClientUtil.getCounterValue("redis:hsh:test:count0"));

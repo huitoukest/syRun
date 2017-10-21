@@ -1,4 +1,4 @@
-package com.tingfeng.syRun.bean;
+package com.tingfeng.syRun.server.bean;
 
 public class CounterBean {
 	/**

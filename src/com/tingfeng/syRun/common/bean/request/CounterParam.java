@@ -1,6 +1,6 @@
-package com.tingfeng.syRun.bean;
+package com.tingfeng.syRun.common.bean.request;
 
-public class CounterParam extends BaseRequestParam{
+public class CounterParam extends BaseRequestParam {
 	/**
 	 * 10分钟
 	 */

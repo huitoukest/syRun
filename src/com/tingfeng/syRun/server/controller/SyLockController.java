@@ -1,8 +1,10 @@
 package com.tingfeng.syRun.server.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.tingfeng.syRun.bean.SyLockParam;
-import com.tingfeng.syRun.bean.SyLockResponse;
+import com.tingfeng.syRun.common.ResponseStatus;
+import com.tingfeng.syRun.common.bean.request.SyLockParam;
+import com.tingfeng.syRun.common.bean.response.ResponseBean;
+import com.tingfeng.syRun.common.util.IdWorker;
 import com.tingfeng.syRun.server.service.impl.SyLockService;
 
 /**
@@ -24,7 +26,7 @@ public class SyLockController {
 	 * @return 
 	 */
 	public String lockSyLock(String id,SyLockParam syLockParam) {
-		SyLockResponse response =  syLockService.lockSyLock(id,syLockParam);
+		ResponseBean response =  syLockService.lockSyLock(id,syLockParam);
 		return toJSONString(response);
 	}
 	/**
@@ -34,15 +36,23 @@ public class SyLockController {
 	 */
 	public String unlockSyLock(String id,SyLockParam syLockParam) {
 		if(null  == syLockParam) {
-			return toJSONString(SyLockResponse.getFaildSyLock("1", id));
+			return toJSONString(getFaildSyLock("1", id));
 		}
 		if(!checkSyLockKey(syLockParam.getLockId())) {
-			return toJSONString(SyLockResponse.getFaildSyLock(syLockParam.getLockId(), id));
+			return toJSONString(getFaildSyLock(syLockParam.getLockId(), id));
 		}
-		SyLockResponse response =  syLockService.unlockSyLock(id,syLockParam);
+		ResponseBean response =  syLockService.unlockSyLock(id,syLockParam);
 		return toJSONString(response);
 	}
-	
+
+	private ResponseBean getFaildSyLock(String id,String lockKey){
+		final ResponseBean response = new ResponseBean();
+		response.setData(null);
+		response.setStatus(ResponseStatus.FAIL.getValue());
+		response.id = id;
+		response.setStatus(ResponseStatus.FAIL.getValue());
+		return response;
+	}
 	
 	
 	/**
