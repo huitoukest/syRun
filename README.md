@@ -14,7 +14,8 @@ to help application synchronized run on distributed system
 redis的计数器和分布式事务能够一定程度上来实现此功能.
 
 # 当前完成版本
-尚无完成版本...
+  0.1-SNAPSHOT 20171022
+
 
 # 版本计划
 ## 0.X版本
