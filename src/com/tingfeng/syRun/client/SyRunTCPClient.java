@@ -26,18 +26,18 @@ public class SyRunTCPClient {
 
 	public static void main(String[] args) throws Exception
 	{
-		init();
+		init(ConfigEntity.SERVER_IP,ConfigEntity.SERVDER_TCP_PORT);
 
 	}
 
-	public static synchronized void init() throws IOException, InterruptedException{
+	public static synchronized void init(String serverIP,int serverPort) throws IOException, InterruptedException{
 		if(!isInited){
-			initClientConnect();
+			initClientConnect(serverIP,serverPort);
 		}
 	}
 
 
-	private static void initClientConnect() {
+	private static void initClientConnect(String serverIP,int serverPort) {
 		// Create TCP/IP connector.
 		connector = new NioSocketConnector();
 		// 创建接收数据的过滤器
@@ -59,7 +59,7 @@ public class SyRunTCPClient {
 		//connector.getSessionConfig().setUseReadOperation(true);//设置消息可同步读
 		//连结到服务器:
 		ConnectFuture cf = connector.connect(new
-				InetSocketAddress(ConfigEntity.SERVER_IP, ConfigEntity.SERVDER_TCP_PORT));
+				InetSocketAddress(serverIP,serverPort));
 		// Wait for the connection attempt to be finished.
 		cf.awaitUninterruptibly();
 		session =  cf.getSession();

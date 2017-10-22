@@ -22,13 +22,12 @@ import com.tingfeng.syRun.server.handler.SyRunSeverHandler;
 public class SyRunTCPServer {
 	public static final int threadSize = 512;
 	private static boolean isInited = false;
-	private static final int PORT = ConfigEntity.SERVDER_TCP_PORT;
 	  
     public static void main(String[] args) throws IOException {  
-    	init();
+    	init(ConfigEntity.SERVER_IP,ConfigEntity.SERVDER_TCP_PORT);
     }
     
-    public static void init() throws IOException{
+    public static void init(String serverIP,int serverPort) throws IOException{
     	if(!isInited){
     		isInited = true;
 	    	 //首先，我们为服务端创建IoAcceptor，NioSocketAcceptor是基于NIO的服务端监听器  
@@ -49,7 +48,7 @@ public class SyRunTCPServer {
 	        //设置等待时间，每隔IdleTime将调用一次handler.sessionIdle()方法  
 	        acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, 10); 
 	        //绑定端口
-	        acceptor.bind(new InetSocketAddress(ConfigEntity.SERVER_IP,PORT));
+	        acceptor.bind(new InetSocketAddress(serverIP,serverPort));
     	}
     }
 

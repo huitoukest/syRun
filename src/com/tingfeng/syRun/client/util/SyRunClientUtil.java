@@ -6,6 +6,7 @@ import java.util.concurrent.TimeoutException;
 
 import com.alibaba.fastjson.JSONObject;
 import com.tingfeng.syRun.client.SyRunTCPClient;
+import com.tingfeng.syRun.common.ConfigEntity;
 import com.tingfeng.syRun.common.bean.request.BaseRequestParam;
 import com.tingfeng.syRun.common.bean.request.CounterParam;
 import com.tingfeng.syRun.common.bean.request.RequestBean;
@@ -193,7 +194,7 @@ public class SyRunClientUtil {
 	 * @throws ExecutionException
 	 */
 	private static <T extends BaseRequestParam> ResponseBean sendMsgToServer(RequestBean<T> requestBean) throws InterruptedException, IOException, OutTimeException, TimeoutException, ExecutionException {
-		SyRunTCPClient.init();
+		SyRunTCPClient.init(ConfigEntity.SERVER_IP,ConfigEntity.SERVDER_TCP_PORT);
 		return SyRunMsgSynchronizeUtil.sendMsg(requestBean);
 	}
 }
