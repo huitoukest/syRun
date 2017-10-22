@@ -5,7 +5,7 @@ import com.tingfeng.syRun.common.bean.request.CounterParam;
 import com.tingfeng.syRun.common.bean.request.RequestBean;
 import com.tingfeng.syRun.common.bean.request.SyLockParam;
 import com.tingfeng.syRun.common.RequestType;
-import com.tingfeng.syRun.common.RequestUtil;
+import com.tingfeng.syRun.common.util.RequestUtil;
 
 /**
  * 根据参数,构建相应的请求参数
@@ -72,11 +72,11 @@ public class RequestParameterUtil {
     }
 
     public static RequestBean<SyLockParam> getParamOfGetLock(RequestType requestType,String key){
-        return getParamOfLock(requestType,"lockSyLock",key,null);
+        return getParamOfLock(requestType,"lock",key,null);
     }
 
     public static RequestBean<SyLockParam> getParamOfReleaseLock(RequestType requestType,String key,String unLockId){
-        return getParamOfLock(requestType,"unlockSyLock",key,unLockId);
+        return getParamOfLock(requestType,"unLock",key,unLockId);
     }
 
 

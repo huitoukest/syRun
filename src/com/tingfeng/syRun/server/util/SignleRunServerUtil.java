@@ -3,7 +3,6 @@ package com.tingfeng.syRun.server.util;
 import java.io.IOException;
 import com.alibaba.fastjson.JSONObject;
 import com.tingfeng.syRun.client.util.MsgType;
-import com.tingfeng.syRun.common.RequestType;
 import com.tingfeng.syRun.common.ResponseStatus;
 import com.tingfeng.syRun.common.bean.request.CounterParam;
 import com.tingfeng.syRun.common.bean.request.RequestBean;
@@ -18,13 +17,13 @@ public class SignleRunServerUtil {
 	public static final SyLockController syLockController = new SyLockController();
 
     public static String doServerWork(String str) throws IOException {
-		JSONObject jsonObject = JSONObject.parseObject(str);
-		int type = jsonObject.getIntValue(CodeConstants.RquestKey.TYPE);
-		String id = jsonObject.getString(CodeConstants.RquestKey.ID);
 		ResponseBean responseBean = new ResponseBean();
-		responseBean.setId(id);
 		String result = null;
 		try {
+			JSONObject jsonObject = JSONObject.parseObject(str);
+			int type = jsonObject.getIntValue(CodeConstants.RquestKey.TYPE);
+			String id = jsonObject.getString(CodeConstants.RquestKey.ID);
+			responseBean.setId(id);
 			if(type == MsgType.COUNTER.getValue())
 			{
 				CounterParam counterRequest = jsonObject.getObject(CodeConstants.RquestKey.PARAMS, CounterParam.class);
@@ -40,6 +39,7 @@ public class SignleRunServerUtil {
 			responseBean.setStatus(ResponseStatus.SUCCESS.getValue());
 		}catch (Exception e){
 			e.printStackTrace();
+			System.out.println("error msg is:" + str);
 			responseBean.setStatus(ResponseStatus.FAIL.getValue());
 			responseBean.setErrorMsg(e.getCause().toString());
 		}
@@ -56,11 +56,11 @@ public class SignleRunServerUtil {
     	String id = requestBean.getId();
     	//String lockId = requestBean.getParams().getLockId();
     	switch(method){
-    		case "lockSyLock":{
+    		case "lock":{
     			result = syLockController.lockSyLock(id, requestBean.getParams());
     			break;
     		}
-    		case "unlockSyLock":{
+    		case "unLock":{
     			result = syLockController.unlockSyLock(id, requestBean.getParams());
     			break;
     		}

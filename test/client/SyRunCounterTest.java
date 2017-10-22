@@ -107,7 +107,7 @@ public class SyRunCounterTest{
 	
 	@Test
 	public void testAddStep() throws IOException, InterruptedException, OutTimeException, TimeoutException, ExecutionException {
-		int threadPoolSize = 500;
+		int threadPoolSize = 200;
 		//开启一个线程池，指定线程池的大小
         ExecutorService service = Executors.newFixedThreadPool(threadPoolSize);
         //指定方法完成的执行器
@@ -147,10 +147,10 @@ public class SyRunCounterTest{
             }
         } finally {
             service.shutdown();
-            SyRunTCPClient.closeConnect();
         }
         long end = System.currentTimeMillis();
         System.out.println("\n\ncount:"+ SyRunClientUtil.getCounterValue("redis:hsh:test:count0"));
         System.out.println("\nuseTime:"+(end - start));
+		//SyRunTCPClient.closeConnect();
 	}
 }

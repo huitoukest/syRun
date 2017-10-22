@@ -1,10 +1,12 @@
 package com.tingfeng.syRun.client.handler;
 
 import com.alibaba.fastjson.JSONObject;
+import com.tingfeng.syRun.common.bean.request.RequestBean;
 import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import com.tingfeng.syRun.client.util.SyRunMsgAsynchronizeUtil;
 import com.tingfeng.syRun.client.util.SyRunMsgSynchronizeUtil;
-import com.tingfeng.syRun.common.RequestUtil;
+import com.tingfeng.syRun.common.util.Base64Util;
+import com.tingfeng.syRun.common.util.RequestUtil;
 import com.tingfeng.syRun.common.ex.OutTimeException;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
@@ -47,6 +49,7 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 	throws Exception {
 		//我们己设定了服务器解析消息的规则是一行一行读取,这里就可转为String:
 		String s=(String)message;
+		//s = Base64Util.deCodeFromBase64(s);
 		receiveMsg(s);
 		/*// Write the received data back to remote peer
 		System.out.println("服务器发来的收到消息: "+s);
@@ -86,23 +89,7 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 	/*public  static String sendMessage(RequestBean<?> requestBean) throws InterruptedException, OutTimeException{
 		return sendMessage(SyRunCounterTCPClient.getSession(),requestBean);
     }*/
-	/**
-	 * 目前必须使发送的消息和接收的消息互斥才能保证有序,以后考虑
-	 * 通过多线程/唯一id辨识消息唯一性
-	 * @param session
-	 * @return
-	 * @throws InterruptedException
-	 * @throws OutTimeException
-	 * /
-	/*public static String sendMessage(IoSession session,RequestBean<?> requestBean) throws InterruptedException, OutTimeException{
-		String msg = JSONObject.toJSONString(requestBean);
-		String returnMsg = "";
-		WriteFuture future =null;
-	    	future = session.write(msg);
-	    	returnMsg = readReturnMsg(future,session);         
-		return returnMsg;
-    }
-	
+	/*
 	public static String readReturnMsg(WriteFuture future,IoSession session) throws OutTimeException {
 		future.awaitUninterruptibly();
  	    String returnMsg = "";
@@ -115,5 +102,19 @@ public class SyRunClientHandler extends IoHandlerAdapter {
         }
         return returnMsg;
 	} */
+
+	/**
+	 * 目前必须使发送的消息和接收的消息互斥才能保证有序,以后考虑
+	 * 通过多线程/唯一id辨识消息唯一性
+	 * @param requestBean
+	 * @return
+	 * @throws InterruptedException
+	 * @throws OutTimeException
+	 */
+	public static void sendMessage(IoSession ioSession,RequestBean<?> requestBean){
+		String msg = JSONObject.toJSONString(requestBean);
+		//System.out.println("send msg is:" + msg);
+		ioSession.write(msg );
+	}
 	
 }

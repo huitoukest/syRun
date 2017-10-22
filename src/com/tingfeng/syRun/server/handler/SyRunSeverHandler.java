@@ -2,7 +2,13 @@ package com.tingfeng.syRun.server.handler;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import com.alibaba.fastjson.JSONObject;
+import com.tingfeng.syRun.common.ResponseStatus;
+import com.tingfeng.syRun.common.bean.response.ResponseBean;
+import com.tingfeng.syRun.common.util.Base64Util;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.future.IoFutureListener;
 import org.apache.mina.core.future.WriteFuture;
@@ -13,11 +19,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tingfeng.syRun.server.util.SignleRunServerUtil;
+import sun.security.provider.certpath.OCSPResponse;
 
 public class SyRunSeverHandler  extends IoHandlerAdapter{
-	private static Logger logger = LoggerFactory.getLogger(SyRunSeverHandler.class);  
+
+	//public static final int threadSize = 128;
+	//private static final ExecutorService servicePool = Executors.newFixedThreadPool(threadSize);
+	private static Logger logger = LoggerFactory.getLogger(SyRunSeverHandler.class);
     
-	public static final Map<Long, IoSession> minaSessionMap = new ConcurrentHashMap<>();
+	/*public static final Map<Long, IoSession> minaSessionMap = new ConcurrentHashMap<>();*/
 	
     @Override
 	public void sessionCreated(IoSession session) throws Exception {
@@ -27,14 +37,14 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
 	@Override
 	public void sessionOpened(IoSession session) throws Exception {
 		super.sessionOpened(session);
-		minaSessionMap.put(session.getId(), session);
+		//minaSessionMap.put(session.getId(), session);
 		//session.write(CodeConstants.Result.SUCCESS);
 	}
 
 	@Override
 	public void sessionClosed(IoSession session) throws Exception {
 		super.sessionClosed(session);
-		minaSessionMap.remove(session.getId());
+		//minaSessionMap.remove(session.getId());
 	}
 
 	@Override
@@ -62,12 +72,11 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
      * @see IoSession#close(boolean)
      */
     @Override
-    public void exceptionCaught(IoSession session, Throwable cause) throws Exception 
-    {   
+    public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
         logger.error("[IMCORE]exceptionCaught捕获到错了，原因是："+cause.getMessage(), cause);
-        System.out.println(cause.toString());
+		cause.printStackTrace();
         session.closeOnFlush();
-        minaSessionMap.remove(session.getId());
+        //minaSessionMap.remove(session.getId());
     }
          
     /**
@@ -76,32 +85,36 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
      * 本类将在此方法中实现完整的即时通讯数据交互和处理策略。
      * <p>
      * 为了提升并发性能，本方法将运行在独立于MINA的IoProcessor之外的线程池中，
-     * 详见 {@link ServerLauncher#initAcceptor()}中的MINA设置代码 。
      * 
      * @param session 收到消息对应的会话引用
      * @param message 收到的MINA的原始消息封装对象，本类中是 {@link IoBuffer}对象
      * @throws Exception 当有错误发生时将抛出异常
      */
     @Override
-    public void messageReceived(IoSession session, Object message)throws Exception 
+    public void messageReceived(IoSession session, Object message)throws Exception
     {
     	//System.out.println(System.currentTimeMillis() + ": Message server re: " + message);
     	//*********************************************** 接收数据  
-    	String str = message.toString();
-        if(null != str){
-        	str = str.trim();
-        }
-    	try {			
-			String result = SignleRunServerUtil.doServerWork(str);
+		String str = null;
+		String result = null;
+		if(null == message){
+			ResponseBean responseBean = new ResponseBean();
+			responseBean.setStatus(ResponseStatus.FAIL.getValue());
+			responseBean.setErrorMsg("null response msg ");
+			result = JSONObject.toJSONString(responseBean);
+			//result = Base64Util.enCodeToBase64(result);
 			sendMessage(session,result);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-    	if (str.trim().equalsIgnoreCase("quit")) {
-            session.closeOnFlush();
-            return;  
-        }
 
+		}else{
+			str = message.toString();
+			final String reMsg = str;
+			result = SignleRunServerUtil.doServerWork(reMsg);
+			sendMessage(session,result);
+			/*if (str.trim().equalsIgnoreCase("quit")) {
+				session.closeOnFlush();
+				return;
+			}*/
+		}
     }
     
     public static void sendMessage(IoSession session,String msg){

@@ -1,12 +1,15 @@
 package com.tingfeng.syRun.client.util;
 
 import com.alibaba.fastjson.JSONObject;
+import com.tingfeng.syRun.client.handler.SyRunClientHandler;
 import com.tingfeng.syRun.common.bean.request.RequestBean;
 import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import com.tingfeng.syRun.client.SyRunTCPClient;
-import com.tingfeng.syRun.common.RequestUtil;
+import com.tingfeng.syRun.common.util.Base64Util;
+import com.tingfeng.syRun.common.util.RequestUtil;
 import org.apache.mina.core.session.IoSession;
 
+import java.io.UnsupportedEncodingException;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -18,7 +21,7 @@ public class SyRunMsgAsynchronizeUtil {
 
 	private static final ConcurrentHashMap<String,MsgHandler<?>> msgHandlerMap = new ConcurrentHashMap<>(20000);
 
-	public static void sendMsg(RequestBean<?> requestBean,MsgHandler<?> msgHandler){
+	public static void sendMsg(RequestBean<?> requestBean,MsgHandler<?> msgHandler) throws UnsupportedEncodingException {
 		    sendMsg(SyRunTCPClient.getSession(),requestBean,msgHandler);
 	}
 
@@ -28,10 +31,9 @@ public class SyRunMsgAsynchronizeUtil {
 	 * @param requestBean
 	 * @param msgHandler
 	 */
-	public static void sendMsg(IoSession ioSession,RequestBean<?> requestBean,MsgHandler<?> msgHandler){
-		   String msg = JSONObject.toJSONString(requestBean);
+	public static void sendMsg(IoSession ioSession,RequestBean<?> requestBean,MsgHandler<?> msgHandler) throws UnsupportedEncodingException {
 		   msgHandlerMap.put(requestBean.getId(),msgHandler);
-		   ioSession.write(msg);
+		   SyRunClientHandler.sendMessage(ioSession,requestBean);
 	}
 
 	/**

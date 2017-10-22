@@ -8,8 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import com.tingfeng.syRun.common.RequestUtil;
-import com.tingfeng.syRun.common.ResponseStatus;
+import com.tingfeng.syRun.common.util.RequestUtil;
 import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import org.junit.Before;
 import org.junit.Test;

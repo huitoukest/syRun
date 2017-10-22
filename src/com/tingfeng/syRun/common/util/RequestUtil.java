@@ -1,5 +1,6 @@
-package com.tingfeng.syRun.common;
+package com.tingfeng.syRun.common.util;
 
+import com.tingfeng.syRun.common.RequestType;
 import com.tingfeng.syRun.common.util.IdWorker;
 
 public class RequestUtil {

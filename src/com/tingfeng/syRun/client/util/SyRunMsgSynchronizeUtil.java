@@ -1,13 +1,16 @@
 package com.tingfeng.syRun.client.util;
 
 import com.alibaba.fastjson.JSONObject;
+import com.tingfeng.syRun.client.handler.SyRunClientHandler;
 import com.tingfeng.syRun.common.bean.request.BaseRequestParam;
 import com.tingfeng.syRun.common.bean.request.RequestBean;
 import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import com.tingfeng.syRun.client.SyRunTCPClient;
-import com.tingfeng.syRun.common.RequestUtil;
+import com.tingfeng.syRun.common.util.Base64Util;
+import com.tingfeng.syRun.common.util.RequestUtil;
 import org.apache.mina.core.session.IoSession;
 
+import java.io.UnsupportedEncodingException;
 import java.util.concurrent.*;
 
 /**
@@ -54,13 +57,13 @@ public class SyRunMsgSynchronizeUtil {
      * @param requestBean
      * @return
      */
-	public static ResponseBean sendMsg(IoSession ioSession,RequestBean<?> requestBean) throws TimeoutException, ExecutionException, InterruptedException {
+	public static ResponseBean sendMsg(IoSession ioSession,RequestBean<?> requestBean) throws TimeoutException, ExecutionException, InterruptedException, UnsupportedEncodingException {
 		final String id = requestBean.getId();
-		String msg = JSONObject.toJSONString(requestBean);
 		msgResPonseMap.remove(id);
-		ioSession.write(msg);
 		CountDownLatch countDownLatch = new CountDownLatch(1);
 		countDownLatchMap.put(id,countDownLatch);
+
+		SyRunClientHandler.sendMessage(ioSession,requestBean);
 		countDownLatch.await();
 		ResponseBean responseBean = msgResPonseMap.get(id);
 		return responseBean;
@@ -71,7 +74,7 @@ public class SyRunMsgSynchronizeUtil {
      * @param requestBean
      * @return
      */
-    public static <T extends BaseRequestParam> ResponseBean sendMsg(RequestBean<?> requestBean) throws TimeoutException, ExecutionException, InterruptedException {
+    public static <T extends BaseRequestParam> ResponseBean sendMsg(RequestBean<?> requestBean) throws TimeoutException, ExecutionException, InterruptedException, UnsupportedEncodingException {
         return sendMsg(SyRunTCPClient.getSession(),requestBean);
     }
 	

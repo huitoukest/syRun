@@ -22,7 +22,7 @@ public class SyRunSyLockTest{
 	
 	@Test
 	public void testSyLock() {
-		int threadPoolSize = 5;
+		int threadPoolSize = 20;
 		//开启一个线程池，指定线程池的大小
         ExecutorService service = Executors.newFixedThreadPool(threadPoolSize);
         //指定方法完成的执行器
@@ -72,10 +72,11 @@ public class SyRunSyLockTest{
 				}
             }
         } finally {
-            service.shutdown();
+			service.shutdown();
         }
         long end = System.currentTimeMillis();
         System.out.println("\n\ncount:"+ countMap.get("count"));
         System.out.println("\nuseTime:"+(end - start));
+
 	}
 }

@@ -3,7 +3,6 @@ import java.io.IOException;
 
 import com.tingfeng.syRun.server.bean.CounterBean;
 import com.tingfeng.syRun.server.service.impl.CounterService;
-import com.tingfeng.syRun.server.service.impl.ReturnUtil;
 
 public class CounterController {
 	private static CounterService counterHelper =  CounterService.getSigleInstance();	
@@ -12,28 +11,37 @@ public class CounterController {
 	 * @param key 计数器的key
 	 * @param value 初始化的值,为null时默认变为0
 	 * @param expireTime 过期时间
-	 * @return
+	 * @return null
 	 * @throws IOException
 	 */
     public  String initCounter(final String key,final long value,final long expireTime) throws IOException{
-    	return ReturnUtil.getCounterReturnMsg(() -> {
-    		 CounterBean counter = new CounterBean(value, key, expireTime);
-	    	 counterHelper.addCounter(counter);
-    	});
+		CounterBean counter = new CounterBean(value, key, expireTime);
+		counterHelper.addCounter(counter);
+		return null;
     }
-    
 
+	/**
+	 *
+	 * @param key
+	 * @param value
+	 * @return null
+	 * @throws IOException
+	 */
     public  String setCounterValue(final String key,final long value) throws IOException{
-    	return ReturnUtil.getCounterReturnMsg(() -> {
-		    	 counterHelper.setCounterValue(key, value);
-			});
+		counterHelper.setCounterValue(key, value);
+		return null;
     }
-    
 
+	/**
+	 *
+	 * @param key
+	 * @param expireTime
+	 * @return null
+	 * @throws IOException
+	 */
     public String setCounterExpireTime(final String key,final long expireTime) throws IOException{
-    	return ReturnUtil.getCounterReturnMsg(() -> {
-		    	 counterHelper.setCounterExpireTime(key, expireTime);
-			});
+		counterHelper.setCounterExpireTime(key, expireTime);
+		return null;
     }
     
     public  String getCounterExpireTime(final String key) throws IOException{
