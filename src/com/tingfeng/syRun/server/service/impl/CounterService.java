@@ -19,8 +19,8 @@ import com.tingfeng.syRun.server.bean.CounterBean;
 public class CounterService {
 	private static CounterService counterHelper = new CounterService();
 	private Map<String, CounterBean>  counterMap = new HashMap<>(50000);
-	private  int threadPoolSize = 1;
-	private  long counterExpireRemoveInteval = 5 * 1000;//每5秒钟循环一次counter过期移出器;
+	private int threadPoolSize = 1;
+	private long counterExpireRemoveInteval = 5 * 1000;//每5秒钟循环一次counter过期移出器;
 	private List<String> counterKeys = new ArrayList<>(50000);
 	
 	private CounterService(){

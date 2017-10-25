@@ -9,6 +9,9 @@ import com.tingfeng.syRun.common.bean.request.RequestBean;
 import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import com.tingfeng.syRun.common.bean.request.SyLockParam;
 import com.tingfeng.syRun.common.CodeConstants;
+import com.tingfeng.syRun.common.ex.CustomException;
+import com.tingfeng.syRun.common.ex.OverResponseException;
+import com.tingfeng.syRun.common.ex.OverRunTimeException;
 import com.tingfeng.syRun.server.controller.CounterController;
 import com.tingfeng.syRun.server.controller.SyLockController;
 
@@ -31,20 +34,27 @@ public class SignleRunServerUtil {
 			}else if(type == MsgType.LOCK.getValue()){
 				SyLockParam requestParam = jsonObject.getObject(CodeConstants.RquestKey.PARAMS, SyLockParam.class);
 				RequestBean<SyLockParam> requestBean = new RequestBean<>();
-				requestBean.setId(jsonObject.getString(CodeConstants.RquestKey.ID));
 				requestBean.setType(type);
 				requestBean.setParams(requestParam);
 				result = doSyLock(requestBean);
 			}
 			responseBean.setStatus(ResponseStatus.SUCCESS.getValue());
 		}catch (Exception e){
+			if(e instanceof OverRunTimeException){
+				responseBean.setStatus(ResponseStatus.OVERRUNTIME.getValue());
+			}else if(e instanceof OverResponseException){
+				responseBean.setStatus(ResponseStatus.OVERRESPONSETIME.getValue());
+			}else if(e instanceof CustomException){
+				responseBean.setStatus(ResponseStatus.CUSTOM.getValue());
+				responseBean.setErrorMsg(e.getCause().toString());
+			}else{
+				responseBean.setStatus(ResponseStatus.FAIL.getValue());
+				responseBean.setErrorMsg(e.getCause().toString());
+			}
 			e.printStackTrace();
 			System.out.println("error msg is:" + str);
-			responseBean.setStatus(ResponseStatus.FAIL.getValue());
-			responseBean.setErrorMsg(e.getCause().toString());
 		}
 		responseBean.setData(result);
-
 		return JSONObject.toJSONString(responseBean);
 	}
 	
@@ -72,17 +82,25 @@ public class SignleRunServerUtil {
     	String key = counterRequest.key;
     	long value = counterRequest.value;
     	long expireTime = counterRequest.expireTime;
-    	String result = "";
+    	Object result = "";
     	String method = counterRequest.getMethod();
     	switch(method){
     	case "initCounter":{
     		result = syCounterController.initCounter(key, value, expireTime);
     		break;
     	}
+		case "setCounterValue":{
+			result = syCounterController.setCounterValue(key, value);
+			break;
+		}
     	case "getCounterExpireTime":{
     		result = syCounterController.getCounterExpireTime(key);
     		break;
     	}
+		case "setCounterExpireTime":{
+			result = syCounterController.setCounterExpireTime(key,expireTime);
+			break;
+		}
     	case "getCounterValue":{
     		result = syCounterController.getCounterValue(key);
     		break;
@@ -92,7 +110,10 @@ public class SignleRunServerUtil {
     		break;
     	}
 	}
-    	return result;
+		if(null == result){
+    		return null;
+		}
+    	return result.toString();
     }
 
     

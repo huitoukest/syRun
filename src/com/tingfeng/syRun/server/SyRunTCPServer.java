@@ -20,7 +20,10 @@ import com.tingfeng.syRun.common.ConfigEntity;
 import com.tingfeng.syRun.server.handler.SyRunSeverHandler;
 
 public class SyRunTCPServer {
-	public static final int threadSize = 512;
+	public static final int min_threadSize = 12;
+	public static final int max_threadSize = 1024;
+	public static final int time_keepAlive = 600;//秒
+
 	private static boolean isInited = false;
 	  
     public static void main(String[] args) throws IOException {  
@@ -44,9 +47,9 @@ public class SyRunTCPServer {
 	        //配置事务处理Handler，将请求转由TimeServerHandler处理。
 	        acceptor.setHandler(new SyRunSeverHandler());
 	        //配置Buffer的缓冲区大小
-	        acceptor.getSessionConfig().setReadBufferSize(2048);
+	        acceptor.getSessionConfig().setReadBufferSize(10240);
 	        //设置等待时间，每隔IdleTime将调用一次handler.sessionIdle()方法  
-	        acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, 10); 
+	        acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE,ConfigEntity.IDLE_TIME);//10秒
 	        //绑定端口
 	        acceptor.bind(new InetSocketAddress(serverIP,serverPort));
     	}
@@ -58,7 +61,7 @@ public class SyRunTCPServer {
 	 */
     protected static  ExecutorFilter getUnorderedExecutorFilter(){
 		// 添加执行线程池
-		UnorderedThreadPoolExecutor executor = new UnorderedThreadPoolExecutor(12, 512,300, TimeUnit.SECONDS);
+		UnorderedThreadPoolExecutor executor = new UnorderedThreadPoolExecutor(min_threadSize, max_threadSize,time_keepAlive, TimeUnit.SECONDS);
 		// 这里是预先启动corePoolSize个处理线程
 		executor.prestartAllCoreThreads();
 		return new ExecutorFilter(executor,
@@ -69,7 +72,7 @@ public class SyRunTCPServer {
 
 	protected static  ExecutorFilter getOrderedExecutorFilter(){
 		// 添加执行线程池
-		OrderedThreadPoolExecutor executor = new OrderedThreadPoolExecutor(12, 1024,300, TimeUnit.SECONDS);
+		OrderedThreadPoolExecutor executor = new OrderedThreadPoolExecutor(min_threadSize, max_threadSize,time_keepAlive, TimeUnit.SECONDS);
 		// 这里是预先启动corePoolSize个处理线程
 		executor.prestartAllCoreThreads();
 		return new ExecutorFilter(executor,

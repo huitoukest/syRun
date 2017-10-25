@@ -5,12 +5,13 @@ import com.tingfeng.syRun.common.bean.request.RequestBean;
 import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import com.tingfeng.syRun.client.util.SyRunMsgAsynchronizeUtil;
 import com.tingfeng.syRun.client.util.SyRunMsgSynchronizeUtil;
-import com.tingfeng.syRun.common.util.Base64Util;
 import com.tingfeng.syRun.common.util.RequestUtil;
-import com.tingfeng.syRun.common.ex.OutTimeException;
+import com.tingfeng.syRun.common.ex.OverRunTimeException;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
+
+import java.util.Date;
 
 /**
  * 异步handler
@@ -63,6 +64,10 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 	@Override
 	public void sessionIdle(IoSession session, IdleStatus status) throws Exception {
 		super.sessionIdle(session, status);
+		if(null != session){
+			session.closeNow();
+		}
+		System.out.println("客户端空闲,被关闭......" + new Date());
 	}
 	@Override
 	public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
@@ -85,35 +90,16 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 				   SyRunMsgSynchronizeUtil.receiveMsg(responseBean);
 			   }
 	}
-	
-	/*public  static String sendMessage(RequestBean<?> requestBean) throws InterruptedException, OutTimeException{
-		return sendMessage(SyRunCounterTCPClient.getSession(),requestBean);
-    }*/
-	/*
-	public static String readReturnMsg(WriteFuture future,IoSession session) throws OutTimeException {
-		future.awaitUninterruptibly();
- 	    String returnMsg = "";
-		// 接收
-        ReadFuture readFuture = session.read();
-        if (readFuture.awaitUninterruptibly(300, TimeUnit.SECONDS)) {
-        	returnMsg = (String) readFuture.getMessage();
-        } else {
-           throw new OutTimeException("返回等待消息连接超时!");
-        }
-        return returnMsg;
-	} */
-
 	/**
 	 * 目前必须使发送的消息和接收的消息互斥才能保证有序,以后考虑
 	 * 通过多线程/唯一id辨识消息唯一性
 	 * @param requestBean
 	 * @return
 	 * @throws InterruptedException
-	 * @throws OutTimeException
+	 * @throws OverRunTimeException
 	 */
 	public static void sendMessage(IoSession ioSession,RequestBean<?> requestBean){
 		String msg = JSONObject.toJSONString(requestBean);
-		//System.out.println("send msg is:" + msg);
 		ioSession.write(msg );
 	}
 	

@@ -44,8 +44,8 @@ public class CounterController {
 		return null;
     }
     
-    public  String getCounterExpireTime(final String key) throws IOException{
-    	return  counterHelper.getCounterExpireTime(key)  + "";
+    public  long getCounterExpireTime(final String key) throws IOException{
+    	return  counterHelper.getCounterExpireTime(key);
     }
     /**
      * 
@@ -53,16 +53,16 @@ public class CounterController {
      * @return
      * @throws IOException
      */
-    public String getCounterValue(String key) throws IOException{
-    	return counterHelper.getCounterValue(key) + "";
+    public long getCounterValue(String key) throws IOException{
+    	return counterHelper.getCounterValue(key) ;
     }
     /**
      * @param key
      * @return return the value
      * @throws IOException
      */
-    public String addCounterValue(String key,long value) throws IOException{
-    	return counterHelper.addCounterValue(key, value)  + "";
+    public long addCounterValue(String key,long value) throws IOException{
+    	return counterHelper.addCounterValue(key, value) ;
     }
     
 }

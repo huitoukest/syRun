@@ -18,7 +18,7 @@ import org.junit.Test;
 import com.tingfeng.syRun.client.bean.FrequencyBean;
 import com.tingfeng.syRun.client.util.SyRunClientUtil;
 import com.tingfeng.syRun.common.FrequencyControlHelper;
-import com.tingfeng.syRun.common.ex.OutTimeException;
+import com.tingfeng.syRun.common.ex.OverRunTimeException;
 import com.tingfeng.syRun.server.controller.CounterController;
 
 
@@ -32,7 +32,7 @@ public class SyRunCounterTest{
 	}
 	
 	@Test
-	public void testSingleStep() throws IOException, InterruptedException, OutTimeException{
+	public void testSingleStep() throws IOException, InterruptedException, OverRunTimeException {
 		int threadPoolSize = 200;
 		//开启一个线程池，指定线程池的大小
         ExecutorService service = Executors.newFixedThreadPool(threadPoolSize);
@@ -115,7 +115,7 @@ public class SyRunCounterTest{
 	
 	
 	@Test
-	public void testAddStep() throws IOException, InterruptedException, OutTimeException{
+	public void testAddStep() throws IOException, InterruptedException, OverRunTimeException {
 		int threadPoolSize = 1000;
 		//开启一个线程池，指定线程池的大小
         ExecutorService service = Executors.newFixedThreadPool(threadPoolSize);

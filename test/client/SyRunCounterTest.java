@@ -12,14 +12,14 @@ import org.junit.Test;
 import com.tingfeng.syRun.client.bean.FrequencyBean;
 import com.tingfeng.syRun.client.util.SyRunClientUtil;
 import com.tingfeng.syRun.common.FrequencyControlHelper;
-import com.tingfeng.syRun.common.ex.OutTimeException;
+import com.tingfeng.syRun.common.ex.OverRunTimeException;
 
 
 public class SyRunCounterTest{
 	
 	static int counter = 0;
 	@Test
-	public void testSingleStep() throws IOException, InterruptedException, OutTimeException, TimeoutException, ExecutionException {
+	public void testSingleStep() throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException {
 		int threadPoolSize = 200;
 		//开启一个线程池，指定线程池的大小
         ExecutorService service = Executors.newFixedThreadPool(threadPoolSize);
@@ -102,11 +102,12 @@ public class SyRunCounterTest{
         System.out.println("\n\n SignleRunClientUtil count:"+ SyRunClientUtil.getCounterValue(key));
         System.out.println("\n\ncount:"+countMap.get("count"));
         System.out.println("\nuseTime:"+(end - start));
+		SyRunTCPClient.closeConnect();
 	}
 	
 	
 	@Test
-	public void testAddStep() throws IOException, InterruptedException, OutTimeException, TimeoutException, ExecutionException {
+	public void testAddStep() throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException {
 		int threadPoolSize = 200;
 		//开启一个线程池，指定线程池的大小
         ExecutorService service = Executors.newFixedThreadPool(threadPoolSize);
@@ -151,6 +152,6 @@ public class SyRunCounterTest{
         long end = System.currentTimeMillis();
         System.out.println("\n\ncount:"+ SyRunClientUtil.getCounterValue("redis:hsh:test:count0"));
         System.out.println("\nuseTime:"+(end - start));
-		//SyRunTCPClient.closeConnect();
+		SyRunTCPClient.closeConnect();
 	}
 }

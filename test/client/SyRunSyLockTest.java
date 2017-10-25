@@ -1,5 +1,6 @@
 package client;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -8,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import com.tingfeng.syRun.client.SyRunTCPClient;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,7 +23,7 @@ public class SyRunSyLockTest{
 	}
 	
 	@Test
-	public void testSyLock() {
+	public void testSyLock() throws IOException {
 		int threadPoolSize = 20;
 		//开启一个线程池，指定线程池的大小
         ExecutorService service = Executors.newFixedThreadPool(threadPoolSize);
@@ -77,6 +79,6 @@ public class SyRunSyLockTest{
         long end = System.currentTimeMillis();
         System.out.println("\n\ncount:"+ countMap.get("count"));
         System.out.println("\nuseTime:"+(end - start));
-
+		SyRunTCPClient.closeConnect();
 	}
 }

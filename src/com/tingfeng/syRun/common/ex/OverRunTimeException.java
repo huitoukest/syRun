@@ -1,13 +1,13 @@
 package com.tingfeng.syRun.common.ex;
 
 /**
- * 超时异常
+ * 超时异常,超过最大运行时间
  * @author huitoukest
  *
  */
-public class OutTimeException extends Exception{
+public class OverRunTimeException extends RuntimeException{
 
-	public OutTimeException(String msg) {
+	public OverRunTimeException(String msg) {
 		super(msg);
 	}
 

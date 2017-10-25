@@ -1,5 +1,6 @@
 package com.tingfeng.syRun.server.handler;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -50,6 +51,8 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
 	@Override
 	public void sessionIdle(IoSession session, IdleStatus status) throws Exception {
 		super.sessionIdle(session, status);
+		session.closeOnFlush();
+		System.out.println("客户端空闲,关闭......" + new Date());
 	}
 
 	@Override
@@ -120,7 +123,7 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
     public static void sendMessage(IoSession session,String msg){
     	WriteFuture future = session.write(msg);
     	//session.write("\r\n");
-        future.addListener(new IoFutureListener<WriteFuture>() {
+       /* future.addListener(new IoFutureListener<WriteFuture>() {
 
 			@Override
 			public void operationComplete(WriteFuture future) {
@@ -131,6 +134,6 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
 	            	logger.warn("[IMCORE]回复给客户端的数据发送失败！");
 	            }
 			}
-		});
+		});*/
     }
 }

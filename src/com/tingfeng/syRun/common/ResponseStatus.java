@@ -6,7 +6,8 @@ package com.tingfeng.syRun.common;
 public enum ResponseStatus {
    FAIL(-1,"fail"),
    SUCCESS(0,"success"),
-   OVERTIME(1,"overTime"),
+   OVERRUNTIME(1,"overRunTime"),
+   OVERRESPONSETIME(2,"overResPonseTime"),
    CUSTOM(999,"custom msg");
 
    private String msg;

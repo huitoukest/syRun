@@ -37,9 +37,10 @@ public class CounterParam extends BaseRequestParam {
 		this.key = key;
 		this.expireTime = expireTime;
 	}
-	
+
 	/**
-	 * 
+	 *
+	 * @param method
 	 * @param value
 	 * @param key
 	 * @param expireTime
