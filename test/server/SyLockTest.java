@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import com.tingfeng.syRun.common.ResponseStatus;
 import com.tingfeng.syRun.common.util.RequestUtil;
 import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import org.junit.Before;
@@ -42,21 +43,33 @@ public class SyLockTest {
         	 for (int i=0;i<threadPoolSize;i++) {
 	         //提交任务，提交后会默认启动Callable接口中的call方法
 	         completion.submit(() -> {
-					for(int idx = 0 ;idx < 100 ; idx++) {
+					for(int idx = 0 ;idx < 500 ; idx++) {
 						SyLockParam syLockParam = new SyLockParam();
 						syLockParam.setKey(key);
 						ResponseBean response = JSONObject.parseObject(syLockController.lockSyLock(RequestUtil.getSychronizedMsgId(), syLockParam), ResponseBean.class);
+						if(response.getStatus() != ResponseStatus.SUCCESS.getValue()){
+							System.out.println("lock"+Thread.currentThread().getId() + ":error," + JSONObject.toJSONString(response));
+						}/*else{
+							System.out.println("lock"+Thread.currentThread().getId() + ":" + JSONObject.toJSONString(response));
+						}*/
 						String lockId = response.getData();
 						syLockParam.setLockId(lockId);
 						Integer re1 = countMap.get("count");
 						re1  = re1 + 2;
-						if(idx % 5 ==0) {
+						if(idx % 20 ==0) {
 							Thread.sleep(1);
 						}
 						Integer re2  = re1 - 1;
 						countMap.put("count", re2);
-						System.out.println("re1:" + re1 + " ,re2:" + re2);
-						syLockController.unlockSyLock(IdWorker.getUUID() + "", syLockParam);
+						if(idx % 50 ==0) {
+							System.out.println("re1:" + re1 + " ,re2:" + re2);
+						}
+						response = JSONObject.parseObject(syLockController.unlockSyLock(RequestUtil.getSychronizedMsgId(), syLockParam), ResponseBean.class);
+						if(response.getStatus() != ResponseStatus.SUCCESS.getValue()){
+							System.out.println("unlock"+Thread.currentThread().getId() + ":error," + JSONObject.toJSONString(response));
+						}/*else{
+							System.out.println("unlock"+Thread.currentThread().getId() + ":" + JSONObject.toJSONString(response));
+						}*/
 					}
 					 return "";
 				});

@@ -10,5 +10,7 @@ public class ConfigEntity {
 	public static final int IDLE_TIME = 30000;//心跳包30秒一个
 	public static final int HEART_BEAT_TIME = 30000;//心跳包30秒一个
 
+    public static final int TIME_OUT_RUN = 300000;//300秒的运行超时时间/锁占用阻塞
+
 	public static final String KEY_SESSION = "key_session";
 }

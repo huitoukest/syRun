@@ -74,12 +74,12 @@ public class SyRunCounterTest{
 
 								@Override
 								public long getExpireTime(String key) throws Exception {
-									return Long.parseLong(signleRunController.getCounterExpireTime(key));
+									return signleRunController.getCounterExpireTime(key);
 								}
 
 								@Override
 								public long addCounterValue(String key, int value) throws Exception {
-									return Long.parseLong(signleRunController.addCounterValue(key, value));									
+									return signleRunController.addCounterValue(key, value);
 								}
 
 								@Override
@@ -116,7 +116,7 @@ public class SyRunCounterTest{
 	
 	@Test
 	public void testAddStep() throws IOException, InterruptedException, OverRunTimeException {
-		int threadPoolSize = 1000;
+		int threadPoolSize = 200;
 		//开启一个线程池，指定线程池的大小
         ExecutorService service = Executors.newFixedThreadPool(threadPoolSize);
         //指定方法完成的执行器
@@ -134,10 +134,10 @@ public class SyRunCounterTest{
 				@Override
 				public String call() throws Exception {
 					for(int i = 0 ;i < 1000 ; i++) { 
-						long re1  = Long.parseLong(signleRunController.addCounterValue("redis:hsh:test:count0", 2));
-						Long.parseLong(signleRunController.addCounterValue("redis:hsh:test:count0", -1));
+						long re1  = signleRunController.addCounterValue("redis:hsh:test:count0", 2);
+						//signleRunController.addCounterValue("redis:hsh:test:count0", -1);
 						Thread.sleep(1);
-						long re2  =  Long.parseLong(signleRunController.addCounterValue("redis:hsh:test:count0", -1));
+						long re2  =  signleRunController.addCounterValue("redis:hsh:test:count0", -1);
 						System.out.println("re1:" + re1 + " ,re2:" + re2);
 					}
 					 return "";
