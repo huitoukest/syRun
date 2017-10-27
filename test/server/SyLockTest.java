@@ -46,13 +46,7 @@ public class SyLockTest {
 					for(int idx = 0 ;idx < 500 ; idx++) {
 						SyLockParam syLockParam = new SyLockParam();
 						syLockParam.setKey(key);
-						ResponseBean response = JSONObject.parseObject(syLockController.lockSyLock(RequestUtil.getSychronizedMsgId(), syLockParam), ResponseBean.class);
-						if(response.getStatus() != ResponseStatus.SUCCESS.getValue()){
-							System.out.println("lock"+Thread.currentThread().getId() + ":error," + JSONObject.toJSONString(response));
-						}/*else{
-							System.out.println("lock"+Thread.currentThread().getId() + ":" + JSONObject.toJSONString(response));
-						}*/
-						String lockId = response.getData();
+						String lockId  = syLockController.lockSyLock(RequestUtil.getSychronizedMsgId(), syLockParam);
 						syLockParam.setLockId(lockId);
 						Integer re1 = countMap.get("count");
 						re1  = re1 + 2;
@@ -64,12 +58,7 @@ public class SyLockTest {
 						if(idx % 50 ==0) {
 							System.out.println("re1:" + re1 + " ,re2:" + re2);
 						}
-						response = JSONObject.parseObject(syLockController.unlockSyLock(RequestUtil.getSychronizedMsgId(), syLockParam), ResponseBean.class);
-						if(response.getStatus() != ResponseStatus.SUCCESS.getValue()){
-							System.out.println("unlock"+Thread.currentThread().getId() + ":error," + JSONObject.toJSONString(response));
-						}/*else{
-							System.out.println("unlock"+Thread.currentThread().getId() + ":" + JSONObject.toJSONString(response));
-						}*/
+						syLockController.unlockSyLock(RequestUtil.getSychronizedMsgId(), syLockParam);
 					}
 					 return "";
 				});

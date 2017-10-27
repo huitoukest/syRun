@@ -1,5 +1,7 @@
 package com.tingfeng.syRun.common.bean.response;
 
+import com.tingfeng.syRun.common.ResponseStatus;
+
 public class ResponseBean{
 	/**
 	 * 对应请求消息中的唯一id
@@ -46,5 +48,14 @@ public class ResponseBean{
 
 	public void setErrorMsg(String errorMsg) {
 		this.errorMsg = errorMsg;
+	}
+
+
+	public static ResponseBean getResponse(ResponseStatus responseStatus,String msg){
+		final ResponseBean response = new ResponseBean();
+		response.setData(null);
+		response.setStatus(responseStatus.getValue());
+		response.setErrorMsg(msg);
+		return response;
 	}
 }

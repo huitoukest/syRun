@@ -26,35 +26,18 @@ public class SyLockController {
 	 * @return 
 	 */
 	public String lockSyLock(String id,SyLockParam syLockParam) {
-		ResponseBean response =  syLockService.lockSyLock(id,syLockParam);
-		return toJSONString(response);
+		String lockId =  syLockService.lockSyLock(id,syLockParam);
+		return lockId;
 	}
 	/**
 	 * 释放同步锁
 	 * @param syLockParam
 	 * @return
 	 */
-	public String unlockSyLock(String id,SyLockParam syLockParam) {
-		if(null  == syLockParam) {
-			return toJSONString(getFaildSyLock("1", id));
-		}
-		if(!checkSyLockKey(syLockParam.getLockId())) {
-			return toJSONString(getFaildSyLock(syLockParam.getLockId(), id));
-		}
-		ResponseBean response =  syLockService.unlockSyLock(id,syLockParam);
-		return toJSONString(response);
+	public void unlockSyLock(String id,SyLockParam syLockParam) {
+		syLockService.unlockSyLock(id,syLockParam);
 	}
 
-	private ResponseBean getFaildSyLock(String id,String lockKey){
-		final ResponseBean response = new ResponseBean();
-		response.setData(null);
-		response.setStatus(ResponseStatus.FAIL.getValue());
-		response.id = id;
-		response.setStatus(ResponseStatus.FAIL.getValue());
-		return response;
-	}
-	
-	
 	/**
 	 * 检查key的合法性,合法返回true,否则返回false 
 	 * @param key

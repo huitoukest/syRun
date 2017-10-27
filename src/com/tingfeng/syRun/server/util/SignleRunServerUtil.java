@@ -12,6 +12,7 @@ import com.tingfeng.syRun.common.CodeConstants;
 import com.tingfeng.syRun.common.ex.CustomException;
 import com.tingfeng.syRun.common.ex.OverResponseException;
 import com.tingfeng.syRun.common.ex.OverRunTimeException;
+import com.tingfeng.syRun.common.util.CheckUtil;
 import com.tingfeng.syRun.server.controller.CounterController;
 import com.tingfeng.syRun.server.controller.SyLockController;
 
@@ -21,22 +22,30 @@ public class SignleRunServerUtil {
 
     public static String doServerWork(String str) throws IOException {
 		ResponseBean responseBean = new ResponseBean();
-		String result = null;
+		String resultData = null;
 		try {
+			if(CheckUtil.isNull(str)){
+				throw new CustomException("msg is null");
+			}
 			JSONObject jsonObject = JSONObject.parseObject(str);
-			int type = jsonObject.getIntValue(CodeConstants.RquestKey.TYPE);
+			Integer type = jsonObject.getInteger(CodeConstants.RquestKey.TYPE);
 			String id = jsonObject.getString(CodeConstants.RquestKey.ID);
+
+			if(CheckUtil.isNull(id) || CheckUtil.isNull(type))
+			{
+				throw new CustomException("id or type is null");
+			}
 			responseBean.setId(id);
-			if(type == MsgType.COUNTER.getValue())
+		    if(type == MsgType.COUNTER.getValue())
 			{
 				CounterParam counterRequest = jsonObject.getObject(CodeConstants.RquestKey.PARAMS, CounterParam.class);
-				result = doCounter(counterRequest);
+				resultData = doCounter(counterRequest);
 			}else if(type == MsgType.LOCK.getValue()){
 				SyLockParam requestParam = jsonObject.getObject(CodeConstants.RquestKey.PARAMS, SyLockParam.class);
 				RequestBean<SyLockParam> requestBean = new RequestBean<>();
 				requestBean.setType(type);
 				requestBean.setParams(requestParam);
-				result = doSyLock(requestBean);
+				resultData = doSyLock(requestBean);
 			}
 			responseBean.setStatus(ResponseStatus.SUCCESS.getValue());
 		}catch (Exception e){
@@ -46,32 +55,39 @@ public class SignleRunServerUtil {
 				responseBean.setStatus(ResponseStatus.OVERRESPONSETIME.getValue());
 			}else if(e instanceof CustomException){
 				responseBean.setStatus(ResponseStatus.CUSTOM.getValue());
-				responseBean.setErrorMsg(e.getCause().toString());
 			}else{
 				responseBean.setStatus(ResponseStatus.FAIL.getValue());
-				responseBean.setErrorMsg(e.getCause().toString());
+			}
+			if(CheckUtil.isNull(e.getMessage())){
+				responseBean.setErrorMsg(e.getMessage());
 			}
 			e.printStackTrace();
 			System.out.println("error msg is:" + str);
 		}
-		responseBean.setData(result);
+		responseBean.setData(resultData);
 		return JSONObject.toJSONString(responseBean);
 	}
 	
     
     private static String doSyLock(RequestBean<SyLockParam> requestBean) {
-    	String result = "";
-    	//String key = requestBean.getParams().getKey();
+    	if(CheckUtil.isNull(requestBean.getParams().getKey()))
+		{
+			throw new CustomException("null key");
+		}
     	String method = requestBean.getParams().getMethod();
+		if(CheckUtil.isNull(method))
+		{
+			throw new CustomException("null method");
+		}
     	String id = requestBean.getId();
-    	//String lockId = requestBean.getParams().getLockId();
+		String result = null;
     	switch(method){
     		case "lock":{
     			result = syLockController.lockSyLock(id, requestBean.getParams());
     			break;
     		}
     		case "unLock":{
-    			result = syLockController.unlockSyLock(id, requestBean.getParams());
+    			syLockController.unlockSyLock(id, requestBean.getParams());
     			break;
     		}
     	}
@@ -80,10 +96,18 @@ public class SignleRunServerUtil {
 
 	public static String doCounter(CounterParam counterRequest) throws IOException{
     	String key = counterRequest.key;
+		if(CheckUtil.isNull(key))
+		{
+			throw new CustomException("null key");
+		}
     	long value = counterRequest.value;
     	long expireTime = counterRequest.expireTime;
     	Object result = "";
     	String method = counterRequest.getMethod();
+		if(CheckUtil.isNull(key))
+		{
+			throw new CustomException("null method");
+		}
     	switch(method){
     	case "initCounter":{
     		result = syCounterController.initCounter(key, value, expireTime);
