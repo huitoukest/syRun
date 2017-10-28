@@ -58,7 +58,7 @@ public class SignleRunServerUtil {
 			}else{
 				responseBean.setStatus(ResponseStatus.FAIL.getValue());
 			}
-			if(CheckUtil.isNull(e.getMessage())){
+			if(!CheckUtil.isNull(e.getMessage())){
 				responseBean.setErrorMsg(e.getMessage());
 			}
 			e.printStackTrace();

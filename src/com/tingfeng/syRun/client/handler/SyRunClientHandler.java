@@ -52,10 +52,9 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 		String s=(String)message;
 		//s = Base64Util.deCodeFromBase64(s);
 		receiveMsg(s);
-		/*// Write the received data back to remote peer
-		System.out.println("服务器发来的收到消息: "+s);
+		//System.out.println("服务器发来的收到消息: "+s);
 		//测试将消息回送给客户端
-		session.write(s);*/
+		/*session.write(s);*/
 	}
 	@Override
 	public void sessionCreated(IoSession session) throws Exception {
@@ -100,7 +99,9 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 	 */
 	public static void sendMessage(IoSession ioSession,RequestBean<?> requestBean){
 		String msg = JSONObject.toJSONString(requestBean);
+		//System.out.println("发送消息: " + msg);
 		ioSession.write(msg );
+		//ioSession.write("\r\n");
 	}
 	
 }

@@ -1,5 +1,6 @@
 package com.tingfeng.syRun.server.handler;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,8 +25,8 @@ import sun.security.provider.certpath.OCSPResponse;
 
 public class SyRunSeverHandler  extends IoHandlerAdapter{
 
-	//public static final int threadSize = 128;
-	//private static final ExecutorService servicePool = Executors.newFixedThreadPool(threadSize);
+	public static final int threadSize = 1024;
+	private static final ExecutorService servicePool = Executors.newFixedThreadPool(threadSize);
 	private static Logger logger = LoggerFactory.getLogger(SyRunSeverHandler.class);
     
 	/*public static final Map<Long, IoSession> minaSessionMap = new ConcurrentHashMap<>();*/
@@ -100,6 +101,7 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
     	//*********************************************** 接收数据  
 		String str = null;
 		String result = null;
+		//System.out.println("收到消息:" + message);
 		if(null == message){
 			ResponseBean responseBean = new ResponseBean();
 			responseBean.setStatus(ResponseStatus.FAIL.getValue());
@@ -111,12 +113,19 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
 		}else{
 			str = message.toString();
 			final String reMsg = str;
-			result = SignleRunServerUtil.doServerWork(reMsg);
-			sendMessage(session,result);
+			//result = SignleRunServerUtil.doServerWork(reMsg);
+			//sendMessage(session,result);
 			/*if (str.trim().equalsIgnoreCase("quit")) {
 				session.closeOnFlush();
 				return;
 			}*/
+			servicePool.submit(() ->{
+				try {
+					sendMessage(session,SignleRunServerUtil.doServerWork(reMsg));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			});
 		}
     }
     

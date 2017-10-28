@@ -45,8 +45,8 @@ public class SyRunMsgSynchronizeUtil {
 			   msgResPonseMap.put(id, responseBean);
 			   CountDownLatch countDownLatch = countDownLatchMap.get(id);
 			   if (null != countDownLatch) {
-				   countDownLatch.countDown();
 				   countDownLatchMap.remove(id);
+				   countDownLatch.countDown();
 			   }
 		   }
 	}

@@ -30,12 +30,12 @@ public class SyLockService {
 	/**
 	 * 锁状态的Map,,key是当前key,value当前线程计数器
 	 */
-	private final Map<String,SyLockStatusBean> lockCountDownLatchMap = new ConcurrentHashMap<>(5000);
+	private static final Map<String,SyLockStatusBean> lockCountDownLatchMap = new ConcurrentHashMap<>(5000);
 
 	/**
 	 * 是否释放锁的的检查时间间隔,单位毫秒
 	 */
-	public  final int lockCheckInterval = 5;
+	public  static final int lockCheckInterval = 5;
 	
 	private SyLockService(){
 				
@@ -52,36 +52,40 @@ public class SyLockService {
      * @return
      */
 	public String lockSyLock(String id,final SyLockParam syLockParam) {
+		//System.out.println("server:lock:re:" + JSONObject.toJSONString(syLockParam));
         String lockId = IdWorker.getUUID() + "";
 		SyLockStatusBean lockStatus = null;
 		String key = syLockParam.getKey();
-			boolean isOverTime = false;
-			try {
-				synchronized (key) {
-					lockStatus = lockCountDownLatchMap.get(key);
-					if (null != lockStatus) {//如果需要等待
-						isOverTime = !lockStatus.countDownLatch.await(ConfigEntity.TIME_OUT_RUN, TimeUnit.MILLISECONDS);
-					} else {
-						lockStatus = new SyLockStatusBean();
-					}
-					CountDownLatch countDownLatch = new CountDownLatch(1);
-					lockStatus.countDownLatch = countDownLatch;
-					lockStatus.lockId = lockId;
-					lockCountDownLatchMap.put(key, lockStatus);
+		boolean isOverTime = false;
+		try {
+			synchronized (key.intern()) {
+					//synchronized使用的是对象的引用,而不是对象的值,所以每次构建新的字符串会导致同步锁失效.
+				   //Stirng.intern()在jdk6,7,8下的存储位置可能不一致.但是都是从常量池中取出的统一对象
+				lockStatus = lockCountDownLatchMap.get(key);
+				if (null != lockStatus) {//如果需要等待
+					isOverTime = !lockStatus.countDownLatch.await(ConfigEntity.TIME_OUT_RUN, TimeUnit.MILLISECONDS);
+				} else {
+					lockStatus = new SyLockStatusBean();
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				if (e instanceof InterruptedException || isOverTime) {
-					throw  new OverRunTimeException("lock time over max milliseconds:" + ConfigEntity.TIME_OUT_RUN);
-				}
-				SyLockStatusBean statusBean = lockCountDownLatchMap.get(key);
-				if (null != statusBean && lockId.equals(statusBean.lockId)) {
-					if (null != statusBean.countDownLatch) {
-						statusBean.countDownLatch.countDown();
-					}
-					lockCountDownLatchMap.remove(key);
-				}
+				CountDownLatch countDownLatch = new CountDownLatch(1);
+				lockStatus.countDownLatch = countDownLatch;
+				lockStatus.lockId = lockId;
+				lockCountDownLatchMap.put(key, lockStatus);
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			if (e instanceof InterruptedException || isOverTime) {
+				throw  new OverRunTimeException("lock time over max milliseconds:" + ConfigEntity.TIME_OUT_RUN);
+			}
+			SyLockStatusBean statusBean = lockCountDownLatchMap.get(key);
+			if (null != statusBean && lockId.equals(statusBean.lockId)) {
+				if (null != statusBean.countDownLatch) {
+					statusBean.countDownLatch.countDown();
+				}
+				lockCountDownLatchMap.remove(key);
+			}
+		}
+		//System.out.println("server:lock:se:"+lockId + "," + JSONObject.toJSONString(syLockParam));
 		return lockId;
 	}
 	/**
@@ -91,6 +95,7 @@ public class SyLockService {
 	 * @return
 	 */
 	public void unlockSyLock(String id,final SyLockParam syLockParam) {
+		//System.out.println("server:unlock:re:" + JSONObject.toJSONString(syLockParam));
 		String key = syLockParam.getKey();
 		SyLockStatusBean lockStatus = null;
 		lockStatus = lockCountDownLatchMap.get(key);
@@ -108,6 +113,7 @@ public class SyLockService {
 					countDownLatch.countDown();
 				}
 		}
+		//System.out.println("server:unlock:se:" + JSONObject.toJSONString(syLockParam));
 	}
 	
 	
