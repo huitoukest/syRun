@@ -49,6 +49,7 @@ public class SyRunTCPClient {
 
 
 	private static void initClientConnect(String serverIP,int serverPort) {
+		logger.info("客户端开始连接服务器{}:{}",serverIP,serverPort);
 		// Create TCP/IP connector.
 		connector = new NioSocketConnector();
 		// 创建接收数据的过滤器
@@ -106,6 +107,7 @@ public class SyRunTCPClient {
 		});
 		connectToServer(false);
 		isInited = true;
+		logger.info("客户端连接服务器成功{}:{}",serverIP,serverPort);
 	}
 
 	/**
@@ -154,11 +156,11 @@ public class SyRunTCPClient {
 				future.awaitUninterruptibly();// 等待连接创建成功
 				session = future.getSession();// 获取会话
 				if (session.isConnected()) {
-					logger.info("连接服务器 [" + connector.getDefaultRemoteAddress().getHostName() + ":" + connector.getDefaultRemoteAddress().getPort() + "]成功,时间:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+					logger.info("连接服务器 [" + connector.getDefaultRemoteAddress().getHostName() + ":" + connector.getDefaultRemoteAddress().getPort() + "]成功");
 					break;
 				}
 			} catch (Exception ex) {
-				logger.info("服务器登录失败,"+ (ConfigEntity.RECONNECT_TIME /1000.0 * connectCount) + " 秒再连接一次:" + ex.getMessage() + ",时间:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+				logger.info("服务器登录失败,"+ (ConfigEntity.RECONNECT_TIME /1000.0 * connectCount) + " 秒再连接一次:" + ex.getMessage());
 			}
 		}
 	}
@@ -173,7 +175,7 @@ public class SyRunTCPClient {
 		if(null != connector) {
 			connector.dispose();
 		}
-		logger.info("服务器关闭成功,时间:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+		logger.info("服务器关闭成功");
 	}
 
 	public static synchronized IoSession getSession(){

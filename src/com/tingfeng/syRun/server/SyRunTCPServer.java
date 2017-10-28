@@ -18,11 +18,14 @@ import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 
 import com.tingfeng.syRun.common.ConfigEntity;
 import com.tingfeng.syRun.server.handler.SyRunSeverHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SyRunTCPServer {
 	public static final int min_threadSize = 12;
 	public static final int max_threadSize = 1024;
 	public static final int time_keepAlive = 600;//秒
+	private static Logger logger = LoggerFactory.getLogger(SyRunTCPServer.class);
 
 	private static boolean isInited = false;
 	  
@@ -32,6 +35,7 @@ public class SyRunTCPServer {
     
     public static void init(String serverIP,int serverPort) throws IOException{
     	if(!isInited){
+			logger.info("开始启动服务器,ip地址和端口是{}:{}",serverIP,serverPort);
     		isInited = true;
 	    	 //首先，我们为服务端创建IoAcceptor，NioSocketAcceptor是基于NIO的服务端监听器  
 	        IoAcceptor acceptor = new NioSocketAcceptor(); 
@@ -53,6 +57,7 @@ public class SyRunTCPServer {
 	        acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE,ConfigEntity.IDLE_TIME);//10秒
 	        //绑定端口
 	        acceptor.bind(new InetSocketAddress(serverIP,serverPort));
+			logger.info("启动服务器成功,ip地址和端口是{}:{}",serverIP,serverPort);
     	}
     }
 

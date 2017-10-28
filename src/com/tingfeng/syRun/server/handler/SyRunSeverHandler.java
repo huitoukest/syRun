@@ -28,8 +28,6 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
 	public static final int threadSize = 1024;
 	private static final ExecutorService servicePool = Executors.newFixedThreadPool(threadSize);
 	private static Logger logger = LoggerFactory.getLogger(SyRunSeverHandler.class);
-    
-	/*public static final Map<Long, IoSession> minaSessionMap = new ConcurrentHashMap<>();*/
 	
     @Override
 	public void sessionCreated(IoSession session) throws Exception {
@@ -39,21 +37,18 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
 	@Override
 	public void sessionOpened(IoSession session) throws Exception {
 		super.sessionOpened(session);
-		//minaSessionMap.put(session.getId(), session);
-		//session.write(CodeConstants.Result.SUCCESS);
 	}
 
 	@Override
 	public void sessionClosed(IoSession session) throws Exception {
 		super.sessionClosed(session);
-		//minaSessionMap.remove(session.getId());
 	}
 
 	@Override
 	public void sessionIdle(IoSession session, IdleStatus status) throws Exception {
 		super.sessionIdle(session, status);
 		session.closeOnFlush();
-		System.out.println("客户端空闲,关闭......" + new Date());
+		logger.info("客户端空闲,关闭......" + session.getRemoteAddress());
 	}
 
 	@Override
@@ -77,10 +72,9 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
      */
     @Override
     public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
-        logger.error("[IMCORE]exceptionCaught捕获到错了，原因是："+cause.getMessage(), cause);
+        logger.error("{}捕获到错了，原因是：{},{}",session.getRemoteAddress(),cause.getMessage(), cause);
 		cause.printStackTrace();
         session.closeOnFlush();
-        //minaSessionMap.remove(session.getId());
     }
          
     /**
@@ -101,24 +95,15 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
     	//*********************************************** 接收数据  
 		String str = null;
 		String result = null;
-		//System.out.println("收到消息:" + message);
 		if(null == message){
 			ResponseBean responseBean = new ResponseBean();
 			responseBean.setStatus(ResponseStatus.FAIL.getValue());
 			responseBean.setErrorMsg("null response msg ");
 			result = JSONObject.toJSONString(responseBean);
-			//result = Base64Util.enCodeToBase64(result);
 			sendMessage(session,result);
-
 		}else{
 			str = message.toString();
 			final String reMsg = str;
-			//result = SignleRunServerUtil.doServerWork(reMsg);
-			//sendMessage(session,result);
-			/*if (str.trim().equalsIgnoreCase("quit")) {
-				session.closeOnFlush();
-				return;
-			}*/
 			servicePool.submit(() ->{
 				try {
 					sendMessage(session,SignleRunServerUtil.doServerWork(reMsg));
@@ -130,19 +115,7 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
     }
     
     public static void sendMessage(IoSession session,String msg){
-    	WriteFuture future = session.write(msg);
-    	//session.write("\r\n");
-       /* future.addListener(new IoFutureListener<WriteFuture>() {
-
-			@Override
-			public void operationComplete(WriteFuture future) {
-				if( future.isWritten() )
-	            {
-					logger.warn("send sucess ！");
-	            }else{
-	            	logger.warn("[IMCORE]回复给客户端的数据发送失败！");
-	            }
-			}
-		});*/
+    	//WriteFuture future =
+				session.write(msg);
     }
 }

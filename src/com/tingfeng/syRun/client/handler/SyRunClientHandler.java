@@ -10,8 +10,8 @@ import com.tingfeng.syRun.common.ex.OverRunTimeException;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
-
-import java.util.Date;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 异步handler
@@ -26,23 +26,15 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 	public static SyRunClientHandler getSigleInstance(){
 		return signleRunClientHandler;
 	}
-	
-	//private static Logger logger = LoggerFactory.getLogger(SignleRunClientHandler.class);  	
-	//public static IoSession minaSession = null;
+	private static Logger logger = LoggerFactory.getLogger(SyRunClientHandler.class);
 	
 	//当一个客端端连结进入时
 	@Override
 	public void sessionOpened(IoSession session) throws Exception {
-		//minaSession = session;
-		System.out.println("incomming client :" + session.getRemoteAddress());
-		//session.write("我来啦........");
-		//session.closeOnFlush();
 	}
 	//当一个客户端关闭时
 	@Override
 	public void sessionClosed(IoSession session) {
-		System.out.println("one Clinet Disconnect !");
-		//minaSession = null;
 	}
 	//当客户端发送的消息到达时:
 	@Override
@@ -50,11 +42,7 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 	throws Exception {
 		//我们己设定了服务器解析消息的规则是一行一行读取,这里就可转为String:
 		String s=(String)message;
-		//s = Base64Util.deCodeFromBase64(s);
 		receiveMsg(s);
-		//System.out.println("服务器发来的收到消息: "+s);
-		//测试将消息回送给客户端
-		/*session.write(s);*/
 	}
 	@Override
 	public void sessionCreated(IoSession session) throws Exception {
@@ -66,7 +54,7 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 		if(null != session){
 			session.closeNow();
 		}
-		System.out.println("客户端空闲,被关闭......" + new Date());
+		logger.info("客户端空闲,被关闭......");
 	}
 	@Override
 	public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
@@ -101,7 +89,6 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 		String msg = JSONObject.toJSONString(requestBean);
 		//System.out.println("发送消息: " + msg);
 		ioSession.write(msg );
-		//ioSession.write("\r\n");
 	}
 	
 }

@@ -13,10 +13,14 @@ import com.tingfeng.syRun.common.ex.CustomException;
 import com.tingfeng.syRun.common.ex.OverResponseException;
 import com.tingfeng.syRun.common.ex.OverRunTimeException;
 import com.tingfeng.syRun.common.util.CheckUtil;
+import com.tingfeng.syRun.server.SyRunTCPServer;
 import com.tingfeng.syRun.server.controller.CounterController;
 import com.tingfeng.syRun.server.controller.SyLockController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SignleRunServerUtil {
+	private static Logger logger = LoggerFactory.getLogger(SignleRunServerUtil.class);
 	public static final CounterController syCounterController = new CounterController();
 	public static final SyLockController syLockController = new SyLockController();
 
@@ -51,17 +55,20 @@ public class SignleRunServerUtil {
 		}catch (Exception e){
 			if(e instanceof OverRunTimeException){
 				responseBean.setStatus(ResponseStatus.OVERRUNTIME.getValue());
+				logger.debug(e.getCause().toString());
 			}else if(e instanceof OverResponseException){
 				responseBean.setStatus(ResponseStatus.OVERRESPONSETIME.getValue());
+				logger.debug(e.getCause().toString());
 			}else if(e instanceof CustomException){
 				responseBean.setStatus(ResponseStatus.CUSTOM.getValue());
+				logger.debug(e.getCause().toString());
 			}else{
 				responseBean.setStatus(ResponseStatus.FAIL.getValue());
+				logger.error("系统错误:" + e.getCause().toString());
 			}
 			if(!CheckUtil.isNull(e.getMessage())){
 				responseBean.setErrorMsg(e.getMessage());
 			}
-			e.printStackTrace();
 			System.out.println("error msg is:" + str);
 		}
 		responseBean.setData(resultData);
