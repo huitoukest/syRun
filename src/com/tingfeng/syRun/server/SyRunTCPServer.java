@@ -51,8 +51,8 @@ public class SyRunTCPServer {
 	        //配置事务处理Handler，将请求转由TimeServerHandler处理。
 	        acceptor.setHandler(new SyRunSeverHandler());
 	        //配置Buffer的缓冲区大小
-			acceptor.getSessionConfig().setMinReadBufferSize(1024);
-			acceptor.getSessionConfig().setMaxReadBufferSize(40960);
+			acceptor.getSessionConfig().setMinReadBufferSize(4196);
+			acceptor.getSessionConfig().setMaxReadBufferSize(204800);
 	        //设置等待时间，每隔IdleTime将调用一次handler.sessionIdle()方法  
 	        acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE,ConfigEntity.IDLE_TIME);//10秒
 	        //绑定端口

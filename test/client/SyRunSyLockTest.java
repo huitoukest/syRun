@@ -45,7 +45,7 @@ public class SyRunSyLockTest{
 						syLockParam.setLockId(lockId);
 						Integer re1 = countMap.get("count");
 						re1  = re1 + 2;
-						if(idx % 5 ==0) {
+						if(idx % 20 ==0) {
 							Thread.sleep(1);
 						}
 						Integer re2  = re1 - 1;

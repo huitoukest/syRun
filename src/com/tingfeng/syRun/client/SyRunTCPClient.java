@@ -65,6 +65,8 @@ public class SyRunTCPClient {
 		connector.getSessionConfig().setSendBufferSize(bufferSize);
 		connector.getSessionConfig().setReadBufferSize(bufferSize);
 		connector.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, ConfigEntity.IDLE_TIME);//30秒读写空闲
+		connector.getSessionConfig().setReceiveBufferSize(81920);//接收缓冲区
+		connector.getSessionConfig().setSendBufferSize(41960);
 		/*//连结到服务器:
 		ConnectFuture cf = connector.connect(new
 				InetSocketAddress(serverIP,serverPort));
@@ -175,6 +177,7 @@ public class SyRunTCPClient {
 		if(null != connector) {
 			connector.dispose();
 		}
+		isInited = false;
 		logger.info("服务器关闭成功");
 	}
 
