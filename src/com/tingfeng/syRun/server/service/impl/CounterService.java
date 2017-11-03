@@ -65,6 +65,8 @@ public class CounterService {
 		}
 		return counter.value;
 	}
+
+
 	
 	public synchronized long addCounterValue(String key,long value){
 		CounterBean counter = counterMap.get(key);

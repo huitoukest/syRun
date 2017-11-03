@@ -1,5 +1,6 @@
 package com.tingfeng.syRun.client.util;
 
+import com.tingfeng.syRun.common.MsgType;
 import com.tingfeng.syRun.common.bean.request.BaseRequestParam;
 import com.tingfeng.syRun.common.bean.request.CounterParam;
 import com.tingfeng.syRun.common.bean.request.RequestBean;
@@ -12,7 +13,7 @@ import com.tingfeng.syRun.common.util.RequestUtil;
  */
 public class RequestParameterUtil {
 
-    private static <T extends BaseRequestParam> RequestBean<T> getParam(RequestType requestType,MsgType msgType, T param){
+    private static <T extends BaseRequestParam> RequestBean<T> getParam(RequestType requestType, MsgType msgType, T param){
         RequestBean<T> requestBean = new RequestBean<>();
         String id = "";
         if(RequestType.ASY.equals(requestType)){

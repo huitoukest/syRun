@@ -2,7 +2,7 @@ package com.tingfeng.syRun.server.util;
 
 import java.io.IOException;
 import com.alibaba.fastjson.JSONObject;
-import com.tingfeng.syRun.client.util.MsgType;
+import com.tingfeng.syRun.common.MsgType;
 import com.tingfeng.syRun.common.ResponseStatus;
 import com.tingfeng.syRun.common.bean.request.CounterParam;
 import com.tingfeng.syRun.common.bean.request.RequestBean;
@@ -13,7 +13,6 @@ import com.tingfeng.syRun.common.ex.CustomException;
 import com.tingfeng.syRun.common.ex.OverResponseException;
 import com.tingfeng.syRun.common.ex.OverRunTimeException;
 import com.tingfeng.syRun.common.util.CheckUtil;
-import com.tingfeng.syRun.server.SyRunTCPServer;
 import com.tingfeng.syRun.server.controller.CounterController;
 import com.tingfeng.syRun.server.controller.SyLockController;
 import org.slf4j.Logger;
