@@ -1,11 +1,13 @@
 package com.tingfeng.syRun.client.handler;
 
 import com.alibaba.fastjson.JSONObject;
+import com.tingfeng.syRun.common.ConfigEntity;
 import com.tingfeng.syRun.common.ResponseStatus;
 import com.tingfeng.syRun.common.bean.request.RequestBean;
 import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import com.tingfeng.syRun.client.util.SyRunMsgAsynchronizeUtil;
 import com.tingfeng.syRun.client.util.SyRunMsgSynchronizeUtil;
+import com.tingfeng.syRun.common.ex.SendFailException;
 import com.tingfeng.syRun.common.util.RequestUtil;
 import com.tingfeng.syRun.common.ex.OverRunTimeException;
 import org.apache.mina.core.future.IoFuture;
@@ -80,13 +82,23 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 	}
 	
 	public static void receiveMsg(String msg){
-			   ResponseBean responseBean = JSONObject.parseObject(msg,ResponseBean.class);
-			   if(RequestUtil.isAsychronizedMsg(responseBean.getId())) {
-				   SyRunMsgAsynchronizeUtil.receiveMsg(responseBean);
-			   }else {
-				   SyRunMsgSynchronizeUtil.receiveMsg(responseBean);
-			   }
+		ResponseBean responseBean = JSONObject.parseObject(msg,ResponseBean.class);
+		receiveMsg(msg);
 	}
+
+	public static void receiveMsg(ResponseBean responseBean){
+		if(RequestUtil.isAsychronizedMsg(responseBean.getId())) {
+			SyRunMsgAsynchronizeUtil.receiveMsg(responseBean);
+		}else {
+			SyRunMsgSynchronizeUtil.receiveMsg(responseBean);
+		}
+	}
+
+
+    public static void sendMessage(IoSession ioSession,RequestBean<?> requestBean){
+        sendMessage(ioSession,requestBean,0);
+    }
+
 	/**
 	 * 通过多线程/唯一id辨识消息唯一性
 	 * @param requestBean
@@ -94,19 +106,30 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 	 * @throws InterruptedException
 	 * @throws OverRunTimeException
 	 */
-	public static void sendMessage(IoSession ioSession,RequestBean<?> requestBean){
-		final String msg = JSONObject.toJSONString(requestBean);
+	private static void sendMessage(IoSession ioSession,RequestBean<?> requestBean,int hasSendCount){
+        final String msg = JSONObject.toJSONString(requestBean);
 		//System.out.println("发送消息: " + msg);
 		WriteFuture writeFuture = ioSession.write(msg );
 		writeFuture.addListener((IoFuture future) -> {
 				WriteFuture wfuture=(WriteFuture)future;
 				// 写入失败则处理数据
 				if(!wfuture.isWritten()){
-					ResponseBean responseBean = new  ResponseBean();
-					responseBean.setErrorMsg("send failed");
-					responseBean.setStatus(ResponseStatus.CUSTOM.getValue());
-					logger.info("发送消息失败:{}" + msg);
-			}
+                    if(hasSendCount > 2){
+                        ResponseBean responseBean = new  ResponseBean();
+                        responseBean.setId(requestBean.getId());
+                        responseBean.setErrorMsg("send failed");
+                        responseBean.setStatus(ResponseStatus.CUSTOM.getValue());
+                        logger.info("发送消息失败:server:{},msg:{},count{}",ioSession.getServiceAddress(),msg,hasSendCount);
+                        receiveMsg(responseBean);
+                    }else{
+                        try {
+                            Thread.sleep(ConfigEntity.TIME_RESEND_IDLE);
+                        } catch (InterruptedException e) {
+                            logger.info("sleep fail!",e);
+                        }
+                        sendMessage(ioSession,requestBean,hasSendCount + 1);
+                    }
+				}
 		});
 	}
 	

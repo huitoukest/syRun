@@ -10,7 +10,6 @@ import com.tingfeng.syRun.client.util.SingeStepException;
  *  频率检查类
  *  在指定的的计数器有效时间段内允许的最大值检测
  * @author huitoukest
- * @param T doWork的返回值
  */
 public abstract class FrequencyControlHelper<T> {
 	private List<FrequencyBean> frequencyBeans = null;

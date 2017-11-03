@@ -8,10 +8,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.alibaba.fastjson.JSONObject;
+import com.tingfeng.syRun.common.ConfigEntity;
 import com.tingfeng.syRun.common.ResponseStatus;
 import com.tingfeng.syRun.common.bean.response.ResponseBean;
+import com.tingfeng.syRun.common.ex.SendFailException;
 import com.tingfeng.syRun.common.util.Base64Util;
 import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.future.IoFuture;
 import org.apache.mina.core.future.IoFutureListener;
 import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.service.IoHandlerAdapter;
@@ -107,15 +110,35 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
 			servicePool.submit(() ->{
 				try {
 					sendMessage(session,SignleRunServerUtil.doServerWork(reMsg));
-				} catch (IOException e) {
+				}catch (IOException e) {
 					e.printStackTrace();
 				}
 			});
 		}
     }
-    
-    public static void sendMessage(IoSession session,String msg){
-    	//WriteFuture future =
-				session.write(msg);
+
+	public static void sendMessage(IoSession ioSession,String msg){
+    	sendMessage(ioSession,msg,0);
+	}
+
+    private static void sendMessage(final IoSession ioSession,final String msg,final int sendCount){
+		//发送n次后,不再重试发送
+		WriteFuture writeFuture = ioSession.write(msg);
+		writeFuture.addListener((IoFuture future) -> {
+			WriteFuture wfuture=(WriteFuture)future;
+			// 写入失败则处理数据
+			if(!wfuture.isWritten()){
+				if(sendCount > 2){
+					logger.info("消息发送失败,ip:{},消息:{},次数{}",ioSession.getRemoteAddress(),msg,sendCount);
+				}else{
+					try {
+						Thread.sleep(ConfigEntity.TIME_RESEND_IDLE);
+					} catch (InterruptedException e) {
+						logger.info("sleep fail!",e);
+					}
+					sendMessage(ioSession,msg,sendCount + 1);
+				}
+			}
+		});
     }
 }

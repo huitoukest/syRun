@@ -59,12 +59,12 @@ public class SyRunTCPClient {
 		//设定服务器端的消息处理器:一个SamplMinaServerHandler对象,
 		connector.setHandler(SyRunClientHandler.getSigleInstance());
 		// Set connect timeout.
-		connector.setConnectTimeoutMillis(ConfigEntity.OUTTIME_CONNECT);
+		connector.setConnectTimeoutMillis(ConfigEntity.TIME_OUT_CONNECT);
 		connector.getSessionConfig().setTcpNoDelay(true);
 		connector.getSessionConfig().setReceiveBufferSize(bufferSize);
 		connector.getSessionConfig().setSendBufferSize(bufferSize);
 		connector.getSessionConfig().setReadBufferSize(bufferSize);
-		connector.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, ConfigEntity.IDLE_TIME);//30秒读写空闲
+		connector.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, ConfigEntity.TIME_IO_IDLE);//30秒读写空闲
 		connector.getSessionConfig().setReceiveBufferSize(81920);//接收缓冲区
 		connector.getSessionConfig().setSendBufferSize(41960);
 		/*//连结到服务器:
@@ -142,7 +142,7 @@ public class SyRunTCPClient {
 		/** 是否回发 */
 		heartBeat.setForwardEvent(true);
 		/** 发送频率 */
-		heartBeat.setRequestInterval(ConfigEntity.HEART_BEAT_TIME);
+		heartBeat.setRequestInterval(ConfigEntity.TIME_HEART_BEAT);
 		//connector.getSessionConfig().setKeepAlive(true);
 		connector.getFilterChain().addLast("heartbeat", heartBeat);
 	}
@@ -152,7 +152,7 @@ public class SyRunTCPClient {
 		while(!(isReConnected && customCloseConnect)) {//如果重连时是用户自定义关闭则不再重连
 			try {
 				if(isReConnected){
-					Thread.sleep(ConfigEntity.RECONNECT_TIME * connectCount);
+					Thread.sleep(ConfigEntity.TIME_RECONNECT * connectCount);
 				}
 				ConnectFuture future = connector.connect();
 				future.awaitUninterruptibly();// 等待连接创建成功
@@ -162,7 +162,7 @@ public class SyRunTCPClient {
 					break;
 				}
 			} catch (Exception ex) {
-				logger.info("服务器登录失败,"+ (ConfigEntity.RECONNECT_TIME /1000.0 * connectCount) + " 秒再连接一次:" + ex.getMessage());
+				logger.info("服务器登录失败,"+ (ConfigEntity.TIME_RECONNECT /1000.0 * connectCount) + " 秒再连接一次:" + ex.getMessage());
 			}
 		}
 	}
