@@ -83,7 +83,7 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 	
 	public static void receiveMsg(String msg){
 		ResponseBean responseBean = JSONObject.parseObject(msg,ResponseBean.class);
-		receiveMsg(msg);
+		receiveMsg(responseBean);
 	}
 
 	public static void receiveMsg(ResponseBean responseBean){
