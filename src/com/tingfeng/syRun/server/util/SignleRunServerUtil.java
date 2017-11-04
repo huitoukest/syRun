@@ -23,7 +23,7 @@ public class SignleRunServerUtil {
 	public static final CounterController syCounterController = new CounterController();
 	public static final SyLockController syLockController = new SyLockController();
 
-    public static String doServerWork(String str) throws IOException {
+    public static ResponseBean doServerWork(String str) throws IOException {
 		ResponseBean responseBean = new ResponseBean();
 		String resultData = null;
 		try {
@@ -71,7 +71,7 @@ public class SignleRunServerUtil {
 			System.out.println("error msg is:" + str);
 		}
 		responseBean.setData(resultData);
-		return JSONObject.toJSONString(responseBean);
+		return responseBean;
 	}
 	
     
@@ -100,7 +100,7 @@ public class SignleRunServerUtil {
     	return result;
 	}
 
-	public static String doCounter(CounterParam counterRequest) throws IOException{
+	private static String doCounter(CounterParam counterRequest) throws IOException{
     	String key = counterRequest.key;
 		if(CheckUtil.isNull(key))
 		{
@@ -146,5 +146,50 @@ public class SignleRunServerUtil {
     	return result.toString();
     }
 
-    
+	/**
+	 * 处理发送失败的消息
+	 * @param responseBean
+	 */
+	public static void dealFailSendWork(String reqMsg,ResponseBean responseBean) {
+		try {
+			JSONObject jsonObject = JSONObject.parseObject(reqMsg);
+			Integer type = jsonObject.getInteger(CodeConstants.RquestKey.TYPE);
+			if(type == MsgType.COUNTER.getValue())
+			{
+				CounterParam counterRequest = jsonObject.getObject(CodeConstants.RquestKey.PARAMS, CounterParam.class);
+				dealFailSendCounter(counterRequest,responseBean);
+			}else if(type == MsgType.LOCK.getValue()){
+				SyLockParam requestParam = jsonObject.getObject(CodeConstants.RquestKey.PARAMS, SyLockParam.class);
+				RequestBean<SyLockParam> requestBean = new RequestBean<>();
+				requestBean.setType(type);
+				requestBean.setParams(requestParam);
+				dealFailSendSyLock(requestBean,responseBean);
+			}
+		}catch (Exception e){
+				responseBean.setStatus(ResponseStatus.FAIL.getValue());
+				logger.error("发送消息失败后系统处理失败:{},{}" ,e.getCause(),e.getMessage());
+
+		}
+	}
+
+	/**
+	 * 处理lock相关的发送失败的消息
+	 * @param requestBean
+	 * @param responseBean
+	 */
+	private static void dealFailSendSyLock(RequestBean<SyLockParam> requestBean, ResponseBean responseBean) {
+		String method = requestBean.getParams().getMethod();
+		String id = requestBean.getId();
+		switch(method) {
+			case "lock": {//只需要对加锁的消息释放锁
+				requestBean.getParams().setLockId(responseBean.getData());
+				syLockController.unlockSyLock(id, requestBean.getParams());
+				break;
+			}
+		}
+	}
+
+	private static void dealFailSendCounter(CounterParam counterRequest, ResponseBean responseBean) {
+
+	}
 }

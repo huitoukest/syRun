@@ -87,12 +87,12 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
      * <p>
      * 为了提升并发性能，本方法将运行在独立于MINA的IoProcessor之外的线程池中，
      * 
-     * @param session 收到消息对应的会话引用
+     * @param ioSession 收到消息对应的会话引用
      * @param message 收到的MINA的原始消息封装对象，本类中是 {@link IoBuffer}对象
      * @throws Exception 当有错误发生时将抛出异常
      */
     @Override
-    public void messageReceived(IoSession session, Object message)throws Exception
+    public void messageReceived(IoSession ioSession, Object message)throws Exception
     {
     	//System.out.println(System.currentTimeMillis() + ": Message server re: " + message);
     	//*********************************************** 接收数据  
@@ -102,41 +102,46 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
 			ResponseBean responseBean = new ResponseBean();
 			responseBean.setStatus(ResponseStatus.FAIL.getValue());
 			responseBean.setErrorMsg("null response msg ");
-			result = JSONObject.toJSONString(responseBean);
-			sendMessage(session,result);
+			sendMessage(ioSession,"NULL",responseBean);
 		}else{
 			str = message.toString();
-			final String reMsg = str;
+			final String reqMsg = str;
 			servicePool.submit(() ->{
+				ResponseBean responseBean = null;
 				try {
-					sendMessage(session,SignleRunServerUtil.doServerWork(reMsg));
-				}catch (IOException e) {
-					e.printStackTrace();
+					responseBean = SignleRunServerUtil.doServerWork(reqMsg);
+					sendMessage(ioSession,reqMsg,responseBean);
+				}catch (Exception e) {
+					logger.info("消息发送失败,ip:{},收到消息:{},异常:{}",ioSession.getRemoteAddress(),reqMsg,e);
+					//记录失败信息
+					SignleRunServerUtil.dealFailSendWork(reqMsg,responseBean);
 				}
 			});
 		}
     }
 
-	public static void sendMessage(IoSession ioSession,String msg){
-    	sendMessage(ioSession,msg,0);
+	public static void sendMessage(IoSession ioSession,String msg,ResponseBean responseBean){
+    	sendMessage(ioSession,msg,responseBean,0);
 	}
 
-    private static void sendMessage(final IoSession ioSession,final String msg,final int sendCount){
+    private static void sendMessage(final IoSession ioSession,final String msg,final ResponseBean responseBean,final int sendCount){
 		//发送n次后,不再重试发送
-		WriteFuture writeFuture = ioSession.write(msg);
+		final String respMsg = JSONObject.toJSONString(responseBean);
+		WriteFuture writeFuture = ioSession.write(respMsg);
 		writeFuture.addListener((IoFuture future) -> {
 			WriteFuture wfuture=(WriteFuture)future;
 			// 写入失败则处理数据
 			if(!wfuture.isWritten()){
 				if(sendCount > 2){
 					logger.info("消息发送失败,ip:{},消息:{},次数{}",ioSession.getRemoteAddress(),msg,sendCount);
+					SignleRunServerUtil.dealFailSendWork(respMsg,responseBean);
 				}else{
 					try {
 						Thread.sleep(ConfigEntity.TIME_RESEND_IDLE);
 					} catch (InterruptedException e) {
 						logger.info("sleep fail!",e);
 					}
-					sendMessage(ioSession,msg,sendCount + 1);
+					sendMessage(ioSession,msg,responseBean,sendCount + 1);
 				}
 			}
 		});
