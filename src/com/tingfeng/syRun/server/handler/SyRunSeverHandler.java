@@ -137,7 +137,7 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
 					SignleRunServerUtil.dealFailSendWork(respMsg,responseBean);
 				}else{
 					try {
-						Thread.sleep(ConfigEntity.TIME_RESEND_IDLE);
+						Thread.sleep(ConfigEntity.getInstance().getTimeResendIdle());
 					} catch (InterruptedException e) {
 						logger.info("sleep fail!",e);
 					}

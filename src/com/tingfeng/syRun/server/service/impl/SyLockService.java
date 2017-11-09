@@ -63,7 +63,7 @@ public class SyLockService {
 				   //Stirng.intern()在jdk6,7,8下的存储位置可能不一致.但是都是从常量池中取出的统一对象
 				lockStatus = lockCountDownLatchMap.get(key);
 				if (null != lockStatus) {//如果需要等待
-					isOverTime = !lockStatus.countDownLatch.await(ConfigEntity.TIME_OUT_RUN, TimeUnit.MILLISECONDS);
+					isOverTime = !lockStatus.countDownLatch.await(ConfigEntity.getInstance().getTimeOutRun(), TimeUnit.MILLISECONDS);
 				} else {
 					lockStatus = new SyLockStatusBean();
 				}
@@ -75,7 +75,7 @@ public class SyLockService {
 		} catch (Exception e) {
 			e.printStackTrace();
 			if (e instanceof InterruptedException || isOverTime) {
-				throw  new OverRunTimeException("lock time over max milliseconds:" + ConfigEntity.TIME_OUT_RUN);
+				throw  new OverRunTimeException("lock time over max milliseconds:" + ConfigEntity.getInstance().getTimeOutRun());
 			}
 			SyLockStatusBean statusBean = lockCountDownLatchMap.get(key);
 			if (null != statusBean && lockId.equals(statusBean.lockId)) {
@@ -115,5 +115,5 @@ public class SyLockService {
 		}
 		//System.out.println("server:unlock:se:" + JSONObject.toJSONString(syLockParam));
 	}
-	
+
 }

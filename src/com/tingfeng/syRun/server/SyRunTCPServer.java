@@ -30,7 +30,7 @@ public class SyRunTCPServer {
 	private static boolean isInited = false;
 	  
     public static void main(String[] args) throws IOException {  
-    	init(ConfigEntity.SERVER_IP,ConfigEntity.SERVDER_TCP_PORT);
+    	init(ConfigEntity.getInstance().getServerIp(),ConfigEntity.getInstance().getServerTcpPort());
     }
     
     public static void init(String serverIP,int serverPort) throws IOException{
@@ -54,7 +54,7 @@ public class SyRunTCPServer {
 			acceptor.getSessionConfig().setMinReadBufferSize(4196);
 			acceptor.getSessionConfig().setMaxReadBufferSize(204800);
 	        //设置等待时间，每隔IdleTime将调用一次handler.sessionIdle()方法  
-	        acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE,ConfigEntity.TIME_IO_IDLE);//10秒
+	        acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE,ConfigEntity.getInstance().getTimeIoIdle());//10秒
 	        //绑定端口
 	        acceptor.bind(new InetSocketAddress(serverIP,serverPort));
 			logger.info("启动服务器成功,ip地址和端口是{}:{}",serverIP,serverPort);
