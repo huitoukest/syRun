@@ -120,11 +120,11 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
 		}
     }
 
-	public static void sendMessage(IoSession ioSession,String msg,ResponseBean responseBean){
-    	sendMessage(ioSession,msg,responseBean,0);
+	public static void sendMessage(IoSession ioSession,String reqMsg,ResponseBean responseBean){
+    	sendMessage(ioSession,reqMsg,responseBean,0);
 	}
 
-    private static void sendMessage(final IoSession ioSession,final String msg,final ResponseBean responseBean,final int sendCount){
+    private static void sendMessage(final IoSession ioSession,final String reqMsg,final ResponseBean responseBean,final int sendCount){
 		//发送n次后,不再重试发送
 		final String respMsg = JSONObject.toJSONString(responseBean);
 		WriteFuture writeFuture = ioSession.write(respMsg);
@@ -133,15 +133,15 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
 			// 写入失败则处理数据
 			if(!wfuture.isWritten()){
 				if(sendCount > 2){
-					logger.info("消息发送失败,ip:{},消息:{},次数{}",ioSession.getRemoteAddress(),msg,sendCount);
-					SignleRunServerUtil.dealFailSendWork(respMsg,responseBean);
+					logger.info("消息发送失败,ip:{},消息:{},次数{}",ioSession.getRemoteAddress(),reqMsg,sendCount);
+					SignleRunServerUtil.dealFailSendWork(reqMsg,responseBean);
 				}else{
 					try {
 						Thread.sleep(ConfigEntity.getInstance().getTimeResendIdle());
 					} catch (InterruptedException e) {
 						logger.info("sleep fail!",e);
 					}
-					sendMessage(ioSession,msg,responseBean,sendCount + 1);
+					sendMessage(ioSession,reqMsg,responseBean,sendCount + 1);
 				}
 			}
 		});
