@@ -1,11 +1,11 @@
 package com.tingfeng.syRun.common.ex;
 
 /**
- * 自定义异常
+ * 自定义标记的异常
  */
-public class CustomException extends  MyException {
+public class MyException extends  RuntimeException {
 
-    public CustomException(String msg) {
+    public MyException(String msg) {
         super(msg);
     }
 

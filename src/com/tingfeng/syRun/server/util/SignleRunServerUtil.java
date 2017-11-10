@@ -96,6 +96,7 @@ public class SignleRunServerUtil {
     			syLockController.unlockSyLock(id, requestBean.getParams());
     			break;
     		}
+    		default:break;
     	}
     	return result;
 	}
@@ -139,6 +140,7 @@ public class SignleRunServerUtil {
     		result = syCounterController.addCounterValue(key, value);
     		break;
     	}
+			default:break;
 	}
 		if(null == result){
     		return null;
@@ -167,7 +169,7 @@ public class SignleRunServerUtil {
 			}
 		}catch (Exception e){
 				responseBean.setStatus(ResponseStatus.FAIL.getValue());
-				logger.error("发送消息失败后系统处理失败:{},{}" ,e.getCause(),e.getMessage());
+				logger.error("发送消息失败后,系统处理失败:{},{}" ,e.getCause(),e.getMessage());
 
 		}
 	}
@@ -186,6 +188,7 @@ public class SignleRunServerUtil {
 				syLockController.unlockSyLock(id, requestBean.getParams());
 				break;
 			}
+			default:break;
 		}
 	}
 

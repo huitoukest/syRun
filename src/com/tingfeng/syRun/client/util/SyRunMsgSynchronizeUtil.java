@@ -33,7 +33,7 @@ public class SyRunMsgSynchronizeUtil {
 	/*private static final ExecutorService services = Executors.newFixedThreadPool(2);
 	//指定方法完成的执行器
 	private static final ExecutorCompletionService<ResponseBean> completionServices = new ExecutorCompletionService<>(services);*/
-	CountDownLatch countDownLatch = new CountDownLatch(1);
+	//CountDownLatch countDownLatch = new CountDownLatch(1);
 
 	/**
 	 * 收到一条消息后,将此消息通过此处处理

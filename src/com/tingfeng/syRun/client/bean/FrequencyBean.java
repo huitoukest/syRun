@@ -26,15 +26,15 @@ public class FrequencyBean {
 	}
 
 	public long getInterval() {
-		return interval==null?0:interval;
+		return interval == null ? 0 : interval;
 	}
 
 	public void setInterval(Long interval) {
 		this.interval = interval;
 	}
 
-	public Integer getCount() {
-		return count==null?0:count;
+	public int getCount() {
+		return count == null ? 0 : count;
 	}
 
 	public void setCount(Integer count) {

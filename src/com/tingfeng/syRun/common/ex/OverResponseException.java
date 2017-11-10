@@ -5,7 +5,7 @@ package com.tingfeng.syRun.common.ex;
  * @author huitoukest
  *
  */
-public class OverResponseException extends RuntimeException{
+public class OverResponseException extends MyException{
 
 	public OverResponseException(String msg) {
 		super(msg);

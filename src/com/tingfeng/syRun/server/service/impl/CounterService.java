@@ -5,11 +5,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
+import com.tingfeng.syRun.common.ex.CustomException;
 import com.tingfeng.syRun.server.bean.CounterBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -17,12 +20,14 @@ import com.tingfeng.syRun.server.bean.CounterBean;
  *  2. 定时移除过期counter,并且每次取数前检查是否过期
  */
 public class CounterService {
+	private static Logger logger = LoggerFactory.getLogger(CounterService.class);
 	private static CounterService counterHelper = new CounterService();
 	private Map<String, CounterBean>  counterMap = new HashMap<>(50000);
 	private int threadPoolSize = 1;
 	private long counterExpireRemoveInteval = 5 * 1000;//每5秒钟循环一次counter过期移出器;
 	private List<String> counterKeys = new ArrayList<>(50000);
-	
+
+
 	private CounterService(){
 		startRemoveExpiredCounter();	
 	}
@@ -31,9 +36,7 @@ public class CounterService {
 	 */
 	public void startRemoveExpiredCounter(){
 		ExecutorService service = Executors.newFixedThreadPool(threadPoolSize);//此线程仅仅作为一个补充移除功能
-        service.submit(new Callable<CounterService>() {
-			@Override
-			public CounterService call() throws Exception {
+        Future<Integer> future = service.submit(() -> {
 				while(true){
 					counterKeys.clear();
 					Iterator<Map.Entry<String, CounterBean>> it = null;
@@ -48,9 +51,13 @@ public class CounterService {
 					  for(int i = 0; i<counterKeys.size() ;i++){
 						  counterHelper.removeCounter(counterKeys.get(i));
 					  }
-					  Thread.sleep(counterExpireRemoveInteval);
+					  try{
+						  Thread.sleep(counterExpireRemoveInteval);
+					  }catch (Exception e){
+                          logger.error("startRemoveExpiredCounter:thread sleep error",e);
+					  }
+
 				}
-			}
 		});
 	}
 	
@@ -60,7 +67,10 @@ public class CounterService {
 	
 	
 	public synchronized long addCounter(CounterBean counter){
-		if(null != counter && counter.expireTime > System.currentTimeMillis()){
+		if(null == counter){
+			throw new CustomException("addCounter:counter is null");
+		}
+		if(counter.expireTime > System.currentTimeMillis()){
 			counterMap.put(counter.key, counter);
 		}
 		return counter.value;

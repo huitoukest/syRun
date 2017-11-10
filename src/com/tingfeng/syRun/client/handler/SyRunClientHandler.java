@@ -10,6 +10,7 @@ import com.tingfeng.syRun.client.util.SyRunMsgSynchronizeUtil;
 import com.tingfeng.syRun.common.ex.SendFailException;
 import com.tingfeng.syRun.common.util.RequestUtil;
 import com.tingfeng.syRun.common.ex.OverRunTimeException;
+import com.tingfeng.syRun.server.handler.SyRunSeverHandler;
 import org.apache.mina.core.future.IoFuture;
 import org.apache.mina.core.future.IoFutureListener;
 import org.apache.mina.core.future.WriteFuture;
@@ -109,7 +110,10 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 	private static void sendMessage(IoSession ioSession,RequestBean<?> requestBean,int hasSendCount){
         final String msg = JSONObject.toJSONString(requestBean);
 		//System.out.println("发送消息: " + msg);
-		WriteFuture writeFuture = ioSession.write(msg );
+		WriteFuture writeFuture = null;
+		synchronized (SyRunSeverHandler.class) {
+			writeFuture = ioSession.write(msg);
+		}
 		writeFuture.addListener((IoFuture future) -> {
 				WriteFuture wfuture=(WriteFuture)future;
 				// 写入失败则处理数据

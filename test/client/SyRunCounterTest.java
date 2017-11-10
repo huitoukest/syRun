@@ -114,8 +114,8 @@ public class SyRunCounterTest{
         //指定方法完成的执行器
          ExecutorCompletionService<String> completion = new ExecutorCompletionService<String>(
                 service);
-         SyRunClientUtil.initCounter("redis:hsh:test:count0", 0,System.currentTimeMillis() + 1000 * 60 * 10);
-         final Map<String ,Integer> countMap = new HashMap<String ,Integer>();
+		SyRunClientUtil.initCounter("redis:hsh:test:count0", 0,System.currentTimeMillis() + 1000 * 60 * 10);
+		final Map<String ,Integer> countMap = new HashMap<String ,Integer>();
         countMap.put("count", 0);
         long start = System.currentTimeMillis();
         try{

@@ -178,7 +178,7 @@ public class SyRunTCPClient {
 			connector.dispose();
 		}
 		isInited = false;
-		logger.info("服务器关闭成功");
+		logger.info("客户端连接断开成功");
 	}
 
 	public static synchronized IoSession getSession(){

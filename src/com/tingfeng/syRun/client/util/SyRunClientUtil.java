@@ -41,7 +41,8 @@ public class SyRunClientUtil {
 				t  = fc.doWork();
 			}catch (SingeStepException e) {
 				tempTime = System.currentTimeMillis() - tempTime;
-				tempTime = Math.round(tempTime + sleepTime);
+				float seed = (float)(tempTime + sleepTime);
+				tempTime = (long) Math.round(seed);
 				i++;
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -114,14 +115,14 @@ public class SyRunClientUtil {
     public static long getCounterExpireTime(final String key) throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException{
 		RequestBean<CounterParam> requestBean =  RequestParameterUtil.getParamOfGetCounterExpireTime(RequestType.SY,key);
 		ResponseBean responseBean = sendMsgToServer(requestBean);
-		return Long.valueOf(responseBean.getData());
+		return Long.parseLong(responseBean.getData());
     }
 
     
     public static long getCounterValue(String key) throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException{
 		RequestBean<CounterParam> requestBean =  RequestParameterUtil.getParamOfGetCounterValue(RequestType.SY,key);
 		ResponseBean responseBean = sendMsgToServer(requestBean);
-		return Long.valueOf(responseBean.getData());
+		return Long.parseLong(responseBean.getData());
     }
     /**
      * 
@@ -135,7 +136,7 @@ public class SyRunClientUtil {
     public static long addCounterValue(String key,long value) throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException{
 		RequestBean<CounterParam> requestBean =  RequestParameterUtil.getParamOfAddCounterValue(RequestType.SY,key,value);
 		ResponseBean responseBean = sendMsgToServer(requestBean);
-		return Long.valueOf(responseBean.getData());
+		return Long.parseLong(responseBean.getData());
     }
     
     /*************************************************计数器相关********************************************************************/

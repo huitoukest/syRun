@@ -127,7 +127,10 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
     private static void sendMessage(final IoSession ioSession,final String reqMsg,final ResponseBean responseBean,final int sendCount){
 		//发送n次后,不再重试发送
 		final String respMsg = JSONObject.toJSONString(responseBean);
-		WriteFuture writeFuture = ioSession.write(respMsg);
+		WriteFuture writeFuture = null;
+		synchronized (SyRunSeverHandler.class) {
+			writeFuture = ioSession.write(respMsg);
+		}
 		writeFuture.addListener((IoFuture future) -> {
 			WriteFuture wfuture=(WriteFuture)future;
 			// 写入失败则处理数据
