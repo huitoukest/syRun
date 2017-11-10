@@ -89,7 +89,7 @@ public class SyRunTCPClient {
 
 			@Override
 			public void serviceIdle(IoService service, IdleStatus idleStatus) throws Exception {
-
+                connectToServer(true);
 			}
 
 			@Override
@@ -155,7 +155,7 @@ public class SyRunTCPClient {
 	public static synchronized void connectToServer(boolean isReConnected){
 		int connectCount = 1;
 
-		while(!(isReConnected && customCloseConnect) || session == null || null == session.getServiceAddress()) {//如果重连时是用户自定义关闭则不再重连
+		while( !isInited || !customCloseConnect  && (isReConnected  || session == null || null == session.getServiceAddress() ))  {//如果重连时是用户自定义关闭则不再重连
 			try {
 				if(isReConnected){
 					Thread.sleep(ConfigEntity.getInstance().getTimeReconnect() * connectCount);
