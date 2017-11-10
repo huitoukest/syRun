@@ -41,14 +41,12 @@ public class SyRunMsgSynchronizeUtil {
 	 */
 	public static void receiveMsg(ResponseBean responseBean){
 		   String id = responseBean.getId();
-		   if(RequestUtil.isSychronizedMsg(id)) {
 			   msgResPonseMap.put(id, responseBean);
 			   CountDownLatch countDownLatch = countDownLatchMap.get(id);
 			   if (null != countDownLatch) {
 				   countDownLatchMap.remove(id);
 				   countDownLatch.countDown();
 			   }
-		   }
 	}
 
     /**
@@ -62,10 +60,11 @@ public class SyRunMsgSynchronizeUtil {
 		msgResPonseMap.remove(id);
 		CountDownLatch countDownLatch = new CountDownLatch(1);
 		countDownLatchMap.put(id,countDownLatch);
-
 		SyRunClientHandler.sendMessage(ioSession,requestBean);
 		countDownLatch.await();
 		ResponseBean responseBean = msgResPonseMap.get(id);
+		msgResPonseMap.remove(id);
+
 		return responseBean;
     }
 

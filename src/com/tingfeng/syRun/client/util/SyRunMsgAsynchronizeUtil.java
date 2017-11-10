@@ -19,9 +19,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SyRunMsgAsynchronizeUtil {
 
-	private static final ConcurrentHashMap<String,MsgHandler<?>> msgHandlerMap = new ConcurrentHashMap<>(20000);
+	private static final ConcurrentHashMap<String,MsgHandler> msgHandlerMap = new ConcurrentHashMap<>(20000);
 
-	public static void sendMsg(RequestBean<?> requestBean,MsgHandler<?> msgHandler) throws UnsupportedEncodingException {
+	public static void sendMsg(RequestBean<?> requestBean,MsgHandler msgHandler) throws UnsupportedEncodingException {
 		    sendMsg(SyRunTCPClient.getSession(),requestBean,msgHandler);
 	}
 
@@ -31,7 +31,7 @@ public class SyRunMsgAsynchronizeUtil {
 	 * @param requestBean
 	 * @param msgHandler
 	 */
-	public static void sendMsg(IoSession ioSession,RequestBean<?> requestBean,MsgHandler<?> msgHandler) throws UnsupportedEncodingException {
+	public static void sendMsg(IoSession ioSession,RequestBean<?> requestBean,MsgHandler msgHandler) throws UnsupportedEncodingException {
 		   msgHandlerMap.put(requestBean.getId(),msgHandler);
 		   SyRunClientHandler.sendMessage(ioSession,requestBean);
 	}
@@ -42,14 +42,12 @@ public class SyRunMsgAsynchronizeUtil {
 	 */
 	public static void receiveMsg(ResponseBean responseBean){
 		   String id = responseBean.getId();
-		   if(RequestUtil.isAsychronizedMsg(id)) {
-			   MsgHandler<?> msgHandler = msgHandlerMap.get(id);
+			   MsgHandler msgHandler = msgHandlerMap.get(id);
 			   try {
 				   msgHandler.handMsg(responseBean);
 			   } finally {
 				   msgHandlerMap.remove(id);
 			   }
-		   }
 	}
 	
 }

@@ -23,12 +23,12 @@ import org.slf4j.LoggerFactory;
 
 public class SyRunTCPServer {
 	public static final int min_threadSize = 12;
-	public static final int max_threadSize = 1024;
+	public static final int max_threadSize = 512;
 	public static final int time_keepAlive = 600;//秒
 	private static Logger logger = LoggerFactory.getLogger(SyRunTCPServer.class);
 
 	private static boolean isInited = false;
-	  
+
     public static void main(String[] args) throws IOException {  
     	init(ConfigEntity.getInstance().getServerIp(),ConfigEntity.getInstance().getServerTcpPort());
     }
@@ -42,16 +42,17 @@ public class SyRunTCPServer {
 	        //接着，如结构图示，在Acceptor和IoHandler之间将设置一系列的Fliter  
 	        //包括记录过滤器和编解码过滤器。其中TextLineCodecFactory是mina自带的文本解编码器  
 	        //acceptor.getFilterChain().addLast("logger", new LoggingFilter());
+
+			acceptor.getFilterChain().addLast("exec",getOrderedExecutorFilter());
 			acceptor.getFilterChain().addLast("codec",
 	                new ProtocolCodecFilter(new TextLineCodecFactory(Charset.forName("UTF-8"),"\r\n", "\r\n")));
 			//系统默认是有序线程队列,采用无序目前会使收到的被拆分的消息无序,从而使消息不完整.
 			//acceptor.getFilterChain().addLast("threadPool",new ExecutorFilter(Executors.newFixedThreadPool(threadSize)));
 			//acceptor.getFilterChain().addLast("exec",getUnorderedExecutorFilter());
-			acceptor.getFilterChain().addLast("exec",getOrderedExecutorFilter());
 	        //配置事务处理Handler，将请求转由TimeServerHandler处理。
 	        acceptor.setHandler(new SyRunSeverHandler());
 	        //配置Buffer的缓冲区大小
-			acceptor.getSessionConfig().setMinReadBufferSize(4196);
+			acceptor.getSessionConfig().setMinReadBufferSize(8192);
 			acceptor.getSessionConfig().setMaxReadBufferSize(204800);
 	        //设置等待时间，每隔IdleTime将调用一次handler.sessionIdle()方法  
 	        acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE,ConfigEntity.getInstance().getTimeIoIdle());//10秒

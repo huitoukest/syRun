@@ -28,7 +28,7 @@ import sun.security.provider.certpath.OCSPResponse;
 
 public class SyRunSeverHandler  extends IoHandlerAdapter{
 
-	public static final int threadSize = 1024;
+	public static final int threadSize = 512;
 	private static final ExecutorService servicePool = Executors.newFixedThreadPool(threadSize);
 	private static Logger logger = LoggerFactory.getLogger(SyRunSeverHandler.class);
 	

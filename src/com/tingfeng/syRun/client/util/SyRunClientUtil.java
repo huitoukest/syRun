@@ -153,7 +153,7 @@ public class SyRunClientUtil {
 	 * @throws TimeoutException
 	 * @throws ExecutionException
 	 */
-	public static void initCounter(final String key,final long value,final long expireTime,MsgHandler<?> msgHandler) throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException{
+	public static void initCounter(final String key,final long value,final long expireTime,MsgHandler msgHandler) throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException{
 		RequestBean<CounterParam> requestBean =  RequestParameterUtil.getParamOfInitCounter(RequestType.ASY,key,value,expireTime);
 		sendMsgToServer(requestBean,msgHandler);
 	}
@@ -169,7 +169,7 @@ public class SyRunClientUtil {
 	 * @throws TimeoutException
 	 * @throws ExecutionException
 	 */
-	public static  void setCounterValue(final String key,final long value,MsgHandler<?> msgHandler) throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException{
+	public static  void setCounterValue(final String key,final long value,MsgHandler msgHandler) throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException{
 		RequestBean<CounterParam> requestBean =  RequestParameterUtil.getParamOfSetCounterValue(RequestType.ASY,key,value);
 		sendMsgToServer(requestBean,msgHandler);
 	}
@@ -185,7 +185,7 @@ public class SyRunClientUtil {
 	 * @throws TimeoutException
 	 * @throws ExecutionException
 	 */
-	public static void setCounterExpireTime(final String key,final long expireTime,MsgHandler<?> msgHandler) throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException{
+	public static void setCounterExpireTime(final String key,final long expireTime,MsgHandler msgHandler) throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException{
 		RequestBean<CounterParam> requestBean =  RequestParameterUtil.getParamOfSetCounterExpireTime(RequestType.ASY,key,expireTime);
 		sendMsgToServer(requestBean,msgHandler);
 	}
@@ -200,7 +200,7 @@ public class SyRunClientUtil {
 	 * @throws TimeoutException
 	 * @throws ExecutionException
 	 */
-	public static void getCounterExpireTime(final String key,MsgHandler<?> msgHandler) throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException{
+	public static void getCounterExpireTime(final String key,MsgHandler msgHandler) throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException{
 		RequestBean<CounterParam> requestBean =  RequestParameterUtil.getParamOfGetCounterExpireTime(RequestType.ASY,key);
 		sendMsgToServer(requestBean,msgHandler);
 	}
@@ -215,7 +215,7 @@ public class SyRunClientUtil {
 	 * @throws TimeoutException
 	 * @throws ExecutionException
 	 */
-	public static void getCounterValue(String key,MsgHandler<?> msgHandler) throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException{
+	public static void getCounterValue(String key,MsgHandler msgHandler) throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException{
 		RequestBean<CounterParam> requestBean =  RequestParameterUtil.getParamOfGetCounterValue(RequestType.ASY,key);
 		sendMsgToServer(requestBean,msgHandler);
 	}
@@ -228,7 +228,7 @@ public class SyRunClientUtil {
 	 * @throws InterruptedException
 	 * @throws OverRunTimeException
 	 */
-	public static void addCounterValue(String key,long value,MsgHandler<?> msgHandler) throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException {
+	public static void addCounterValue(String key,long value,MsgHandler msgHandler) throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException {
 		RequestBean<CounterParam> requestBean =  RequestParameterUtil.getParamOfAddCounterValue(RequestType.ASY,key,value);
 		sendMsgToServer(requestBean,msgHandler);
 	}
@@ -282,7 +282,7 @@ public class SyRunClientUtil {
 	 * @throws TimeoutException
 	 * @throws ExecutionException
 	 */
-	public static void getLock(String key,MsgHandler<?> msgHandler) throws InterruptedException, IOException, OverRunTimeException, TimeoutException, ExecutionException {
+	public static void getLock(String key,MsgHandler msgHandler) throws InterruptedException, IOException, OverRunTimeException, TimeoutException, ExecutionException {
 		RequestBean<SyLockParam> requestBean = RequestParameterUtil.getParamOfGetLock(RequestType.ASY,key);
 		sendMsgToServer(requestBean,msgHandler);
 	}
@@ -298,7 +298,7 @@ public class SyRunClientUtil {
 	 * @throws TimeoutException
 	 * @throws ExecutionException
 	 */
-	public static void releaseLock(String key,String lockId,MsgHandler<?> msgHandler) throws InterruptedException, IOException, OverRunTimeException, TimeoutException, ExecutionException {
+	public static void releaseLock(String key,String lockId,MsgHandler msgHandler) throws InterruptedException, IOException, OverRunTimeException, TimeoutException, ExecutionException {
 		RequestBean<SyLockParam> requestBean = RequestParameterUtil.getParamOfReleaseLock(RequestType.ASY,key,lockId);
 		sendMsgToServer(requestBean,msgHandler);
 	}
@@ -336,7 +336,7 @@ public class SyRunClientUtil {
 	 * @throws TimeoutException
 	 * @throws ExecutionException
 	 */
-	private static <T extends BaseRequestParam> void sendMsgToServer(RequestBean<T> requestBean,MsgHandler<?> msgHandler) throws InterruptedException, IOException, OverRunTimeException, TimeoutException, ExecutionException {
+	private static <T extends BaseRequestParam> void sendMsgToServer(RequestBean<T> requestBean,MsgHandler msgHandler) throws InterruptedException, IOException, OverRunTimeException, TimeoutException, ExecutionException {
 		SyRunTCPClient.init(ConfigEntity.getInstance().getServerIp(),ConfigEntity.getInstance().getServerTcpPort());
 		SyRunMsgAsynchronizeUtil.sendMsg(requestBean,msgHandler);
 	}

@@ -7,10 +7,12 @@ import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.service.IoService;
 import org.apache.mina.core.service.IoServiceListener;
 import org.apache.mina.core.session.IdleStatus;
+import org.apache.mina.core.session.IoEventType;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
 import org.apache.mina.filter.executor.ExecutorFilter;
+import org.apache.mina.filter.executor.OrderedThreadPoolExecutor;
 import org.apache.mina.filter.keepalive.KeepAliveFilter;
 import org.apache.mina.filter.keepalive.KeepAliveMessageFactory;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
@@ -23,10 +25,14 @@ import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class SyRunTCPClient {
 
-	public static final int bufferSize = 2048;
+	public static final int min_threadSize = 12;
+	public static final int max_threadSize = 64;//这里的线程不用开很多,通过在Handler中另外开线程来处理接收消息.
+	public static final int time_keepAlive = 600;//秒
+
 	private static boolean isInited = false;
 	public static final int threadSize = 512;
 
@@ -54,6 +60,8 @@ public class SyRunTCPClient {
 		connector = new NioSocketConnector();
 		// 创建接收数据的过滤器
 		DefaultIoFilterChainBuilder chain = connector.getFilterChain();
+
+        chain.addLast("exec",getOrderedExecutorFilter());
 		chain.addLast("codec",
 				new ProtocolCodecFilter(new TextLineCodecFactory(Charset.forName("UTF-8"),"\r\n", "\r\n")));
 		//设定服务器端的消息处理器:一个SamplMinaServerHandler对象,
@@ -61,11 +69,8 @@ public class SyRunTCPClient {
 		// Set connect timeout.
 		connector.setConnectTimeoutMillis(ConfigEntity.getInstance().getTimeOutConnect());
 		connector.getSessionConfig().setTcpNoDelay(true);
-		connector.getSessionConfig().setReceiveBufferSize(bufferSize);
-		connector.getSessionConfig().setSendBufferSize(bufferSize);
-		connector.getSessionConfig().setReadBufferSize(bufferSize);
 		connector.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, ConfigEntity.getInstance().getTimeIoIdle());//30秒读写空闲
-		connector.getSessionConfig().setReceiveBufferSize(81920);//接收缓冲区
+		connector.getSessionConfig().setReceiveBufferSize(41960);//接收缓冲区
 		connector.getSessionConfig().setSendBufferSize(41960);
 		/*//连结到服务器:
 		ConnectFuture cf = connector.connect(new
@@ -99,7 +104,7 @@ public class SyRunTCPClient {
 
 			@Override
 			public void sessionClosed(IoSession session) throws Exception {
-
+                connectToServer(true);
 			}
 
 			@Override
@@ -149,7 +154,8 @@ public class SyRunTCPClient {
 
 	public static synchronized void connectToServer(boolean isReConnected){
 		int connectCount = 1;
-		while(!(isReConnected && customCloseConnect)) {//如果重连时是用户自定义关闭则不再重连
+
+		while(!(isReConnected && customCloseConnect) || session == null || null == session.getServiceAddress()) {//如果重连时是用户自定义关闭则不再重连
 			try {
 				if(isReConnected){
 					Thread.sleep(ConfigEntity.getInstance().getTimeReconnect() * connectCount);
@@ -185,6 +191,15 @@ public class SyRunTCPClient {
 			return session;
 	}
 
-
+	protected static  ExecutorFilter getOrderedExecutorFilter(){
+		// 添加执行线程池
+		OrderedThreadPoolExecutor executor = new OrderedThreadPoolExecutor(min_threadSize, max_threadSize,time_keepAlive, TimeUnit.SECONDS);
+		// 这里是预先启动corePoolSize个处理线程
+		executor.prestartAllCoreThreads();
+		return new ExecutorFilter(executor,
+				IoEventType.EXCEPTION_CAUGHT, IoEventType.MESSAGE_RECEIVED,
+				IoEventType.SESSION_CLOSED, IoEventType.SESSION_IDLE,
+				IoEventType.SESSION_OPENED);
+	}
 
 }

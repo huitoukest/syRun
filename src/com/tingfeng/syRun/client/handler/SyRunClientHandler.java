@@ -7,12 +7,9 @@ import com.tingfeng.syRun.common.bean.request.RequestBean;
 import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import com.tingfeng.syRun.client.util.SyRunMsgAsynchronizeUtil;
 import com.tingfeng.syRun.client.util.SyRunMsgSynchronizeUtil;
-import com.tingfeng.syRun.common.ex.SendFailException;
 import com.tingfeng.syRun.common.util.RequestUtil;
 import com.tingfeng.syRun.common.ex.OverRunTimeException;
-import com.tingfeng.syRun.server.handler.SyRunSeverHandler;
 import org.apache.mina.core.future.IoFuture;
-import org.apache.mina.core.future.IoFutureListener;
 import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
@@ -27,6 +24,9 @@ import org.slf4j.LoggerFactory;
 public class SyRunClientHandler extends IoHandlerAdapter {
 
 	private static final SyRunClientHandler signleRunClientHandler = new SyRunClientHandler();
+
+/*	public static final int threadSize = 512;
+	private static final ExecutorService serviceReceiveMsgPool = Executors.newFixedThreadPool(threadSize);*/
 
 	private SyRunClientHandler() {}
 	
@@ -88,11 +88,13 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 	}
 
 	public static void receiveMsg(ResponseBean responseBean){
-		if(RequestUtil.isAsychronizedMsg(responseBean.getId())) {
-			SyRunMsgAsynchronizeUtil.receiveMsg(responseBean);
-		}else {
-			SyRunMsgSynchronizeUtil.receiveMsg(responseBean);
-		}
+		//serviceReceiveMsgPool.submit(()->{
+			if(RequestUtil.isAsychronizedMsg(responseBean.getId())) {
+				SyRunMsgAsynchronizeUtil.receiveMsg(responseBean);
+			}else {
+				SyRunMsgSynchronizeUtil.receiveMsg(responseBean);
+			}
+		//});
 	}
 
 
@@ -111,9 +113,9 @@ public class SyRunClientHandler extends IoHandlerAdapter {
         final String msg = JSONObject.toJSONString(requestBean);
 		//System.out.println("发送消息: " + msg);
 		WriteFuture writeFuture = null;
-		synchronized (SyRunSeverHandler.class) {
+		//synchronized (SyRunSeverHandler.class) {
 			writeFuture = ioSession.write(msg);
-		}
+		//}
 		writeFuture.addListener((IoFuture future) -> {
 				WriteFuture wfuture=(WriteFuture)future;
 				// 写入失败则处理数据
