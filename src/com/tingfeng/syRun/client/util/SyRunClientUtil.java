@@ -138,6 +138,100 @@ public class SyRunClientUtil {
 		ResponseBean responseBean = sendMsgToServer(requestBean);
 		return Long.parseLong(responseBean.getData());
     }
+
+    /**************************************** 异步的counter方法,名称和同步的方法名相同,增加一个回调参数,无返回值*************************************************************/
+
+	/**
+	 *
+	 * @param key
+	 * @param value
+	 * @param expireTime
+	 * @param msgHandler handle server msg , msg is com.tingfeng.syRun.common.bean.response.ResponseBean
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @throws OverRunTimeException
+	 * @throws TimeoutException
+	 * @throws ExecutionException
+	 */
+	public static void initCounter(final String key,final long value,final long expireTime,MsgHandler<?> msgHandler) throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException{
+		RequestBean<CounterParam> requestBean =  RequestParameterUtil.getParamOfInitCounter(RequestType.ASY,key,value,expireTime);
+		sendMsgToServer(requestBean,msgHandler);
+	}
+
+	/**
+	 *
+	 * @param key
+	 * @param value
+	 * @param msgHandler handle server msg , msg is com.tingfeng.syRun.common.bean.response.ResponseBean
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @throws OverRunTimeException
+	 * @throws TimeoutException
+	 * @throws ExecutionException
+	 */
+	public static  void setCounterValue(final String key,final long value,MsgHandler<?> msgHandler) throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException{
+		RequestBean<CounterParam> requestBean =  RequestParameterUtil.getParamOfSetCounterValue(RequestType.ASY,key,value);
+		sendMsgToServer(requestBean,msgHandler);
+	}
+
+	/**
+	 *
+	 * @param key
+	 * @param expireTime
+	 * @param msgHandler handle server msg , msg is com.tingfeng.syRun.common.bean.response.ResponseBean
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @throws OverRunTimeException
+	 * @throws TimeoutException
+	 * @throws ExecutionException
+	 */
+	public static void setCounterExpireTime(final String key,final long expireTime,MsgHandler<?> msgHandler) throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException{
+		RequestBean<CounterParam> requestBean =  RequestParameterUtil.getParamOfSetCounterExpireTime(RequestType.ASY,key,expireTime);
+		sendMsgToServer(requestBean,msgHandler);
+	}
+
+	/**
+	 *
+	 * @param key
+	 * @param msgHandler handle server msg , msg is com.tingfeng.syRun.common.bean.response.ResponseBean
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @throws OverRunTimeException
+	 * @throws TimeoutException
+	 * @throws ExecutionException
+	 */
+	public static void getCounterExpireTime(final String key,MsgHandler<?> msgHandler) throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException{
+		RequestBean<CounterParam> requestBean =  RequestParameterUtil.getParamOfGetCounterExpireTime(RequestType.ASY,key);
+		sendMsgToServer(requestBean,msgHandler);
+	}
+
+	/**
+	 *
+	 * @param key
+	 * @param msgHandler handle server msg , msg is com.tingfeng.syRun.common.bean.response.ResponseBean
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @throws OverRunTimeException
+	 * @throws TimeoutException
+	 * @throws ExecutionException
+	 */
+	public static void getCounterValue(String key,MsgHandler<?> msgHandler) throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException{
+		RequestBean<CounterParam> requestBean =  RequestParameterUtil.getParamOfGetCounterValue(RequestType.ASY,key);
+		sendMsgToServer(requestBean,msgHandler);
+	}
+	/**
+	 *
+	 * @param key
+	 * @param value
+	 * @param msgHandler handle server msg , msg is com.tingfeng.syRun.common.bean.response.ResponseBean
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @throws OverRunTimeException
+	 */
+	public static void addCounterValue(String key,long value,MsgHandler<?> msgHandler) throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException {
+		RequestBean<CounterParam> requestBean =  RequestParameterUtil.getParamOfAddCounterValue(RequestType.ASY,key,value);
+		sendMsgToServer(requestBean,msgHandler);
+	}
     
     /*************************************************计数器相关********************************************************************/
     
@@ -177,6 +271,37 @@ public class SyRunClientUtil {
 		ResponseBean responseBean = sendMsgToServer(requestBean);
 		return responseBean.getStatus();
     }
+
+	/**
+	 * if fial throw exception
+	 * @param key
+	 * @param msgHandler handle server msg , msg is com.tingfeng.syRun.common.bean.response.ResponseBean
+	 * @throws InterruptedException
+	 * @throws IOException
+	 * @throws OverRunTimeException
+	 * @throws TimeoutException
+	 * @throws ExecutionException
+	 */
+	public static void getLock(String key,MsgHandler<?> msgHandler) throws InterruptedException, IOException, OverRunTimeException, TimeoutException, ExecutionException {
+		RequestBean<SyLockParam> requestBean = RequestParameterUtil.getParamOfGetLock(RequestType.ASY,key);
+		sendMsgToServer(requestBean,msgHandler);
+	}
+
+	/**
+	 *
+	 * @param key
+	 * @param lockId
+	 * @param msgHandler handle server msg , msg is com.tingfeng.syRun.common.bean.response.ResponseBean
+	 * @throws InterruptedException
+	 * @throws IOException
+	 * @throws OverRunTimeException
+	 * @throws TimeoutException
+	 * @throws ExecutionException
+	 */
+	public static void releaseLock(String key,String lockId,MsgHandler<?> msgHandler) throws InterruptedException, IOException, OverRunTimeException, TimeoutException, ExecutionException {
+		RequestBean<SyLockParam> requestBean = RequestParameterUtil.getParamOfReleaseLock(RequestType.ASY,key,lockId);
+		sendMsgToServer(requestBean,msgHandler);
+	}
     
     
     /*************************************************同步锁相关********************************************************************/
@@ -197,5 +322,22 @@ public class SyRunClientUtil {
 	private static <T extends BaseRequestParam> ResponseBean sendMsgToServer(RequestBean<T> requestBean) throws InterruptedException, IOException, OverRunTimeException, TimeoutException, ExecutionException {
 		SyRunTCPClient.init(ConfigEntity.getInstance().getServerIp(),ConfigEntity.getInstance().getServerTcpPort());
 		return SyRunMsgSynchronizeUtil.sendMsg(requestBean);
+	}
+
+	/**
+	 * 统一的异步消息发送
+	 * @param requestBean
+	 * @param <T>
+	 * @param  msgHandler 异步的消息回调类
+	 * @return
+	 * @throws InterruptedException
+	 * @throws IOException
+	 * @throws OverRunTimeException
+	 * @throws TimeoutException
+	 * @throws ExecutionException
+	 */
+	private static <T extends BaseRequestParam> void sendMsgToServer(RequestBean<T> requestBean,MsgHandler<?> msgHandler) throws InterruptedException, IOException, OverRunTimeException, TimeoutException, ExecutionException {
+		SyRunTCPClient.init(ConfigEntity.getInstance().getServerIp(),ConfigEntity.getInstance().getServerTcpPort());
+		SyRunMsgAsynchronizeUtil.sendMsg(requestBean,msgHandler);
 	}
 }
