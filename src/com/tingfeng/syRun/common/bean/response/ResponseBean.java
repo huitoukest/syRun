@@ -2,7 +2,10 @@ package com.tingfeng.syRun.common.bean.response;
 
 import com.tingfeng.syRun.common.ResponseStatus;
 
-public class ResponseBean{
+import java.io.Serializable;
+
+public class ResponseBean implements Serializable{
+
 	/**
 	 * 对应请求消息中的唯一id
 	 */

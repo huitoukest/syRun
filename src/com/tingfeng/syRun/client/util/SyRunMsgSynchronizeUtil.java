@@ -8,7 +8,7 @@ import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import com.tingfeng.syRun.client.SyRunTCPClient;
 import com.tingfeng.syRun.common.util.Base64Util;
 import com.tingfeng.syRun.common.util.RequestUtil;
-import org.apache.mina.core.session.IoSession;
+import io.netty.channel.Channel;
 
 import java.io.UnsupportedEncodingException;
 import java.util.concurrent.*;
@@ -51,16 +51,15 @@ public class SyRunMsgSynchronizeUtil {
 
     /**
      * 同步的消息发送,效率低下
-     * @param ioSession
      * @param requestBean
      * @return
      */
-	public static ResponseBean sendMsg(IoSession ioSession,RequestBean<?> requestBean) throws TimeoutException, ExecutionException, InterruptedException, UnsupportedEncodingException {
+	public static ResponseBean sendMsg(Channel channel, RequestBean<?> requestBean) throws TimeoutException, ExecutionException, InterruptedException, UnsupportedEncodingException {
 		final String id = requestBean.getId();
 		msgResPonseMap.remove(id);
 		CountDownLatch countDownLatch = new CountDownLatch(1);
 		countDownLatchMap.put(id,countDownLatch);
-		SyRunClientHandler.sendMessage(ioSession,requestBean);
+		SyRunClientHandler.sendMessage(channel,requestBean);
 		countDownLatch.await();
 		ResponseBean responseBean = msgResPonseMap.get(id);
 		msgResPonseMap.remove(id);
@@ -74,7 +73,8 @@ public class SyRunMsgSynchronizeUtil {
      * @return
      */
     public static <T extends BaseRequestParam> ResponseBean sendMsg(RequestBean<?> requestBean) throws TimeoutException, ExecutionException, InterruptedException, UnsupportedEncodingException {
-        return sendMsg(SyRunTCPClient.getSession(),requestBean);
+        //return sendMsg(SyRunTCPClient.getSession(),requestBean);
+    return null;
     }
 	
 }

@@ -2,213 +2,113 @@ package com.tingfeng.syRun.client;
 
 import com.tingfeng.syRun.client.handler.SyRunClientHandler;
 import com.tingfeng.syRun.common.ConfigEntity;
-import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
-import org.apache.mina.core.future.ConnectFuture;
-import org.apache.mina.core.service.IoService;
-import org.apache.mina.core.service.IoServiceListener;
-import org.apache.mina.core.session.IdleStatus;
-import org.apache.mina.core.session.IoEventType;
-import org.apache.mina.core.session.IoSession;
-import org.apache.mina.filter.codec.ProtocolCodecFilter;
-import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
-import org.apache.mina.filter.executor.ExecutorFilter;
-import org.apache.mina.filter.executor.OrderedThreadPoolExecutor;
-import org.apache.mina.filter.keepalive.KeepAliveFilter;
-import org.apache.mina.filter.keepalive.KeepAliveMessageFactory;
-import org.apache.mina.transport.socket.nio.NioSocketConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
+import io.netty.util.CharsetUtil;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+
 
 public class SyRunTCPClient {
+    private static Logger logger = LoggerFactory.getLogger(SyRunTCPClient.class);
 
-	public static final int min_threadSize = 6;
-	public static final int max_threadSize = 64;//这里的线程不用开很多,通过在Handler中另外开线程来处理接收消息.
-	public static final int time_keepAlive = 300;//秒
+    private static boolean isInited = false;
 
-	private static boolean isInited = false;
+    private static String serverIP = null;
+    private static int serverPort = 0;
 
-	private static String serverIP = null;
-	private static int serverPort = 0;
+    public static Bootstrap bootstrap = getBootstrap();
+    public static Channel channel = null; //getChannel(HOST,PORT);
+    /**
+     * 初始化Bootstrap
+     * @return
+     */
+    private synchronized static final Bootstrap getBootstrap(){
+        EventLoopGroup group = new NioEventLoopGroup();
+        Bootstrap b = new Bootstrap();
+        b.group(group).channel(NioSocketChannel.class);
+        b.handler(new ChannelInitializer<Channel>() {
+            @Override
+            protected void initChannel(Channel ch) throws Exception {
+                ChannelPipeline pipeline = ch.pipeline();
+                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
+                pipeline.addLast("frameEncoder", new LengthFieldPrepender(4));
+                pipeline.addLast("decoder", new StringDecoder(CharsetUtil.UTF_8));
+                pipeline.addLast("encoder", new StringEncoder(CharsetUtil.UTF_8));
+                pipeline.addLast("handler", SyRunClientHandler.getSigleInstance());
+            }
+        });
+        b.option(ChannelOption.SO_KEEPALIVE, true);
+        return b;
+    }
 
-	private static Logger logger = LoggerFactory.getLogger(SyRunTCPClient.class);
-	private static IoSession session = null;
-	private static NioSocketConnector connector = null;
-	private static boolean customCloseConnect  = false;
+    public synchronized static final Channel getChannel(String host,int port){
+        Channel channel = null;
+        try {
+            channel = bootstrap.connect(host, port).sync().channel();
+        } catch (Exception e) {
+            logger.error(String.format("连接Server(IP[%s],PORT[%s])失败", host,port),e);
+            return null;
+        }
+        return channel;
+    }
 
-	public static void main(String[] args) throws Exception
-	{
-		init(ConfigEntity.getInstance().getServerIp(),ConfigEntity.getInstance().getServerTcpPort());
+    public synchronized static final Channel getChannel(){
+        return channel;
+    }
 
-	}
+    public synchronized static final Channel reConnectChannel(){
+        return getChannel(serverIP,serverPort);
+    }
 
-	public static synchronized void init(String serverIP,int serverPort) throws IOException, InterruptedException{
-		if(!isInited){
-			initClientConnect(serverIP,serverPort);
-		}
-	}
+    /*public static void sendMsg(String msg) throws Exception {
+        if(channel!=null){
+            channel.writeAndFlush(msg).sync();
+        }else{
+            logger.warn("消息发送失败,连接尚未建立!");
+        }
+    }*/
 
+    /* public static void main(String[] args) throws Exception {
+       try {
+            long t0 = System.nanoTime();
+            for (int i = 0; i < 100000; i++) {
+                //Thread.sleep(1000);
+                SyRunTCPClient.sendMsg(i+"你好1");
+            }
+            long t1 = System.nanoTime();
+            System.out.println((t1-t0)/1000000.0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    */
 
-	private static void initClientConnect(String serverIP_,int serverPort_) {
-		serverIP = serverIP_;
-		serverPort = serverPort_;
-		logger.info("客户端开始连接服务器{}:{}",serverIP,serverPort);
-		// Create TCP/IP connector.
-		connector = new NioSocketConnector();
-		// 创建接收数据的过滤器
-		DefaultIoFilterChainBuilder chain = connector.getFilterChain();
+    public static void main(String[] args) throws Exception
+    {
+        init(ConfigEntity.getInstance().getServerIp(),ConfigEntity.getInstance().getServerTcpPort());
 
-        chain.addLast("exec",getOrderedExecutorFilter());
-		chain.addLast("codec",
-				new ProtocolCodecFilter(new TextLineCodecFactory(Charset.forName("UTF-8"),"\r\n", "\r\n")));
-		//设定服务器端的消息处理器:一个SamplMinaServerHandler对象,
-		connector.setHandler(SyRunClientHandler.getSigleInstance());
-		// Set connect timeout.
-		connector.setConnectTimeoutMillis(ConfigEntity.getInstance().getTimeOutConnect());
-		connector.getSessionConfig().setTcpNoDelay(true);
-		connector.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, ConfigEntity.getInstance().getTimeIoIdle());//30秒读写空闲
-		connector.getSessionConfig().setReceiveBufferSize(41960);//接收缓冲区
-		connector.getSessionConfig().setSendBufferSize(41960);
-		/*//连结到服务器:
-		ConnectFuture cf = connector.connect(new
-				InetSocketAddress(serverIP,serverPort));
-		// Wait for the connection attempt to be finished.
-		cf.awaitUninterruptibly();
-		session =  cf.getSession();*/
-		//connector.setDefaultRemoteAddress(new InetSocketAddress(serverIP,serverPort));// 设置默认访问地址
-		setHearBeat();
-		// 添加重连监听
-		connector.addListener(new IoServiceListener() {
-			@Override
-			public void serviceActivated(IoService service) throws Exception {
+    }
 
-			}
+    public static synchronized void init(String serverIP,int serverPort) throws IOException, InterruptedException{
+        if(!isInited){
+            getChannel(serverIP,serverPort);
+        }
+    }
 
-			@Override
-			public void serviceIdle(IoService service, IdleStatus idleStatus) throws Exception {
-                connectToServer(true);
-			}
-
-			@Override
-			public void serviceDeactivated(IoService service) throws Exception {
-
-			}
-
-			@Override
-			public void sessionCreated(IoSession session) throws Exception {
-
-			}
-
-			@Override
-			public void sessionClosed(IoSession session) throws Exception {
-                connectToServer(true);
-			}
-
-			@Override
-			public void sessionDestroyed(IoSession arg0) throws Exception {
-				connectToServer(true);
-			}
-		});
-		connectToServer(false);
-		isInited = true;
-		logger.info("客户端连接服务器成功{}:{}",serverIP,serverPort);
-	}
-
-	/**
-	 * 设置心跳包
-	 */
-	private static synchronized void setHearBeat(){
-		/** 主角登场 */
-		KeepAliveMessageFactory heartBeatFactory = new KeepAliveMessageFactory() {
-			@Override
-			public boolean isRequest(IoSession session, Object message) {
-				return false;
-			}
-
-			@Override
-			public boolean isResponse(IoSession session, Object message) {
-				return false;
-			}
-
-			@Override
-			public Object getRequest(IoSession session) {
-				return null;
-			}
-
-			@Override
-			public Object getResponse(IoSession session, Object request) {
-				return null;
-			}
-		};
-		KeepAliveFilter heartBeat = new KeepAliveFilter(heartBeatFactory);
-		/** 是否回发 */
-		heartBeat.setForwardEvent(true);
-		/** 发送频率 */
-		heartBeat.setRequestInterval(ConfigEntity.getInstance().getTimeHeartBea());
-		//connector.getSessionConfig().setKeepAlive(true);
-		connector.getFilterChain().addLast("heartbeat", heartBeat);
-	}
-
-	public static synchronized void connectToServer(boolean isReConnected){
-		int connectCount = 1;
-
-		while( !isInited || !customCloseConnect  && (isReConnected  || session == null || null == session.getServiceAddress() ))  {//如果重连时是用户自定义关闭则不再重连
-			try {
-
-/*				if(session == null || session.getServiceAddress() == null)
-				{*/
-					connector.setDefaultRemoteAddress(new InetSocketAddress(serverIP,serverPort));// 设置默认访问地址
-//				}
-				if(isReConnected){
-					Thread.sleep(ConfigEntity.getInstance().getTimeReconnect() * connectCount);
-				}
-				ConnectFuture future = connector.connect();
-				future.awaitUninterruptibly();// 等待连接创建成功
-				session = future.getSession();// 获取会话
-				if (session.isConnected()) {
-					logger.info("连接服务器 [" + connector.getDefaultRemoteAddress().getHostName() + ":" + connector.getDefaultRemoteAddress().getPort() + "]成功");
-					break;
-				}
-			} catch (Exception ex) {
-				logger.info("服务器登录失败,"+ (ConfigEntity.getInstance().getTimeReconnect() /1000.0 * connectCount) + " 秒再连接一次:" + ex.getMessage());
-			}
-		}
-	}
-
-	public static synchronized void closeConnect() throws IOException{
-		//session.getCloseFuture().awaitUninterruptibly();
-		customCloseConnect = true;
-		if(session != null) {
-			session.closeNow();
-			session.getService().dispose();
-		}
-		if(null != connector) {
-			connector.dispose();
-		}
-		isInited = false;
-		logger.info("客户端连接断开成功");
-	}
-
-	public static synchronized IoSession getSession(){
-			return session;
-	}
-
-	protected static  ExecutorFilter getOrderedExecutorFilter(){
-		// 添加执行线程池
-		OrderedThreadPoolExecutor executor = new OrderedThreadPoolExecutor(min_threadSize, max_threadSize,time_keepAlive, TimeUnit.SECONDS);
-		// 这里是预先启动corePoolSize个处理线程
-		executor.prestartAllCoreThreads();
-		return new ExecutorFilter(executor,
-				IoEventType.EXCEPTION_CAUGHT, IoEventType.MESSAGE_RECEIVED,
-				IoEventType.SESSION_CLOSED, IoEventType.SESSION_IDLE,
-				IoEventType.SESSION_OPENED);
-	}
-
+    public static void closeConnect() throws IOException {
+        channel.close();
+    }
 }

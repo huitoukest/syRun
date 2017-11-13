@@ -29,7 +29,7 @@ public class SyLockTest {
 	
 	@Test
 	public void testSyLock() {
-		int threadPoolSize = 10;
+		int threadPoolSize = 1000;
 		//开启一个线程池，指定线程池的大小
         ExecutorService service = Executors.newFixedThreadPool(threadPoolSize);
         //指定方法完成的执行器
@@ -43,7 +43,7 @@ public class SyLockTest {
         	 for (int i=0;i<threadPoolSize;i++) {
 	         //提交任务，提交后会默认启动Callable接口中的call方法
 	         completion.submit(() -> {
-					for(int idx = 0 ;idx < 5 ; idx++) {
+					for(int idx = 0 ;idx < 50 ; idx++) {
 						SyLockParam syLockParam = new SyLockParam();
 						syLockParam.setKey(new String(key+""));
 						String lockId  = syLockController.lockSyLock(RequestUtil.getSychronizedMsgId(), syLockParam);

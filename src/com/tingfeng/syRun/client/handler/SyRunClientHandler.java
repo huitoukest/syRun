@@ -3,33 +3,33 @@ package com.tingfeng.syRun.client.handler;
 import com.alibaba.fastjson.JSONObject;
 import com.tingfeng.syRun.client.SyRunTCPClient;
 import com.tingfeng.syRun.common.ConfigEntity;
-import com.tingfeng.syRun.common.ResponseStatus;
 import com.tingfeng.syRun.common.bean.request.RequestBean;
 import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import com.tingfeng.syRun.client.util.SyRunMsgAsynchronizeUtil;
 import com.tingfeng.syRun.client.util.SyRunMsgSynchronizeUtil;
 import com.tingfeng.syRun.common.util.RequestUtil;
 import com.tingfeng.syRun.common.ex.OverRunTimeException;
-import org.apache.mina.core.future.IoFuture;
-import org.apache.mina.core.future.WriteFuture;
-import org.apache.mina.core.service.IoHandlerAdapter;
-import org.apache.mina.core.session.IdleStatus;
-import org.apache.mina.core.session.IoSession;
+import com.tingfeng.syRun.server.SyRunTCPServer;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 import java.io.IOException;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
+
 
 /**
  * 异步handler
  * @author huitoukest
  */
-public class SyRunClientHandler extends IoHandlerAdapter {
+public class SyRunClientHandler extends SimpleChannelInboundHandler<String> {
+	private static Logger logger = LoggerFactory.getLogger(SyRunClientHandler.class);
 
-	public static final int SIZE_CORE_POOL = 2000;
-	public static final long TIME_KEEP_ALIVE = 300L;
+	public static final int SIZE_CORE_POOL = 1;
+	public static final long TIME_KEEP_ALIVE = 60L;
 
 	private static final SyRunClientHandler signleRunClientHandler = new SyRunClientHandler();
 
@@ -43,11 +43,23 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 			new SynchronousQueue<Runnable>());
 
 	private SyRunClientHandler() {}
-	
+
+
+
+	@Override
+	protected void channelRead0(ChannelHandlerContext channelHandlerContext, String msg) throws Exception {
+		//channelHandlerContext.channel().writeAndFlush(msg);
+		//System.out.println(msg);
+		receiveMsg(msg);
+	}
+
+
+
+
 	public static SyRunClientHandler getSigleInstance(){
 		return signleRunClientHandler;
 	}
-	private static Logger logger = LoggerFactory.getLogger(SyRunClientHandler.class);
+/*
 	private static final AtomicInteger  reConnectCount = new AtomicInteger(0);
 	
 	//当一个客端端连结进入时
@@ -95,7 +107,7 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 	@Override
 	public void inputClosed(IoSession session) throws Exception {
 		super.inputClosed(session);
-	}
+	}*/
 	
 	public static void receiveMsg(String msg){
 		logger.debug("Client,收到消息: " + msg);
@@ -104,18 +116,28 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 	}
 
 	public static void receiveMsg(ResponseBean responseBean){
-		serviceReceiveMsgPool.submit(()->{
+		new Thread(()->{
 			if(RequestUtil.isAsychronizedMsg(responseBean.getId())) {
 				SyRunMsgAsynchronizeUtil.receiveMsg(responseBean);
 			}else {
 				SyRunMsgSynchronizeUtil.receiveMsg(responseBean);
 			}
-		});
+		}).start();
 	}
 
 
-    public static void sendMessage(IoSession ioSession,RequestBean<?> requestBean){
-        sendMessage(ioSession,requestBean,0);
+
+	public static void sendMessage(RequestBean<?> requestBean){
+		try {
+			SyRunTCPClient.init(ConfigEntity.getInstance().getServerIp(),ConfigEntity.getInstance().getServerTcpPort());
+		} catch (Exception e) {
+			logger.error("");
+		}
+		sendMessage(SyRunTCPClient.getChannel(),requestBean,0);
+	}
+
+    public static void sendMessage(Channel channel,RequestBean<?> requestBean){
+        sendMessage(channel,requestBean,0);
     }
 
 	/**
@@ -125,24 +147,25 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 	 * @throws InterruptedException
 	 * @throws OverRunTimeException
 	 */
-	private static void sendMessage(IoSession ioSession,RequestBean<?> requestBean,int hasSendCount){
-        final String msg = JSONObject.toJSONString(requestBean);
-		logger.debug("Client,发送消息: " + msg);
-		WriteFuture writeFuture = null;
+	private static void sendMessage(Channel channel , RequestBean<?> requestBean, int hasSendCount){
 		//synchronized (SyRunSeverHandler.class) {
-			writeFuture = ioSession.write(msg);
-		//}
-		writeFuture.addListener((IoFuture future) -> {
+		//serviceReceiveMsgPool.submit(()-> {
+			final String msg = JSONObject.toJSONString(requestBean);
+			logger.debug("Client,发送消息: " + msg);
+		  channel.writeAndFlush(msg);
+			/*WriteFuture writeFuture = null;
+					writeFuture = ioSession.write(msg);
+			writeFuture.addListener((IoFuture future) -> {
 				WriteFuture wfuture=(WriteFuture)future;
 				// 写入失败则处理数据
 				if(!wfuture.isWritten()){
-                    if(hasSendCount > 2){
-                        ResponseBean responseBean = new  ResponseBean();
-                        responseBean.setId(requestBean.getId());
-                        responseBean.setErrorMsg("send failed");
-                        responseBean.setStatus(ResponseStatus.CUSTOM.getValue());
-                        logger.info("发送消息失败:server:{},msg:{},count{}",ioSession.getServiceAddress(),msg,hasSendCount);
-                        if(reConnectCount.get() < 1 && (null == ioSession || null == ioSession.getServiceAddress())){
+					if(hasSendCount > 2){
+						ResponseBean responseBean = new  ResponseBean();
+						responseBean.setId(requestBean.getId());
+						responseBean.setErrorMsg("send failed");
+						responseBean.setStatus(ResponseStatus.CUSTOM.getValue());
+						logger.info("发送消息失败:server:{},msg:{},count{}",ioSession.getServiceAddress(),msg,hasSendCount);
+						if(reConnectCount.get() < 1 && (null == ioSession || null == ioSession.getServiceAddress())){
 							try {
 								reConnectCount.incrementAndGet();
 								SyRunTCPClient.closeConnect();
@@ -154,17 +177,19 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 								reConnectCount.decrementAndGet();
 							}
 						}
-                        receiveMsg(responseBean);
-                    }else{
-                        try {
-                            Thread.sleep(ConfigEntity.getInstance().getTimeResendIdle());
-                        } catch (InterruptedException e) {
-                            logger.info("sleep fail!",e);
-                        }
-                        sendMessage(ioSession,requestBean,hasSendCount + 1);
-                    }
+						receiveMsg(responseBean);
+					}else{
+						try {
+							Thread.sleep(ConfigEntity.getInstance().getTimeResendIdle());
+						} catch (InterruptedException e) {
+							logger.info("sleep fail!",e);
+						}
+						sendMessage(ioSession,requestBean,hasSendCount + 1);
+					}
 				}
-		});
+			});
+		});*/
+		//}
 	}
 	
 }

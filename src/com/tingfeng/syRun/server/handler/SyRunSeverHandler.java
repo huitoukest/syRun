@@ -11,88 +11,24 @@ import com.alibaba.fastjson.JSONObject;
 import com.tingfeng.syRun.common.ConfigEntity;
 import com.tingfeng.syRun.common.ResponseStatus;
 import com.tingfeng.syRun.common.bean.response.ResponseBean;
-import com.tingfeng.syRun.common.ex.SendFailException;
-import com.tingfeng.syRun.common.util.Base64Util;
-import org.apache.mina.core.buffer.IoBuffer;
-import org.apache.mina.core.future.IoFuture;
-import org.apache.mina.core.future.IoFutureListener;
-import org.apache.mina.core.future.WriteFuture;
-import org.apache.mina.core.service.IoHandlerAdapter;
-import org.apache.mina.core.session.IdleStatus;
-import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tingfeng.syRun.server.util.SignleRunServerUtil;
 import sun.security.provider.certpath.OCSPResponse;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
 
-public class SyRunSeverHandler  extends IoHandlerAdapter{
+public class SyRunSeverHandler  extends SimpleChannelInboundHandler<String>{
 
 	public static final int threadSize = 512;
 	private static final ExecutorService servicePool = Executors.newFixedThreadPool(threadSize);
 	private static Logger logger = LoggerFactory.getLogger(SyRunSeverHandler.class);
 	
-    @Override
-	public void sessionCreated(IoSession session) throws Exception {
-		super.sessionCreated(session);
-	}
 
-	@Override
-	public void sessionOpened(IoSession session) throws Exception {
-		super.sessionOpened(session);
-	}
-
-	@Override
-	public void sessionClosed(IoSession session) throws Exception {
-		super.sessionClosed(session);
-	}
-
-	@Override
-	public void sessionIdle(IoSession session, IdleStatus status) throws Exception {
-		super.sessionIdle(session, status);
-		session.closeOnFlush();
-		logger.info("客户端空闲,关闭......" + session.getRemoteAddress());
-	}
-
-	@Override
-	public void messageSent(IoSession session, Object message) throws Exception {
-		super.messageSent(session, message);
-	}
-
-	@Override
-	public void inputClosed(IoSession session) throws Exception {
-		super.inputClosed(session);
-	}
-
-	/**
-     * MINA的异常回调方法。
-     * <p>
-     * 本类中将在异常发生时，立即close当前会话。
-     * 
-     * @param session 发生异常的会话
-     * @param cause 异常内容
-     * @see IoSession#close(boolean)
-     */
-    @Override
-    public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
-        logger.error("{}捕获到错了，原因是：{},{}",session.getRemoteAddress(),cause.getMessage(), cause);
-		cause.printStackTrace();
-        session.closeOnFlush();
-    }
          
-    /**
-     * MINA框架中收到客户端消息的回调方法。
-     * <p>
-     * 本类将在此方法中实现完整的即时通讯数据交互和处理策略。
-     * <p>
-     * 为了提升并发性能，本方法将运行在独立于MINA的IoProcessor之外的线程池中，
-     * 
-     * @param ioSession 收到消息对应的会话引用
-     * @param message 收到的MINA的原始消息封装对象，本类中是 {@link IoBuffer}对象
-     * @throws Exception 当有错误发生时将抛出异常
-     */
-    @Override
-    public void messageReceived(IoSession ioSession, Object message)throws Exception
+
+    public void messageReceived(ChannelHandlerContext channelHandlerContext, Object message)throws Exception
     {
     	logger.debug("Server 收到信息: {}: " , message);
     	//*********************************************** 接收数据  
@@ -102,7 +38,7 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
 			ResponseBean responseBean = new ResponseBean();
 			responseBean.setStatus(ResponseStatus.FAIL.getValue());
 			responseBean.setErrorMsg("null response msg ");
-			sendMessage(ioSession,"NULL",responseBean);
+			sendMessage(channelHandlerContext,"NULL",responseBean);
 		}else{
 			str = message.toString();
 			final String reqMsg = str;
@@ -110,9 +46,10 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
 				ResponseBean responseBean = null;
 				try {
 					responseBean = SignleRunServerUtil.doServerWork(reqMsg);
-					sendMessage(ioSession,reqMsg,responseBean);
+					sendMessage(channelHandlerContext,reqMsg,responseBean);
 				}catch (Exception e) {
-					logger.info("消息发送失败,ip:{},收到消息:{},异常:{}",ioSession.getRemoteAddress(),reqMsg,e);
+					e.printStackTrace();
+					//logger.info("消息发送失败,ip:{},收到消息:{},异常:{}",channelHandlerContext.getRemoteAddress(),reqMsg,e);
 					//记录失败信息
 					SignleRunServerUtil.dealFailSendWork(reqMsg,responseBean);
 				}
@@ -120,19 +57,19 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
 		}
     }
 
-	public static void sendMessage(IoSession ioSession,String reqMsg,ResponseBean responseBean){
-    	sendMessage(ioSession,reqMsg,responseBean,0);
+	public static void sendMessage(ChannelHandlerContext channelHandlerContext,String reqMsg,ResponseBean responseBean){
+    	sendMessage(channelHandlerContext,reqMsg,responseBean,0);
 	}
 
-    private static void sendMessage(final IoSession ioSession,final String reqMsg,final ResponseBean responseBean,final int sendCount){
+    private static void sendMessage(ChannelHandlerContext channelHandlerContext,final String reqMsg,final ResponseBean responseBean,final int sendCount){
 		//发送n次后,不再重试发送
 		final String respMsg = JSONObject.toJSONString(responseBean);
-		WriteFuture writeFuture = null;
-		synchronized (SyRunSeverHandler.class) {
-			writeFuture = ioSession.write(respMsg);
-		}
+		//WriteFuture writeFuture = null;
+		//synchronized (SyRunSeverHandler.class) {
+			channelHandlerContext.channel().writeAndFlush(reqMsg);
+		//}
 		logger.debug("Server 发送消息: {}: " , respMsg);
-		writeFuture.addListener((IoFuture future) -> {
+		/*writeFuture.addListener((IoFuture future) -> {
 			WriteFuture wfuture=(WriteFuture)future;
 			// 写入失败则处理数据
 			if(!wfuture.isWritten()){
@@ -148,6 +85,44 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
 					sendMessage(ioSession,reqMsg,responseBean,sendCount + 1);
 				}
 			}
-		});
+		});*/
     }
+
+	@Override
+	protected void channelRead0(ChannelHandlerContext channelHandlerContext, String message) throws Exception {
+
+		logger.debug("Server 收到信息: {}: " , message);
+		channelHandlerContext.channel().writeAndFlush("Server 收到信息: {}: " + message);
+		//messageReceived(channelHandlerContext,channelHandlerContext);
+		//*********************************************** 接收数据
+		/*String str = null;
+		String result = null;
+		if(null == message){
+			ResponseBean responseBean = new ResponseBean();
+			responseBean.setStatus(ResponseStatus.FAIL.getValue());
+			responseBean.setErrorMsg("null response msg ");
+			sendMessage(channelHandlerContext,"NULL",responseBean);
+		}else{
+			str = message.toString();
+			final String reqMsg = str;
+			servicePool.submit(() ->{
+				ResponseBean responseBean = null;
+				try {
+					responseBean = SignleRunServerUtil.doServerWork(reqMsg);
+					sendMessage(channelHandlerContext,reqMsg,responseBean);
+				}catch (Exception e) {
+					logger.info("消息发送失败,ip:{},收到消息:{},异常:{}",channelHandlerContext.channel().id(),reqMsg,e);
+					//记录失败信息
+					SignleRunServerUtil.dealFailSendWork(reqMsg,responseBean);
+				}
+			});
+		}*/
+	}
+
+	@Override
+	public void exceptionCaught(ChannelHandlerContext ctx,
+								Throwable cause) throws Exception {
+		logger.warn("Unexpected exception from downstream.", cause);
+		ctx.close();
+	}
 }

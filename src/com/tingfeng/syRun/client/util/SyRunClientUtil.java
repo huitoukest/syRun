@@ -320,7 +320,7 @@ public class SyRunClientUtil {
 	 * @throws ExecutionException
 	 */
 	private static <T extends BaseRequestParam> ResponseBean sendMsgToServer(RequestBean<T> requestBean) throws InterruptedException, IOException, OverRunTimeException, TimeoutException, ExecutionException {
-		SyRunTCPClient.init(ConfigEntity.getInstance().getServerIp(),ConfigEntity.getInstance().getServerTcpPort());
+		//SyRunTCPClient.init(ConfigEntity.getInstance().getServerIp(),ConfigEntity.getInstance().getServerTcpPort());
 		return SyRunMsgSynchronizeUtil.sendMsg(requestBean);
 	}
 
@@ -337,7 +337,7 @@ public class SyRunClientUtil {
 	 * @throws ExecutionException
 	 */
 	private static <T extends BaseRequestParam> void sendMsgToServer(RequestBean<T> requestBean,MsgHandler msgHandler) throws InterruptedException, IOException, OverRunTimeException, TimeoutException, ExecutionException {
-		SyRunTCPClient.init(ConfigEntity.getInstance().getServerIp(),ConfigEntity.getInstance().getServerTcpPort());
+		//SyRunTCPClient.init(ConfigEntity.getInstance().getServerIp(),ConfigEntity.getInstance().getServerTcpPort());
 		SyRunMsgAsynchronizeUtil.sendMsg(requestBean,msgHandler);
 	}
 }

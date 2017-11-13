@@ -159,7 +159,7 @@ public class SyRunCounterTest{
             }
         } finally {
             service.shutdown();
-            SyRunTCPClient.closeConnect();
+           // SyRunTCPClient.closeConnect();
         }
         long end = System.currentTimeMillis();
         System.out.println("\n\ncount:"+ signleRunController.getCounterValue("redis:hsh:test:count0"));

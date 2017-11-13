@@ -196,8 +196,6 @@ public class SyRunCounterTest{
 		SyRunClientUtil.initCounter("redis:hsh:test:count0", 0,System.currentTimeMillis() + 1000 * 60 * 10,(ResponseBean msg)->{
             System.out.println(JSON.toJSONString(msg));
         });
-		final Map<String ,Integer> countMap = new HashMap<String ,Integer>();
-		countMap.put("count", 0);
 		long start = System.currentTimeMillis();
 		try{
 			for (int i=0;i<threadPoolSize;i++) {
@@ -216,10 +214,13 @@ public class SyRunCounterTest{
                                         } catch (Exception e) {
                                             System.out.println("add counter error !" + e);
                                         }
-                                    }else{
-                                        countMap.put("count", Integer.parseInt(response.getData()));
                                     }
                                     atomicInteger.addAndGet(1);
+									try {
+										System.out.println("\n\ncount:"+ response.getData());
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
                                 }
                             });
 							SyRunClientUtil.addCounterValue("redis:hsh:test:count0", -1,new MsgHandler() {
@@ -231,13 +232,15 @@ public class SyRunCounterTest{
                                         } catch (Exception e) {
                                             System.out.println("add counter error !" + e);
                                         }
-                                    }else{
-                                        countMap.put("count", Integer.parseInt(response.getData()));
                                     }
                                     atomicInteger.addAndGet(1);
-                                }
+									try {
+										System.out.println("\n\ncount:"+ response.getData());
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+								}
                             });
-							System.out.println("countMap:" + countMap.get("count"));
 						}
 						return "";
 					}

@@ -5,7 +5,7 @@ import com.tingfeng.syRun.client.handler.SyRunClientHandler;
 import com.tingfeng.syRun.common.bean.request.RequestBean;
 import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import com.tingfeng.syRun.client.SyRunTCPClient;
-import org.apache.mina.core.session.IoSession;
+import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +25,7 @@ public class SyRunMsgAsynchronizeUtil {
 	private static final ConcurrentHashMap<String,MsgHandler> msgHandlerMap = new ConcurrentHashMap<>(MSG_POOL_SIZE);
 
 	public static void sendMsg(RequestBean<?> requestBean,MsgHandler msgHandler) throws UnsupportedEncodingException {
-		    sendMsg(SyRunTCPClient.getSession(),requestBean,msgHandler);
+		   // sendMsg(SyRunTCPClient.getSession(),requestBean,msgHandler);
 	}
 
 	/**
@@ -34,9 +34,9 @@ public class SyRunMsgAsynchronizeUtil {
 	 * @param requestBean
 	 * @param msgHandler
 	 */
-	public static void sendMsg(IoSession ioSession,RequestBean<?> requestBean,MsgHandler msgHandler) throws UnsupportedEncodingException {
+	public static void sendMsg(Channel channel,RequestBean<?> requestBean, MsgHandler msgHandler) throws UnsupportedEncodingException {
 		   msgHandlerMap.put(requestBean.getId(),msgHandler);
-		   SyRunClientHandler.sendMessage(ioSession,requestBean);
+		   SyRunClientHandler.sendMessage(channel,requestBean);
 	}
 
 	/**

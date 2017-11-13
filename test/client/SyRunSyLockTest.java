@@ -77,7 +77,7 @@ public class SyRunSyLockTest{
         long end = System.currentTimeMillis();
         System.out.println("\n\ncount:"+ countMap.get("count"));
         System.out.println("\nuseTime:"+(end - start));
-		SyRunTCPClient.closeConnect();
+		//SyRunTCPClient.closeConnect();
 	}
 
 
