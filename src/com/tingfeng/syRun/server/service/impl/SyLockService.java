@@ -12,7 +12,10 @@ import com.tingfeng.syRun.common.ex.CustomException;
 import com.tingfeng.syRun.common.ex.OverRunTimeException;
 import com.tingfeng.syRun.common.util.CheckUtil;
 import com.tingfeng.syRun.common.util.IdWorker;
+import com.tingfeng.syRun.server.SyRunTCPServer;
 import com.tingfeng.syRun.server.bean.SyLockStatusBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -20,6 +23,7 @@ import com.tingfeng.syRun.server.bean.SyLockStatusBean;
  *
  */
 public class SyLockService {
+	private static Logger logger = LoggerFactory.getLogger(SyLockService.class);
 	/***************************计划****************************************/
 	/**
 	 * 3.锁的同步实现中增加自定义的超时设置,替代取消功能
@@ -52,15 +56,15 @@ public class SyLockService {
      * @return
      */
 	public String lockSyLock(String id,final SyLockParam syLockParam) {
-		//System.out.println("server:lock:re:" + JSONObject.toJSONString(syLockParam));
+		logger.debug("server:lockSyLock:id:{},lock:re:{}" ,id, JSONObject.toJSONString(syLockParam));
         String lockId = IdWorker.getUUID() + "";
 		SyLockStatusBean lockStatus = null;
 		String key = syLockParam.getKey();
 		boolean isOverTime = false;
 		try {
 			synchronized (key.intern()) {
-					//synchronized使用的是对象的引用,而不是对象的值,所以每次构建新的字符串会导致同步锁失效.
-				   //Stirng.intern()在jdk6,7,8下的存储位置可能不一致.但是都是从常量池中取出的统一对象
+				//synchronized使用的是对象的引用,而不是对象的值,所以每次构建新的字符串会导致同步锁失效.
+				//Stirng.intern()在jdk6,7,8下的存储位置可能不一致.但是都是从常量池中取出的统一对象
 				lockStatus = lockCountDownLatchMap.get(key);
 				if (null != lockStatus) {//如果需要等待
 					isOverTime = !lockStatus.countDownLatch.await(ConfigEntity.getInstance().getTimeOutRun(), TimeUnit.MILLISECONDS);
@@ -85,7 +89,7 @@ public class SyLockService {
 				lockCountDownLatchMap.remove(key);
 			}
 		}
-		//System.out.println("server:lock:se:"+lockId + "," + JSONObject.toJSONString(syLockParam));
+		logger.debug("server:lockSyLock:id:{},lockId:{},se:{}",id,lockId ,JSONObject.toJSONString(syLockParam));
 		return lockId;
 	}
 	/**
@@ -95,7 +99,7 @@ public class SyLockService {
 	 * @return
 	 */
 	public void unlockSyLock(String id,final SyLockParam syLockParam) {
-		//System.out.println("server:unlock:re:" + JSONObject.toJSONString(syLockParam));
+		logger.debug("server:unlockSyLock:id:{},unlock:re:{}",id,JSONObject.toJSONString(syLockParam));
 		String key = syLockParam.getKey();
 		SyLockStatusBean lockStatus = null;
 		lockStatus = lockCountDownLatchMap.get(key);
@@ -113,7 +117,7 @@ public class SyLockService {
 					countDownLatch.countDown();
 				}
 		}
-		//System.out.println("server:unlock:se:" + JSONObject.toJSONString(syLockParam));
+		logger.debug("server:unlockSyLock:id:{},unlock:se:{}" ,id, JSONObject.toJSONString(syLockParam));
 	}
 
 }

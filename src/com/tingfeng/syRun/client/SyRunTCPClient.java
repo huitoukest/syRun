@@ -29,12 +29,14 @@ import java.util.concurrent.TimeUnit;
 
 public class SyRunTCPClient {
 
-	public static final int min_threadSize = 12;
+	public static final int min_threadSize = 6;
 	public static final int max_threadSize = 64;//这里的线程不用开很多,通过在Handler中另外开线程来处理接收消息.
-	public static final int time_keepAlive = 600;//秒
+	public static final int time_keepAlive = 300;//秒
 
 	private static boolean isInited = false;
-	public static final int threadSize = 512;
+
+	private static String serverIP = null;
+	private static int serverPort = 0;
 
 	private static Logger logger = LoggerFactory.getLogger(SyRunTCPClient.class);
 	private static IoSession session = null;
@@ -54,7 +56,9 @@ public class SyRunTCPClient {
 	}
 
 
-	private static void initClientConnect(String serverIP,int serverPort) {
+	private static void initClientConnect(String serverIP_,int serverPort_) {
+		serverIP = serverIP_;
+		serverPort = serverPort_;
 		logger.info("客户端开始连接服务器{}:{}",serverIP,serverPort);
 		// Create TCP/IP connector.
 		connector = new NioSocketConnector();
@@ -78,7 +82,7 @@ public class SyRunTCPClient {
 		// Wait for the connection attempt to be finished.
 		cf.awaitUninterruptibly();
 		session =  cf.getSession();*/
-		connector.setDefaultRemoteAddress(new InetSocketAddress(serverIP,serverPort));// 设置默认访问地址
+		//connector.setDefaultRemoteAddress(new InetSocketAddress(serverIP,serverPort));// 设置默认访问地址
 		setHearBeat();
 		// 添加重连监听
 		connector.addListener(new IoServiceListener() {
@@ -157,6 +161,11 @@ public class SyRunTCPClient {
 
 		while( !isInited || !customCloseConnect  && (isReConnected  || session == null || null == session.getServiceAddress() ))  {//如果重连时是用户自定义关闭则不再重连
 			try {
+
+/*				if(session == null || session.getServiceAddress() == null)
+				{*/
+					connector.setDefaultRemoteAddress(new InetSocketAddress(serverIP,serverPort));// 设置默认访问地址
+//				}
 				if(isReConnected){
 					Thread.sleep(ConfigEntity.getInstance().getTimeReconnect() * connectCount);
 				}

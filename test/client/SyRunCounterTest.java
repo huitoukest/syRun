@@ -205,7 +205,7 @@ public class SyRunCounterTest{
 				completion.submit(new Callable<String>() {
 					@Override
 					public String call() throws Exception {
-						for(int i = 0 ;i < 1000 ; i++) {
+						for(int i = 0 ;i < 100 ; i++) {
 
 							SyRunClientUtil.addCounterValue("redis:hsh:test:count0", 2, new MsgHandler() {
                                 @Override

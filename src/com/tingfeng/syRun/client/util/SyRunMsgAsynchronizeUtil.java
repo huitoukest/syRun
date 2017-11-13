@@ -5,9 +5,9 @@ import com.tingfeng.syRun.client.handler.SyRunClientHandler;
 import com.tingfeng.syRun.common.bean.request.RequestBean;
 import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import com.tingfeng.syRun.client.SyRunTCPClient;
-import com.tingfeng.syRun.common.util.Base64Util;
-import com.tingfeng.syRun.common.util.RequestUtil;
 import org.apache.mina.core.session.IoSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,7 +19,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SyRunMsgAsynchronizeUtil {
 
-	private static final ConcurrentHashMap<String,MsgHandler> msgHandlerMap = new ConcurrentHashMap<>(20000);
+	private static Logger logger = LoggerFactory.getLogger(SyRunMsgAsynchronizeUtil.class);
+	public static final int MSG_POOL_SIZE = 20000;
+
+	private static final ConcurrentHashMap<String,MsgHandler> msgHandlerMap = new ConcurrentHashMap<>(MSG_POOL_SIZE);
 
 	public static void sendMsg(RequestBean<?> requestBean,MsgHandler msgHandler) throws UnsupportedEncodingException {
 		    sendMsg(SyRunTCPClient.getSession(),requestBean,msgHandler);
@@ -42,12 +45,16 @@ public class SyRunMsgAsynchronizeUtil {
 	 */
 	public static void receiveMsg(ResponseBean responseBean){
 		   String id = responseBean.getId();
-			   MsgHandler msgHandler = msgHandlerMap.get(id);
+		   MsgHandler msgHandler = msgHandlerMap.get(id);
+		   if(null == msgHandler){
+			logger.warn("receive a msg which has no msgHanler !,response is {}", JSONObject.toJSON(responseBean));
+		   }else{
 			   try {
 				   msgHandler.handMsg(responseBean);
 			   } finally {
 				   msgHandlerMap.remove(id);
 			   }
+		   }
 	}
 	
 }

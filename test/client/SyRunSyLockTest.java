@@ -82,24 +82,25 @@ public class SyRunSyLockTest{
 
 
 
+	public static void main(String[] margs){
+        new SyRunSyLockTest().testSyLockByAsy();
+    }
+
 	@Test
 	public void testSyLockByAsy() {
-		int threadPoolSize = 200;
-		//开启一个线程池，指定线程池的大小
+		int threadPoolSize = 20;
+		int threadPerSize = 50;
+				//开启一个线程池，指定线程池的大小
 		ExecutorService service = Executors.newFixedThreadPool(threadPoolSize);
-		//指定方法完成的执行器
-		ExecutorCompletionService<String> completion = new ExecutorCompletionService<String>(
-				service);
 		final Map<String ,Integer> countMap = new HashMap<String ,Integer>();
 		countMap.put("count", 0);
 		long start = System.currentTimeMillis();
 		String key = "test:" + start;
 		final AtomicInteger atomicInteger = new AtomicInteger(0);
-		//try{
 			for (int i=0;i<threadPoolSize;i++) {
 				//提交任务，提交后会默认启动Callable接口中的call方法
-				completion.submit(() -> {
-					for(int idx = 0 ;idx < 50 ; idx++) {
+				service.submit(() -> {
+					for(int idx = 0 ;idx < threadPerSize ; idx++) {
 						SyLockParam syLockParam = new SyLockParam();
 						syLockParam.setKey(key);
 						SyRunClientUtil.getLock(key,(ResponseBean responseBean)->{
@@ -120,30 +121,9 @@ public class SyRunSyLockTest{
 					return "";
 				});
 			}
-			/*//保证这些并发参数执行完毕后，再回到主线程。
-			for (int i=0;i<threadPoolSize;i++) {
-				Future<String> future = null;
-				try {
-					//返回内部具体委托的执行对象
-					future = completion.take();
-					future.get();//等待任务执行结束，然后获得返回的结果
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				} catch (ExecutionException e) {
-					e.printStackTrace();
-				}finally {
-					if(null != future && !future.isCancelled()) {
-						future.cancel(true);
-					}
-				}
-			}*/
-		//} /*finally {
-			service.shutdown();
-		//}*/
-
-		while(atomicInteger.addAndGet(0) < threadPoolSize * 50){
+		while(atomicInteger.addAndGet(0) < threadPoolSize * threadPerSize){
 			try {
-				Thread.sleep(100);
+				Thread.sleep(400);
 				if(System.currentTimeMillis() % 1000 == 0){
 					System.out.println("waiting ... ," + atomicInteger.addAndGet(0) );
 				}

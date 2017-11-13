@@ -94,7 +94,7 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
     @Override
     public void messageReceived(IoSession ioSession, Object message)throws Exception
     {
-    	//System.out.println(System.currentTimeMillis() + ": Message server re: " + message);
+    	logger.debug("Server 收到信息: {}: " , message);
     	//*********************************************** 接收数据  
 		String str = null;
 		String result = null;
@@ -131,6 +131,7 @@ public class SyRunSeverHandler  extends IoHandlerAdapter{
 		synchronized (SyRunSeverHandler.class) {
 			writeFuture = ioSession.write(respMsg);
 		}
+		logger.debug("Server 发送消息: {}: " , respMsg);
 		writeFuture.addListener((IoFuture future) -> {
 			WriteFuture wfuture=(WriteFuture)future;
 			// 写入失败则处理数据

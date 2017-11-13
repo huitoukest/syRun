@@ -47,6 +47,7 @@ public class SignleRunServerUtil {
 				SyLockParam requestParam = jsonObject.getObject(CodeConstants.RquestKey.PARAMS, SyLockParam.class);
 				RequestBean<SyLockParam> requestBean = new RequestBean<>();
 				requestBean.setType(type);
+				requestBean.setId(id);
 				requestBean.setParams(requestParam);
 				resultData = doSyLock(requestBean);
 			}

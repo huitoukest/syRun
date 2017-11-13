@@ -1,3 +1,4 @@
+import client.SyRunSyLockTest;
 import com.tingfeng.syRun.common.bean.request.RequestBean;
 import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import com.tingfeng.syRun.common.util.IdWorker;
@@ -142,6 +143,9 @@ public class CountDownLatchTest {
     public static  void main(String[] args){
         CountDownLatchTest test =   new CountDownLatchTest();
         test.countDownLatchTest();//默认的效率测试
+
+
+        //new SyRunSyLockTest().testSyLockByAsy();
     }
 
 

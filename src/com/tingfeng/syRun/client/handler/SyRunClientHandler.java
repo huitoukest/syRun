@@ -1,6 +1,7 @@
 package com.tingfeng.syRun.client.handler;
 
 import com.alibaba.fastjson.JSONObject;
+import com.tingfeng.syRun.client.SyRunTCPClient;
 import com.tingfeng.syRun.common.ConfigEntity;
 import com.tingfeng.syRun.common.ResponseStatus;
 import com.tingfeng.syRun.common.bean.request.RequestBean;
@@ -17,16 +18,29 @@ import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * 异步handler
  * @author huitoukest
  */
 public class SyRunClientHandler extends IoHandlerAdapter {
 
+	public static final int SIZE_CORE_POOL = 2000;
+	public static final long TIME_KEEP_ALIVE = 300L;
+
 	private static final SyRunClientHandler signleRunClientHandler = new SyRunClientHandler();
 
-/*	public static final int threadSize = 512;
-	private static final ExecutorService serviceReceiveMsgPool = Executors.newFixedThreadPool(threadSize);*/
+	/**
+	 * 单独开一个线程池来处理接收的数据,不然因为消息的顺序接收的关系,可能导致io接收线程阻塞,
+	 * 导致消息无法收到.
+	 */
+	//public static final int threadSize = 10;
+	private static final ExecutorService serviceReceiveMsgPool = new ThreadPoolExecutor(SIZE_CORE_POOL, Integer.MAX_VALUE,
+			TIME_KEEP_ALIVE, TimeUnit.SECONDS,
+			new SynchronousQueue<Runnable>());
 
 	private SyRunClientHandler() {}
 	
@@ -34,6 +48,7 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 		return signleRunClientHandler;
 	}
 	private static Logger logger = LoggerFactory.getLogger(SyRunClientHandler.class);
+	private static final AtomicInteger  reConnectCount = new AtomicInteger(0);
 	
 	//当一个客端端连结进入时
 	@Override
@@ -83,18 +98,19 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 	}
 	
 	public static void receiveMsg(String msg){
+		logger.debug("Client,收到消息: " + msg);
 		ResponseBean responseBean = JSONObject.parseObject(msg,ResponseBean.class);
 		receiveMsg(responseBean);
 	}
 
 	public static void receiveMsg(ResponseBean responseBean){
-		//serviceReceiveMsgPool.submit(()->{
+		serviceReceiveMsgPool.submit(()->{
 			if(RequestUtil.isAsychronizedMsg(responseBean.getId())) {
 				SyRunMsgAsynchronizeUtil.receiveMsg(responseBean);
 			}else {
 				SyRunMsgSynchronizeUtil.receiveMsg(responseBean);
 			}
-		//});
+		});
 	}
 
 
@@ -111,7 +127,7 @@ public class SyRunClientHandler extends IoHandlerAdapter {
 	 */
 	private static void sendMessage(IoSession ioSession,RequestBean<?> requestBean,int hasSendCount){
         final String msg = JSONObject.toJSONString(requestBean);
-		//System.out.println("发送消息: " + msg);
+		logger.debug("Client,发送消息: " + msg);
 		WriteFuture writeFuture = null;
 		//synchronized (SyRunSeverHandler.class) {
 			writeFuture = ioSession.write(msg);
@@ -126,6 +142,18 @@ public class SyRunClientHandler extends IoHandlerAdapter {
                         responseBean.setErrorMsg("send failed");
                         responseBean.setStatus(ResponseStatus.CUSTOM.getValue());
                         logger.info("发送消息失败:server:{},msg:{},count{}",ioSession.getServiceAddress(),msg,hasSendCount);
+                        if(reConnectCount.get() < 1 && (null == ioSession || null == ioSession.getServiceAddress())){
+							try {
+								reConnectCount.incrementAndGet();
+								SyRunTCPClient.closeConnect();
+								SyRunTCPClient.connectToServer(false);
+								logger.info("发送消息失败:server:{},msg:{},count{},开始关闭客户端准备重连...",ioSession.getServiceAddress(),msg,hasSendCount);
+							} catch (IOException e) {
+								logger.info("发送消息失败:server:{},msg:{},count{},开始关闭客户端准备重连异常{}",ioSession.getServiceAddress(),msg,hasSendCount,e.getStackTrace());
+							}finally {
+								reConnectCount.decrementAndGet();
+							}
+						}
                         receiveMsg(responseBean);
                     }else{
                         try {

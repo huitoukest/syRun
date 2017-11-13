@@ -13,10 +13,6 @@ public enum MsgType {
      */
     LOCK(2),
     /**
-     * 代码同步运行
-     */
-    SYRUN(3),
-    /**
      * 计数器回滚
      */
     COUNTERROLLBACK(11),
