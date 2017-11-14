@@ -16,8 +16,14 @@ import com.tingfeng.syRun.common.FrequencyControlHelper;
 import com.tingfeng.syRun.common.RequestType;
 import com.tingfeng.syRun.common.ResponseStatus;
 import com.tingfeng.syRun.common.ex.OverRunTimeException;
+import com.tingfeng.syRun.common.util.StringUtil;
+import com.tingfeng.syRun.server.SyRunTCPServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SyRunClientUtil {
+
+	private static Logger logger = LoggerFactory.getLogger(SyRunClientUtil.class);
 	
 	/**
 	 * 通过计数器模拟的同步执行方法
@@ -136,8 +142,8 @@ public class SyRunClientUtil {
     public static long addCounterValue(String key,long value) throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException{
 		RequestBean<CounterParam> requestBean =  RequestParameterUtil.getParamOfAddCounterValue(RequestType.SY,key,value);
 		ResponseBean responseBean = sendMsgToServer(requestBean);
-		return Long.parseLong(responseBean.getData());
-    }
+		return getLong(responseBean,logger);
+	}
 
     /**************************************** 异步的counter方法,名称和同步的方法名相同,增加一个回调参数,无返回值*************************************************************/
 
@@ -340,4 +346,16 @@ public class SyRunClientUtil {
 		//SyRunTCPClient.init(ConfigEntity.getInstance().getServerIp(),ConfigEntity.getInstance().getServerTcpPort());
 		SyRunMsgAsynchronizeUtil.sendMsg(requestBean,msgHandler);
 	}
+
+	public static long getLong(ResponseBean responseBean, Logger logger) throws NumberFormatException{
+		long result = 0;
+		try{
+			result = Long.parseLong(responseBean.getData());
+		}catch (Exception e){
+			logger.error("解析结果出错.",e);
+			throw e;
+		}
+		return result;
+	}
+
 }

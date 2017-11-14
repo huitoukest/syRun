@@ -6,7 +6,10 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.alibaba.fastjson.JSONObject;
 import com.tingfeng.syRun.client.SyRunTCPClient;
+import com.tingfeng.syRun.client.util.MsgHandler;
+import com.tingfeng.syRun.common.ResponseStatus;
 import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +42,17 @@ public class SyRunSyLockTest{
 					for(int idx = 0 ;idx < 50 ; idx++) {
 						SyLockParam syLockParam = new SyLockParam();
 						syLockParam.setKey(key);
-						String lockId = SyRunClientUtil.getLock(key);
+
+						String lockId = null;
+                        while (true){
+                            try{
+                                lockId = SyRunClientUtil.getLock(key);
+                                break;
+                            }catch (Exception e){
+                                //e.printStackTrace();
+                                Thread.sleep((int)(Math.random()*200));
+                            }
+                        }
 						syLockParam.setLockId(lockId);
 						Integer re1 = countMap.get("count");
 						re1  = re1 + 2;
@@ -88,7 +101,7 @@ public class SyRunSyLockTest{
 
 	@Test
 	public void testSyLockByAsy() {
-		int threadPoolSize = 20;
+		int threadPoolSize = 100;
 		int threadPerSize = 50;
 				//开启一个线程池，指定线程池的大小
 		ExecutorService service = Executors.newFixedThreadPool(threadPoolSize);
@@ -101,29 +114,44 @@ public class SyRunSyLockTest{
 				//提交任务，提交后会默认启动Callable接口中的call方法
 				service.submit(() -> {
 					for(int idx = 0 ;idx < threadPerSize ; idx++) {
-						SyLockParam syLockParam = new SyLockParam();
-						syLockParam.setKey(key);
-						SyRunClientUtil.getLock(key,(ResponseBean responseBean)->{
-							syLockParam.setLockId(responseBean.getData());
-							Integer re1 = countMap.get("count");
-							re1  = re1 + 2;
-							Integer re2  = re1 - 1;
-							countMap.put("count", re2);
-							System.out.println("re1:" + re1 + " ,re2:" + re2);
-							try {
-								SyRunClientUtil.releaseLock(key, responseBean.getData());
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-							atomicInteger.incrementAndGet();
-						});
-					}
-					return "";
+                        SyLockParam syLockParam = new SyLockParam();
+                        syLockParam.setKey(key);
+                        SyRunClientUtil.getLock(key, new MsgHandler() {
+                            @Override
+                            public void handMsg(ResponseBean responseBean) {
+
+                                if (ResponseStatus.SUCCESS.getValue() != responseBean.getStatus()) {
+                                    //System.out.println("lock error:" + responseBean.getErrorMsg());
+                                    try {
+                                        Thread.sleep((int)(Math.random()*300));
+                                        SyRunClientUtil.getLock(key, this);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                } else {
+                                    syLockParam.setLockId(responseBean.getData());
+                                    //System.out.println("lock result:" + JSONObject.toJSONString(responseBean));
+                                    Integer re1 = countMap.get("count");
+                                    re1 = re1 + 2;
+                                    Integer re2 = re1 - 1;
+                                    countMap.put("count", re2);
+                                    System.out.println("re1:" + re1 + " ,re2:" + re2);
+                                    try {
+                                        SyRunClientUtil.releaseLock(key, responseBean.getData());
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                    atomicInteger.incrementAndGet();
+                                }
+                            }
+                        });
+                    }
+                    return "";  //end for
 				});
 			}
 		while(atomicInteger.addAndGet(0) < threadPoolSize * threadPerSize){
 			try {
-				Thread.sleep(400);
+				Thread.sleep(200);
 				if(System.currentTimeMillis() % 1000 == 0){
 					System.out.println("waiting ... ," + atomicInteger.addAndGet(0) );
 				}
@@ -139,7 +167,7 @@ public class SyRunSyLockTest{
 			e.printStackTrace();
 		}
 		long end = System.currentTimeMillis();
-		System.out.println("\n\ncount:"+ countMap.get("count"));
+        System.out.println("\n\ncount:"+ countMap.get("count"));
 		System.out.println("\nuseTime:"+(end - start));
 
 	}

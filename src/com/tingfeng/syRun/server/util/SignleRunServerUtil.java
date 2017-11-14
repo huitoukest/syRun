@@ -9,9 +9,7 @@ import com.tingfeng.syRun.common.bean.request.RequestBean;
 import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import com.tingfeng.syRun.common.bean.request.SyLockParam;
 import com.tingfeng.syRun.common.CodeConstants;
-import com.tingfeng.syRun.common.ex.CustomException;
-import com.tingfeng.syRun.common.ex.OverResponseException;
-import com.tingfeng.syRun.common.ex.OverRunTimeException;
+import com.tingfeng.syRun.common.ex.*;
 import com.tingfeng.syRun.common.util.CheckUtil;
 import com.tingfeng.syRun.server.controller.CounterController;
 import com.tingfeng.syRun.server.controller.SyLockController;
@@ -53,23 +51,28 @@ public class SignleRunServerUtil {
 			}
 			responseBean.setStatus(ResponseStatus.SUCCESS.getValue());
 		}catch (Exception e){
-			if(e instanceof OverRunTimeException){
-				responseBean.setStatus(ResponseStatus.OVERRUNTIME.getValue());
-				logger.debug(e.getCause().toString());
-			}else if(e instanceof OverResponseException){
-				responseBean.setStatus(ResponseStatus.OVERRESPONSETIME.getValue());
-				logger.debug(e.getCause().toString());
-			}else if(e instanceof CustomException){
-				responseBean.setStatus(ResponseStatus.CUSTOM.getValue());
-				logger.debug(e.getCause().toString());
-			}else{
-				responseBean.setStatus(ResponseStatus.FAIL.getValue());
-				logger.error("系统错误:" + e.getCause().toString());
-			}
-			if(!CheckUtil.isNull(e.getMessage())){
-				responseBean.setErrorMsg(e.getMessage());
-			}
-			System.out.println("error msg is:" + str);
+			 if(!(e instanceof RelaseLockException)) {//RelaseLockException是锁异常后的释放,不需要发送消息
+				 if (e instanceof OverRunTimeException) {
+					 responseBean.setStatus(ResponseStatus.OVERRUNTIME.getValue());
+					 logger.debug("运行超时", e);
+				 } else if (e instanceof OverResponseException) {
+					 responseBean.setStatus(ResponseStatus.OVERRESPONSETIME.getValue());
+					 logger.debug("超时响应", e);
+				 } else if (e instanceof CustomException) {
+					 responseBean.setStatus(ResponseStatus.CUSTOM.getValue());
+					 logger.debug("自定义错误", e);
+				 } else if (e instanceof InfoException) {
+					 responseBean.setStatus(ResponseStatus.CUSTOM.getValue());
+				 } else {
+					 responseBean.setStatus(ResponseStatus.FAIL.getValue());
+					 logger.error("系统错误:", e);
+				 }
+				 if (!CheckUtil.isNull(e.getMessage())) {
+					 responseBean.setErrorMsg(e.getMessage());
+				 }
+			 }else{
+			 	throw  e;
+			 }
 		}
 		responseBean.setData(resultData);
 		return responseBean;

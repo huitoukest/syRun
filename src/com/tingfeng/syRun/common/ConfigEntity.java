@@ -33,6 +33,11 @@ public class ConfigEntity {
 
     private  int timeResendIdle = 5000;//消息发送失败后的重发间隔时间.
 
+    private  int serverHandlPoolSize = 256;//服务器处理消息收发的业务线程池大小
+    private  int serverMaxLockSize = 200;//maxLockSize是最大lock阻塞的线程数量,所以必须小于serverHandlPoolSize,如果大于等于serverHandlPoolSize,将会导致服务器宕机问题.
+
+
+
     public synchronized static ConfigEntity getInstance(){
         if(!isInit) {
             loadProperties();
@@ -62,6 +67,12 @@ public class ConfigEntity {
             configEntity.timeOutRun = Integer.parseInt(pro.getProperty("timeOutRun","300000"));
             //keySession = pro.getProperty("keySession","key_session");
             configEntity.timeResendIdle = Integer.parseInt(pro.getProperty("timeResendIdle","5000"));
+            configEntity.serverHandlPoolSize = Integer.parseInt(pro.getProperty("serverHandlPoolSize","256"));
+            configEntity.serverMaxLockSize = Integer.parseInt(pro.getProperty("serverMaxLockSize","200"));
+            if(configEntity.serverHandlPoolSize <= configEntity.serverMaxLockSize ){
+                configEntity.serverHandlPoolSize = configEntity.serverMaxLockSize + 1;
+            }
+
 		} catch (FileNotFoundException e) {
 			logger.warn("not find syRun.properties , will run with default properties",e);
 		} catch (IOException e) {
@@ -112,5 +123,13 @@ public class ConfigEntity {
 
     public  int getTimeResendIdle() {
         return timeResendIdle;
+    }
+
+    public int getServerHandlPoolSize() {
+        return serverHandlPoolSize;
+    }
+
+    public int getServerMaxLockSize() {
+        return serverMaxLockSize;
     }
 }

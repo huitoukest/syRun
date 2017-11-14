@@ -9,5 +9,5 @@ import java.io.IOException;
  */
 @FunctionalInterface
 public interface MsgHandler {
-    public void handMsg(ResponseBean msg);
+    public void handMsg(ResponseBean responseBean);
 }

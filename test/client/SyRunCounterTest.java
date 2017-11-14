@@ -131,7 +131,7 @@ public class SyRunCounterTest{
                  Future<String> future = service.submit(new Callable<String>() {
                     @Override
                     public String call() throws Exception {
-                        for(int i = 0 ;i < 1000 ; i++) {
+                        for(int i = 0 ;i < 500 ; i++) {
                             long re1  = SyRunClientUtil.addCounterValue("redis:hsh:test:count0", 2);
                             long re2  = SyRunClientUtil.addCounterValue("redis:hsh:test:count0", -1);
                             if(i % 1000 == 0){
@@ -186,7 +186,7 @@ public class SyRunCounterTest{
 	 */
 	@Test
 	public void testAddStepByAsy() throws IOException, InterruptedException, OverRunTimeException, TimeoutException, ExecutionException {
-		int threadPoolSize = 200;
+		int threadPoolSize = 100;
         AtomicInteger atomicInteger = new AtomicInteger(0);
 		//开启一个线程池，指定线程池的大小
 		ExecutorService service = Executors.newFixedThreadPool(threadPoolSize);
@@ -262,7 +262,7 @@ public class SyRunCounterTest{
 		} finally {
 			service.shutdown();
 		}
-		while (atomicInteger.addAndGet(0) < 200000){
+		while (atomicInteger.addAndGet(0) < 10000){
 
 		    Thread.sleep(100);
 		    if(System.currentTimeMillis() % 1000 == 0){

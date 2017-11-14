@@ -73,8 +73,8 @@ public class SyRunMsgSynchronizeUtil {
      * @return
      */
     public static <T extends BaseRequestParam> ResponseBean sendMsg(RequestBean<?> requestBean) throws TimeoutException, ExecutionException, InterruptedException, UnsupportedEncodingException {
-        //return sendMsg(SyRunTCPClient.getSession(),requestBean);
-    return null;
+		Channel channel = SyRunTCPClient.getChannel();
+    	return sendMsg(channel,requestBean);
     }
 	
 }

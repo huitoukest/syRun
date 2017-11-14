@@ -5,7 +5,9 @@ import com.tingfeng.syRun.common.ResponseStatus;
 import com.tingfeng.syRun.common.bean.request.SyLockParam;
 import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import com.tingfeng.syRun.common.util.IdWorker;
+import com.tingfeng.syRun.server.handler.SyRunSeverHandler;
 import com.tingfeng.syRun.server.service.impl.SyLockService;
+import io.netty.channel.Channel;
 
 /**
  * 对外处理他同步锁
@@ -26,7 +28,8 @@ public class SyLockController {
 	 * @return 
 	 */
 	public String lockSyLock(String id,SyLockParam syLockParam) {
-		String lockId =  syLockService.lockSyLock(id,syLockParam);
+		Channel channel = SyRunSeverHandler.channels.get();
+		String lockId =  syLockService.lockSyLock(channel.id().toString(),id,syLockParam);
 		return lockId;
 	}
 	/**
@@ -35,7 +38,8 @@ public class SyLockController {
 	 * @return
 	 */
 	public void unlockSyLock(String id,SyLockParam syLockParam) {
-		syLockService.unlockSyLock(id,syLockParam);
+		Channel channel = SyRunSeverHandler.channels.get();
+		syLockService.unlockSyLock(channel.id().toString(),id,syLockParam);
 	}
 
 	/**

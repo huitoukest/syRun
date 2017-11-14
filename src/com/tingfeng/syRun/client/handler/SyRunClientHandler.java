@@ -3,6 +3,7 @@ package com.tingfeng.syRun.client.handler;
 import com.alibaba.fastjson.JSONObject;
 import com.tingfeng.syRun.client.SyRunTCPClient;
 import com.tingfeng.syRun.common.ConfigEntity;
+import com.tingfeng.syRun.common.WriteHelper;
 import com.tingfeng.syRun.common.bean.request.RequestBean;
 import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import com.tingfeng.syRun.client.util.SyRunMsgAsynchronizeUtil;
@@ -33,6 +34,8 @@ public class SyRunClientHandler extends SimpleChannelInboundHandler<String> {
 
 	private static final SyRunClientHandler signleRunClientHandler = new SyRunClientHandler();
 
+	private static final WriteHelper writeHelper = new WriteHelper();
+
 	/**
 	 * 单独开一个线程池来处理接收的数据,不然因为消息的顺序接收的关系,可能导致io接收线程阻塞,
 	 * 导致消息无法收到.
@@ -50,7 +53,10 @@ public class SyRunClientHandler extends SimpleChannelInboundHandler<String> {
 	protected void channelRead0(ChannelHandlerContext channelHandlerContext, String msg) throws Exception {
 		//channelHandlerContext.channel().writeAndFlush(msg);
 		//System.out.println(msg);
-		receiveMsg(msg);
+		String[] msgArray = msg.split("\\\r\\\n");
+		for(String str:msgArray){
+			receiveMsg(str);
+		}
 	}
 
 
@@ -152,7 +158,8 @@ public class SyRunClientHandler extends SimpleChannelInboundHandler<String> {
 		//serviceReceiveMsgPool.submit(()-> {
 			final String msg = JSONObject.toJSONString(requestBean);
 			logger.debug("Client,发送消息: " + msg);
-		  channel.writeAndFlush(msg);
+		    //channel.writeAndFlush(msg);
+			writeHelper.write(channel,msg);
 			/*WriteFuture writeFuture = null;
 					writeFuture = ioSession.write(msg);
 			writeFuture.addListener((IoFuture future) -> {

@@ -43,8 +43,8 @@ public class SyRunTCPClient {
             @Override
             protected void initChannel(Channel ch) throws Exception {
                 ChannelPipeline pipeline = ch.pipeline();
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
-                pipeline.addLast("frameEncoder", new LengthFieldPrepender(4));
+                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 2, 0, 2));
+                pipeline.addLast("frameEncoder", new LengthFieldPrepender(2));
                 pipeline.addLast("decoder", new StringDecoder(CharsetUtil.UTF_8));
                 pipeline.addLast("encoder", new StringEncoder(CharsetUtil.UTF_8));
                 pipeline.addLast("handler", SyRunClientHandler.getSigleInstance());
@@ -55,7 +55,6 @@ public class SyRunTCPClient {
     }
 
     public synchronized static final Channel getChannel(String host,int port){
-        Channel channel = null;
         try {
             channel = bootstrap.connect(host, port).sync().channel();
         } catch (Exception e) {
@@ -66,6 +65,13 @@ public class SyRunTCPClient {
     }
 
     public synchronized static final Channel getChannel(){
+        if(null == channel){
+            try {
+                init();
+            } catch (Exception e) {
+                logger.error("连接Server失败!",e);
+            }
+        }
         return channel;
     }
 
@@ -98,7 +104,7 @@ public class SyRunTCPClient {
 
     public static void main(String[] args) throws Exception
     {
-        init(ConfigEntity.getInstance().getServerIp(),ConfigEntity.getInstance().getServerTcpPort());
+
 
     }
 
@@ -106,6 +112,10 @@ public class SyRunTCPClient {
         if(!isInited){
             getChannel(serverIP,serverPort);
         }
+    }
+
+    public static synchronized void init() throws IOException, InterruptedException{
+        init(ConfigEntity.getInstance().getServerIp(),ConfigEntity.getInstance().getServerTcpPort());
     }
 
     public static void closeConnect() throws IOException {

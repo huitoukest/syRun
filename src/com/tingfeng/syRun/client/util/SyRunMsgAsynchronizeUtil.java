@@ -25,12 +25,11 @@ public class SyRunMsgAsynchronizeUtil {
 	private static final ConcurrentHashMap<String,MsgHandler> msgHandlerMap = new ConcurrentHashMap<>(MSG_POOL_SIZE);
 
 	public static void sendMsg(RequestBean<?> requestBean,MsgHandler msgHandler) throws UnsupportedEncodingException {
-		   // sendMsg(SyRunTCPClient.getSession(),requestBean,msgHandler);
+		    sendMsg(SyRunTCPClient.getChannel(),requestBean,msgHandler);
 	}
 
 	/**
 	 * 消息的异步发送,通过msgHandler回调处理消息
-	 * @param ioSession
 	 * @param requestBean
 	 * @param msgHandler
 	 */
