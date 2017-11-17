@@ -2,6 +2,9 @@ package com.tingfeng.syRun.client;
 
 import com.tingfeng.syRun.client.handler.SyRunClientHandler;
 import com.tingfeng.syRun.common.ConfigEntity;
+import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.DelimiterBasedFrameDecoder;
+import io.netty.handler.codec.Delimiters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.netty.bootstrap.Bootstrap;
@@ -29,6 +32,7 @@ public class SyRunTCPClient {
     private static String serverIP = null;
     private static int serverPort = 0;
 
+    private static EventLoopGroup workerGroup = new NioEventLoopGroup();
     public static Bootstrap bootstrap = getBootstrap();
     public static Channel channel = null; //getChannel(HOST,PORT);
     /**
@@ -36,21 +40,27 @@ public class SyRunTCPClient {
      * @return
      */
     private synchronized static final Bootstrap getBootstrap(){
-        EventLoopGroup group = new NioEventLoopGroup();
-        Bootstrap b = new Bootstrap();
-        b.group(group).channel(NioSocketChannel.class);
-        b.handler(new ChannelInitializer<Channel>() {
-            @Override
-            protected void initChannel(Channel ch) throws Exception {
-                ChannelPipeline pipeline = ch.pipeline();
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 2, 0, 2));
-                pipeline.addLast("frameEncoder", new LengthFieldPrepender(2));
-                pipeline.addLast("decoder", new StringDecoder(CharsetUtil.UTF_8));
-                pipeline.addLast("encoder", new StringEncoder(CharsetUtil.UTF_8));
-                pipeline.addLast("handler", SyRunClientHandler.getSigleInstance());
-            }
-        });
-        b.option(ChannelOption.SO_KEEPALIVE, true);
+        Bootstrap b = null;
+        try {
+            b = new Bootstrap();
+            b.group(workerGroup).channel(NioSocketChannel.class);
+            b.handler(new ChannelInitializer<Channel>() {
+                @Override
+                protected void initChannel(Channel ch) throws Exception {
+                    ChannelPipeline pipeline = ch.pipeline();
+                    //pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 2, 0, 2));
+                    //pipeline.addLast("frameEncoder", new LengthFieldPrepender(2));
+                    pipeline.addLast("frameDecoder",new DelimiterBasedFrameDecoder(81920, Delimiters.lineDelimiter()));
+                    //pipeline.addLast("frameEncoder",new DelimiterBasedFrameDecoder(81920, Delimiters.lineDelimiter()));
+                    pipeline.addLast("decoder", new StringDecoder(CharsetUtil.UTF_8));
+                    pipeline.addLast("encoder", new StringEncoder(CharsetUtil.UTF_8));
+                    pipeline.addLast("handler", SyRunClientHandler.getSigleInstance());
+                }
+            });
+            b.option(ChannelOption.SO_KEEPALIVE, true);
+        }catch (Exception e){
+            closeConnect();
+        }
         return b;
     }
 
@@ -118,7 +128,7 @@ public class SyRunTCPClient {
         init(ConfigEntity.getInstance().getServerIp(),ConfigEntity.getInstance().getServerTcpPort());
     }
 
-    public static void closeConnect() throws IOException {
-        channel.close();
+    public static void closeConnect() {
+        workerGroup.shutdownGracefully();
     }
 }

@@ -11,7 +11,7 @@ import com.tingfeng.syRun.common.ConfigEntity;
 import com.tingfeng.syRun.common.bean.request.SyLockParam;
 import com.tingfeng.syRun.common.ex.InfoException;
 import com.tingfeng.syRun.common.ex.OverRunTimeException;
-import com.tingfeng.syRun.common.ex.RelaseLockException;
+import com.tingfeng.syRun.common.ex.ReleaseLockException;
 import com.tingfeng.syRun.common.util.CheckUtil;
 import com.tingfeng.syRun.common.util.IdWorker;
 import com.tingfeng.syRun.server.bean.SyLockStatusBean;
@@ -95,7 +95,7 @@ public class SyLockService {
                 sessionAndKeyMap.put(sessionKey,key);
                 if(sessionRemoveBlockList.contains(sessionKey)){//如果是
                     addBlockSize(sessionKey,-1);
-                    throw new RelaseLockException("释放锁");
+                    throw new ReleaseLockException("释放锁");
                 }
 				//synchronized使用的是对象的引用,而不是对象的值,所以每次构建新的字符串会导致同步锁失效.
 				//Stirng.intern()在jdk6,7,8下的存储位置可能不一致.但是都是从常量池中取出的统一对象

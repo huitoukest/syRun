@@ -51,7 +51,7 @@ public class SignleRunServerUtil {
 			}
 			responseBean.setStatus(ResponseStatus.SUCCESS.getValue());
 		}catch (Exception e){
-			 if(!(e instanceof RelaseLockException)) {//RelaseLockException是锁异常后的释放,不需要发送消息
+			 if(!(e instanceof ReleaseLockException)) {//RelaseLockException是锁异常后的释放,不需要发送消息
 				 if (e instanceof OverRunTimeException) {
 					 responseBean.setStatus(ResponseStatus.OVERRUNTIME.getValue());
 					 logger.debug("运行超时", e);

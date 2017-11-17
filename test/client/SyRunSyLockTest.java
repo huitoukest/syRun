@@ -161,11 +161,8 @@ public class SyRunSyLockTest{
 		}
 		service.shutdown();
 
-		try {
 			SyRunTCPClient.closeConnect();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+
 		long end = System.currentTimeMillis();
         System.out.println("\n\ncount:"+ countMap.get("count"));
 		System.out.println("\nuseTime:"+(end - start));

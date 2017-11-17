@@ -14,6 +14,7 @@ import com.tingfeng.syRun.server.SyRunTCPServer;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.util.ReferenceCountUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,10 +54,15 @@ public class SyRunClientHandler extends SimpleChannelInboundHandler<String> {
 	protected void channelRead0(ChannelHandlerContext channelHandlerContext, String msg) throws Exception {
 		//channelHandlerContext.channel().writeAndFlush(msg);
 		//System.out.println(msg);
-		String[] msgArray = msg.split("\\\r\\\n");
-		for(String str:msgArray){
-			receiveMsg(str);
+		try {
+			String[] msgArray = msg.split("\\\r\\\n");
+			for (String str : msgArray) {
+				receiveMsg(str);
+			}
+		}finally {
+			ReferenceCountUtil.release(msg);
 		}
+
 	}
 
 

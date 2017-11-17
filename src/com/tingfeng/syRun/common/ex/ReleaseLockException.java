@@ -3,9 +3,9 @@ package com.tingfeng.syRun.common.ex;
 /**
  * 用来主动释放锁
  */
-public class RelaseLockException extends  MyException {
+public class ReleaseLockException extends  MyException {
 
-    public RelaseLockException(String msg) {
+    public ReleaseLockException(String msg) {
         super(msg);
     }
 

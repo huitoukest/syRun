@@ -9,9 +9,10 @@ import com.tingfeng.syRun.common.ConfigEntity;
 import com.tingfeng.syRun.common.ResponseStatus;
 import com.tingfeng.syRun.common.WriteHelper;
 import com.tingfeng.syRun.common.bean.response.ResponseBean;
-import com.tingfeng.syRun.common.ex.RelaseLockException;
+import com.tingfeng.syRun.common.ex.ReleaseLockException;
 import com.tingfeng.syRun.server.service.impl.SyLockService;
 import io.netty.channel.Channel;
+import io.netty.util.ReferenceCountUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,7 @@ public class SyRunSeverHandler  extends SimpleChannelInboundHandler<String>{
 					responseBean = SignleRunServerUtil.doServerWork(reqMsg);
 					sendMessage(channel,reqMsg,responseBean);
 				}catch (Exception e) {
-					if(!(e instanceof RelaseLockException)){
+					if(!(e instanceof ReleaseLockException)){
 						e.printStackTrace();
 						//logger.info("消息发送失败,ip:{},收到消息:{},异常:{}",channelHandlerContext.getRemoteAddress(),reqMsg,e);
 						//记录失败信息
@@ -96,9 +97,13 @@ public class SyRunSeverHandler  extends SimpleChannelInboundHandler<String>{
 
 		//logger.debug("Server 收到信息: {}: " , message);
 		//channelHandlerContext.channel().writeAndFlush("Server 收到信息: {}: " + message);
-		String[] msgArray = message.split("\\\r\\\n");
-		for(String str:msgArray){
-			messageReceived(channelHandlerContext.channel(),str);
+		try {
+			String[] msgArray = message.split("\\\r\\\n");
+			for (String str : msgArray) {
+				messageReceived(channelHandlerContext.channel(), str);
+			}
+		}finally {
+			ReferenceCountUtil.release(message);
 		}
 		//messageReceived(channelHandlerContext.channel(),message);
 

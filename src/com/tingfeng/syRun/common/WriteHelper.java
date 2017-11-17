@@ -71,29 +71,37 @@ public class WriteHelper {
     }
 
     public void write(Channel channel,String msg){
-        servicePool.submit(()->{
-            synchronized (WriteHelper.this){
-                if(channelMap.get(channel) == null){
-                    channelMap.put(channel,new WriteBean());
-                }
-                WriteBean writeBean = channelMap.get(channel);
-                if(writeBean.sb.length() + msg.length() > maxBufferSize){
+        write(channel,msg,false);
+    }
 
-                    writeBean.sb.append(separators);
-                    writeBean.sb.append(msg);
-                    channel.writeAndFlush(writeBean.sb.toString());
-                    //logger.debug("\r\nsend a big msg is:{},end big msg \r\n" ,writeBean.sb.toString());
-                    writeBean.sb.setLength(0);
-                    writeBean.lastSendTime = System.currentTimeMillis();
-                }else{
-                    if(writeBean.sb.length() > 0){
-                        writeBean.sb.append(separators);
+    public void write(Channel channel,String msg,boolean useCache){
+        if(!useCache){
+            channel.writeAndFlush(msg);
+        }else{
+            servicePool.submit(()->{
+                synchronized (WriteHelper.this){
+                    if(channelMap.get(channel) == null){
+                        channelMap.put(channel,new WriteBean());
                     }
-                    writeBean.sb.append(msg);
+                    WriteBean writeBean = channelMap.get(channel);
+                    if(writeBean.sb.length() + msg.length() > maxBufferSize){
 
+                        writeBean.sb.append(separators);
+                        writeBean.sb.append(msg);
+                        channel.writeAndFlush(writeBean.sb.toString());
+                        //logger.debug("\r\nsend a big msg is:{},end big msg \r\n" ,writeBean.sb.toString());
+                        writeBean.sb.setLength(0);
+                        writeBean.lastSendTime = System.currentTimeMillis();
+                    }else{
+                        if(writeBean.sb.length() > 0){
+                            writeBean.sb.append(separators);
+                        }
+                        writeBean.sb.append(msg);
+
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     public int getMinBufferSize() {
