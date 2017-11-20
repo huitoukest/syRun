@@ -6,12 +6,14 @@ import java.util.concurrent.Executors;
 
 import com.alibaba.fastjson.JSONObject;
 import com.tingfeng.syRun.common.ConfigEntity;
+import com.tingfeng.syRun.common.HeartBeatHelper;
 import com.tingfeng.syRun.common.ResponseStatus;
 import com.tingfeng.syRun.common.WriteHelper;
 import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import com.tingfeng.syRun.common.ex.ReleaseLockException;
 import com.tingfeng.syRun.server.service.impl.SyLockService;
 import io.netty.channel.Channel;
+import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.ReferenceCountUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,12 +23,22 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 public class SyRunSeverHandler  extends SimpleChannelInboundHandler<String>{
-
+	private static final SyRunSeverHandler syRunSeverHandler = new SyRunSeverHandler();
+    private static boolean isInit = false;
 	private static final ExecutorService servicePool = Executors.newFixedThreadPool(ConfigEntity.getInstance().getServerHandlPoolSize());
 	private static Logger logger = LoggerFactory.getLogger(SyRunSeverHandler.class);
 	private static final WriteHelper writeHelper = new WriteHelper();
+    private static HeartBeatHelper hearBeatHelper = null;
 
 	public static final ThreadLocal<Channel> channels = new ThreadLocal<>();
+
+	private SyRunSeverHandler(){
+	}
+
+	public static SyRunSeverHandler getInstance(){
+		return syRunSeverHandler;
+	}
+
 
     public void messageReceived(Channel channel, String message)throws Exception
     {
@@ -39,7 +51,9 @@ public class SyRunSeverHandler  extends SimpleChannelInboundHandler<String>{
 			responseBean.setStatus(ResponseStatus.FAIL.getValue());
 			responseBean.setErrorMsg("null response msg ");
 			sendMessage(channel,"NULL",responseBean);
-		}else{
+		}else if (HeartBeatHelper.isHeartBeatMessage(message)){
+		     sendMessage(channel,message,HeartBeatHelper.getHeartBeatMessage(message));
+        }else{
 			str = message.toString();
 			final String reqMsg = str;
 			servicePool.submit(() ->{
@@ -63,6 +77,9 @@ public class SyRunSeverHandler  extends SimpleChannelInboundHandler<String>{
 	public static void sendMessage(Channel channel,String reqMsg,ResponseBean responseBean){
     	sendMessage(channel,reqMsg,responseBean,0);
 	}
+    public static void sendMessage(Channel channel,String reqMsg,String respMsg){
+        writeHelper.write(channel,respMsg);
+    }
 
     private static void sendMessage(Channel channel,final String reqMsg,final ResponseBean responseBean,final int sendCount){
 		//发送n次后,不再重试发送
@@ -122,4 +139,33 @@ public class SyRunSeverHandler  extends SimpleChannelInboundHandler<String>{
 		logger.info("链接断开:{}",ctx);
 		SyLockService.removeBlockLock(ctx.channel().id().toString());
 	}
+
+	@Override
+	public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+		super.userEventTriggered(ctx, evt);
+        if (evt instanceof IdleStateEvent) {
+            IdleStateEvent e = (IdleStateEvent) evt;
+            switch (e.state()) {
+                case READER_IDLE:
+                    handleReaderIdle(ctx);
+                    break;
+                /*case WRITER_IDLE:
+                    handleWriterIdle(ctx);
+                    break;
+                case ALL_IDLE:
+                    handleAllIdle(ctx);
+                    break;*/
+                default:
+                    break;
+            }
+        }
+	}
+
+    private void handleReaderIdle(ChannelHandlerContext ctx) {
+        logger.info("链接空闲,server主动断开:{}",ctx);
+        ctx.close();
+        SyLockService.removeBlockLock(ctx.channel().id().toString());
+    }
+
+
 }

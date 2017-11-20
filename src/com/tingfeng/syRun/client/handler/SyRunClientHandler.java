@@ -3,6 +3,7 @@ package com.tingfeng.syRun.client.handler;
 import com.alibaba.fastjson.JSONObject;
 import com.tingfeng.syRun.client.SyRunTCPClient;
 import com.tingfeng.syRun.common.ConfigEntity;
+import com.tingfeng.syRun.common.HeartBeatHelper;
 import com.tingfeng.syRun.common.WriteHelper;
 import com.tingfeng.syRun.common.bean.request.RequestBean;
 import com.tingfeng.syRun.common.bean.response.ResponseBean;
@@ -10,7 +11,6 @@ import com.tingfeng.syRun.client.util.SyRunMsgAsynchronizeUtil;
 import com.tingfeng.syRun.client.util.SyRunMsgSynchronizeUtil;
 import com.tingfeng.syRun.common.util.RequestUtil;
 import com.tingfeng.syRun.common.ex.OverRunTimeException;
-import com.tingfeng.syRun.server.SyRunTCPServer;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -18,8 +18,6 @@ import io.netty.util.ReferenceCountUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-import java.io.IOException;
 import java.util.concurrent.*;
 
 
@@ -29,13 +27,14 @@ import java.util.concurrent.*;
  */
 public class SyRunClientHandler extends SimpleChannelInboundHandler<String> {
 	private static Logger logger = LoggerFactory.getLogger(SyRunClientHandler.class);
-
+	private static boolean isInit = false;
 	public static final int SIZE_CORE_POOL = 1;
 	public static final long TIME_KEEP_ALIVE = 60L;
 
 	private static final SyRunClientHandler signleRunClientHandler = new SyRunClientHandler();
 
 	private static final WriteHelper writeHelper = new WriteHelper();
+	private static HeartBeatHelper hearBeatHelper = null;
 
 	/**
 	 * 单独开一个线程池来处理接收的数据,不然因为消息的顺序接收的关系,可能导致io接收线程阻塞,
@@ -48,7 +47,27 @@ public class SyRunClientHandler extends SimpleChannelInboundHandler<String> {
 
 	private SyRunClientHandler() {}
 
+	public static SyRunClientHandler getSigleInstance(){
+		init();
+		return signleRunClientHandler;
+	}
 
+	private synchronized  static void init(){
+		if(!isInit){
+			hearBeatHelper = new HeartBeatHelper(ConfigEntity.getInstance().getTimeHeartBeat()) {
+				@Override
+				public void handleReaderIdle(ChannelHandlerContext ctx) {
+					   SyRunTCPClient.doConnect();
+				}
+
+				@Override
+				public void writeMsg(Channel channel, String msg) {
+					writeHelper.write(channel,msg);
+				}
+			};
+			hearBeatHelper.startSendHeartBeatMessage(SyRunTCPClient.getChannel());
+		}
+	}
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext channelHandlerContext, String msg) throws Exception {
@@ -68,9 +87,7 @@ public class SyRunClientHandler extends SimpleChannelInboundHandler<String> {
 
 
 
-	public static SyRunClientHandler getSigleInstance(){
-		return signleRunClientHandler;
-	}
+
 /*
 	private static final AtomicInteger  reConnectCount = new AtomicInteger(0);
 	
@@ -123,8 +140,10 @@ public class SyRunClientHandler extends SimpleChannelInboundHandler<String> {
 	
 	public static void receiveMsg(String msg){
 		logger.debug("Client,收到消息: " + msg);
-		ResponseBean responseBean = JSONObject.parseObject(msg,ResponseBean.class);
-		receiveMsg(responseBean);
+		if(!HeartBeatHelper.isHeartBeatMessage(msg)){
+			ResponseBean responseBean = JSONObject.parseObject(msg,ResponseBean.class);
+			receiveMsg(responseBean);
+		}
 	}
 
 	public static void receiveMsg(ResponseBean responseBean){
@@ -204,5 +223,10 @@ public class SyRunClientHandler extends SimpleChannelInboundHandler<String> {
 		});*/
 		//}
 	}
-	
+
+	@Override
+	public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+		super.userEventTriggered(ctx, evt);
+		hearBeatHelper.userEventTriggered(ctx,evt);
+	}
 }

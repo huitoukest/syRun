@@ -25,8 +25,9 @@ public class ConfigEntity {
     private  int timeOutConnect = 20000;//连接超时时间,默认20秒.
     private  int timeReconnect = 2000;//重连2秒内.
 
-    private  int timeIoIdle = 30000;//IO空闲时间30秒一个.
-    private  int timeHeartBea = 30000;//心跳包30秒一个.
+    private  int timeClientIdle = 30000;//客户端空闲时间30秒一个.
+    private  int timeServerIdle = 30000;//服务器空闲时间30秒一个.
+    private  int timeHeartBeat = 20000;//心跳包.
 
     private  int timeOutRun = 300000;//300秒的运行超时时间/锁占用阻塞.
 
@@ -62,8 +63,9 @@ public class ConfigEntity {
             configEntity.serverIp = pro.getProperty("serverIp","127.0.0.1");
             configEntity.timeOutConnect = Integer.parseInt(pro.getProperty("timeOutConnect","20000"));
             configEntity.timeReconnect = Integer.parseInt(pro.getProperty("timeReconnect","2000"));
-            configEntity.timeIoIdle = Integer.parseInt(pro.getProperty("timeIoIdle","30000"));
-            configEntity.timeHeartBea = Integer.parseInt(pro.getProperty("timeHeartBea","30000"));
+            configEntity.timeClientIdle = Integer.parseInt(pro.getProperty("timeClientIdle","30000"));
+            configEntity.timeServerIdle = Integer.parseInt(pro.getProperty("timeServerIdle","30000"));
+            configEntity.timeHeartBeat = Integer.parseInt(pro.getProperty("timeHeartBeat","20000"));
             configEntity.timeOutRun = Integer.parseInt(pro.getProperty("timeOutRun","300000"));
             //keySession = pro.getProperty("keySession","key_session");
             configEntity.timeResendIdle = Integer.parseInt(pro.getProperty("timeResendIdle","5000"));
@@ -109,14 +111,16 @@ public class ConfigEntity {
         return timeReconnect;
     }
 
-    public  int getTimeIoIdle() {
-        return timeIoIdle;
+    public  int getTimeHeartBeat() {
+        return timeHeartBeat;
+    }
+    public int getTimeClientIdle() {
+        return timeClientIdle;
     }
 
-    public  int getTimeHeartBea() {
-        return timeHeartBea;
+    public int getTimeServerIdle() {
+        return timeServerIdle;
     }
-
     public  int getTimeOutRun() {
         return timeOutRun;
     }

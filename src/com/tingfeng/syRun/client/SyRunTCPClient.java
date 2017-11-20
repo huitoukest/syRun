@@ -1,27 +1,26 @@
 package com.tingfeng.syRun.client;
 
+import com.tingfeng.syRun.client.handler.ClientHeartBeathandler;
 import com.tingfeng.syRun.client.handler.SyRunClientHandler;
 import com.tingfeng.syRun.common.ConfigEntity;
 import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
-import io.netty.handler.codec.Delimiters;
+import io.netty.channel.*;
+import io.netty.handler.codec.*;
+import io.netty.handler.codec.string.LineEncoder;
+import io.netty.handler.codec.string.LineSeparator;
+import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.util.CharsetUtil;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class SyRunTCPClient {
@@ -35,6 +34,7 @@ public class SyRunTCPClient {
     private static EventLoopGroup workerGroup = new NioEventLoopGroup();
     public static Bootstrap bootstrap = getBootstrap();
     public static Channel channel = null; //getChannel(HOST,PORT);
+
     /**
      * 初始化Bootstrap
      * @return
@@ -50,11 +50,17 @@ public class SyRunTCPClient {
                     ChannelPipeline pipeline = ch.pipeline();
                     //pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 2, 0, 2));
                     //pipeline.addLast("frameEncoder", new LengthFieldPrepender(2));
-                    pipeline.addLast("frameDecoder",new DelimiterBasedFrameDecoder(81920, Delimiters.lineDelimiter()));
+                    //pipeline.addLast("frameDecoder",new DelimiterBasedFrameDecoder(81920, Delimiters.lineDelimiter()));
                     //pipeline.addLast("frameEncoder",new DelimiterBasedFrameDecoder(81920, Delimiters.lineDelimiter()));
+
+                    pipeline.addLast(new IdleStateHandler(ConfigEntity.getInstance().getTimeClientIdle()/1000, 0, 5));//心跳包
+                    pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(81920));
                     pipeline.addLast("decoder", new StringDecoder(CharsetUtil.UTF_8));
                     pipeline.addLast("encoder", new StringEncoder(CharsetUtil.UTF_8));
+                    pipeline.addLast("frameEncoder", new LineEncoder(LineSeparator.WINDOWS,CharsetUtil.UTF_8));
+                    pipeline.addLast("heartHandler",new ClientHeartBeathandler());
                     pipeline.addLast("handler", SyRunClientHandler.getSigleInstance());
+
                 }
             });
             b.option(ChannelOption.SO_KEEPALIVE, true);
@@ -64,14 +70,40 @@ public class SyRunTCPClient {
         return b;
     }
 
-    public synchronized static final Channel getChannel(String host,int port){
-        try {
+    public synchronized static final Channel doConnect(String host,int port){
+        /*try {
             channel = bootstrap.connect(host, port).sync().channel();
         } catch (Exception e) {
             logger.error(String.format("连接Server(IP[%s],PORT[%s])失败", host,port),e);
             return null;
+        }*/
+
+        if (channel != null && channel.isActive()) {
+            return channel;
         }
-        return channel;
+        ChannelFuture future = bootstrap.connect(host, port);
+        future.addListener(new ChannelFutureListener() {
+            public void operationComplete(ChannelFuture futureListener) throws Exception {
+                if (futureListener.isSuccess()) {
+                    channel = futureListener.channel();
+                    logger.info("Connect to server successfully!");
+                } else {
+                    logger.info("Failed to connect to server, try connect after 10s");
+                    futureListener.channel().eventLoop().schedule(new Runnable() {
+                        @Override
+                        public void run() {
+                            doConnect(host,port);
+                        }
+                    }, 10, TimeUnit.SECONDS);
+                }
+            }
+        });
+        try {
+            return future.sync().channel();
+        } catch (Exception e) {
+            logger.error(String.format("连接Server(IP[%s],PORT[%s])失败", host,port),e);
+            return null;
+        }
     }
 
     public synchronized static final Channel getChannel(){
@@ -85,8 +117,8 @@ public class SyRunTCPClient {
         return channel;
     }
 
-    public synchronized static final Channel reConnectChannel(){
-        return getChannel(serverIP,serverPort);
+    public synchronized static final Channel doConnect(){
+        return doConnect(serverIP,serverPort);
     }
 
     /*public static void sendMsg(String msg) throws Exception {
@@ -120,7 +152,7 @@ public class SyRunTCPClient {
 
     public static synchronized void init(String serverIP,int serverPort) throws IOException, InterruptedException{
         if(!isInited){
-            getChannel(serverIP,serverPort);
+            doConnect(serverIP,serverPort);
         }
     }
 

@@ -15,12 +15,12 @@ import java.util.concurrent.Executors;
 public class WriteHelper {
     private  int minBufferSize = 1024;
     private  int maxBufferSize = 4096;
-    private  int checkTime = 30;//30毫秒,空闲后会将剩余缓冲区的消息发送
-    private  int checkSleepTime = 2;//每隔2毫秒检查一次
+    private  int checkTime = 25;//毫秒,空闲后会将剩余缓冲区的消息发送
+    private  int checkSleepTime = 3;//每隔X毫秒检查一次
     private  int removeTime = 100000;//100秒没有消息就会被移出
     private  final String separators = "\r\n";
 
-    public static final int threadSize = 4;
+    public static final int threadSize = 2;
     private static final ExecutorService servicePool = Executors.newFixedThreadPool(threadSize);
 
     private static Logger logger = LoggerFactory.getLogger(WriteHelper.class);
@@ -71,7 +71,7 @@ public class WriteHelper {
     }
 
     public void write(Channel channel,String msg){
-        write(channel,msg,false);
+        write(channel,msg,true);
     }
 
     public void write(Channel channel,String msg,boolean useCache){

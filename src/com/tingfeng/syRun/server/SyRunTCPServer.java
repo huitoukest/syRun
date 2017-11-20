@@ -13,6 +13,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.*;
+import io.netty.handler.codec.string.LineEncoder;
+import io.netty.handler.codec.string.LineSeparator;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.CharsetUtil;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
@@ -69,13 +71,16 @@ public class SyRunTCPServer {
                         ChannelPipeline pipeline = ch.pipeline();
                         //pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 2, 0, 2));
                         //pipeline.addLast("frameEncoder", new LengthFieldPrepender(2));//此对象为 netty默认支持protocolbuf的编解码器
-                        pipeline.addLast("frameDecoder",new DelimiterBasedFrameDecoder(81920, Delimiters.lineDelimiter()));
+                        //pipeline.addLast("frameDecoder",new DelimiterBasedFrameDecoder(81920, Delimiters.lineDelimiter()));
                         //pipeline.addLast("frameEncoder",new DelimiterBasedFrameDecoder(81920, Delimiters.lineDelimiter()));
+                        pipeline.addLast(new IdleStateHandler(ConfigEntity.getInstance().getTimeServerIdle()/1000, 0, 0));
+                        pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(81920));
                         pipeline.addLast("decoder", new StringDecoder(CharsetUtil.UTF_8));
                         pipeline.addLast("encoder", new StringEncoder(CharsetUtil.UTF_8));
+                        pipeline.addLast("frameEncoder", new LineEncoder(LineSeparator.WINDOWS,CharsetUtil.UTF_8));
                         //pipeline.addLast("timeout", new IdleStateHandler(timer, 10, 10, 0));//此两项为添加心跳机制 10秒查看一次在线的客户端channel是否空闲，IdleStateHandler为netty jar包中提供的类
                         //pipeline.addLast("hearbeat", new Heartbeat());//此类 实现了IdleStateAwareChannelHandler接口
-                        pipeline.addLast(new SyRunSeverHandler());
+                        pipeline.addLast(SyRunSeverHandler.getInstance());
                     }
                 });
                 /**
