@@ -71,6 +71,9 @@ public class SyRunTCPClient {
     }
 
     public synchronized static final Channel doConnect(String host,int port){
+        return doConnect(host,port,ConfigEntity.getInstance().getTimeReconnect());
+    }
+    public synchronized static final Channel doConnect(String host,int port,int timeInteval){
         /*try {
             channel = bootstrap.connect(host, port).sync().channel();
         } catch (Exception e) {
@@ -78,11 +81,15 @@ public class SyRunTCPClient {
             return null;
         }*/
 
+
         if (channel != null && channel.isActive()) {
             return channel;
         }
+        if(timeInteval > 1000000){
+            return null;
+        }
         ChannelFuture future = bootstrap.connect(host, port);
-        future.addListener(new ChannelFutureListener() {
+        /*future.addListener(new ChannelFutureListener() {
             public void operationComplete(ChannelFuture futureListener) throws Exception {
                 if (futureListener.isSuccess()) {
                     channel = futureListener.channel();
@@ -99,10 +106,23 @@ public class SyRunTCPClient {
             }
         });
         try {
-            return future.sync().channel();
+             future.sync();
+            return channel;
+             // 4、监听端口关闭
+            //future.channel().closeFuture().sync();
         } catch (Exception e) {
             logger.error(String.format("连接Server(IP[%s],PORT[%s])失败", host,port),e);
             return null;
+        }*/
+
+        try {
+            ChannelFuture channelFuture = bootstrap.connect(host, port);
+            channel = channelFuture.sync().channel();
+            logger.info("Connect to server:{}:{} successfully!",host,port);
+            return channel;
+        } catch (Exception e) {
+            logger.error(String.format("连接Server(IP[%s],PORT[%s])失败", host,port),e);
+            return doConnect(host,port,timeInteval * 2);
         }
     }
 
@@ -147,7 +167,7 @@ public class SyRunTCPClient {
     public static void main(String[] args) throws Exception
     {
 
-
+        init();
     }
 
     public static synchronized void init(String serverIP,int serverPort) throws IOException, InterruptedException{

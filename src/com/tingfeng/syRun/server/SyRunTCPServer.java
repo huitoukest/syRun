@@ -91,13 +91,13 @@ public class SyRunTCPServer {
                 b.childOption(ChannelOption.SO_KEEPALIVE, true); // (6)
                 b.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);//使用PooledByteBufAllocator内存池
                 b.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);//关键是这句
-
+                // 绑定端口，同步等待成功
                 ChannelFuture channelFuture = b.bind(serverIp, serverPort).sync();
 
-                // 等待服务器 socket 关闭 。
-                // 在这个例子中，这不会发生，但你可以优雅地关闭你的服务器。
-                channelFuture.channel().closeFuture().sync();
                 logger.info("TCP服务器已启动");
+                // 等待服务器 socket 关闭 。
+                Channel channel = channelFuture.channel();
+                channel.closeFuture().sync();
                 isInited = true;
             } finally {
                 shutdown();
