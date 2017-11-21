@@ -13,6 +13,7 @@ import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import com.tingfeng.syRun.common.ex.ReleaseLockException;
 import com.tingfeng.syRun.server.service.impl.SyLockService;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.ReferenceCountUtil;
 import org.slf4j.Logger;
@@ -22,6 +23,12 @@ import com.tingfeng.syRun.server.util.SignleRunServerUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
+/**
+ * 1.首先跟服务器操作类一样继承ChannelHandlerAdapter类，重写channelRead和channelActive两个方法
+ *其中channelActive方法是用来发送客户端信息的，channelRead方法客户端是接收服务器数据的
+ *2.先声明一个全局变量firstMessage，用来接收客户端发出去的信息的值
+ */
+@ChannelHandler.Sharable
 public class SyRunSeverHandler  extends SimpleChannelInboundHandler<String>{
 	private static final SyRunSeverHandler syRunSeverHandler = new SyRunSeverHandler();
     private static boolean isInit = false;
@@ -138,6 +145,7 @@ public class SyRunSeverHandler  extends SimpleChannelInboundHandler<String>{
 		super.channelUnregistered(ctx);
 		logger.info("链接断开:{}",ctx);
 		SyLockService.removeBlockLock(ctx.channel().id().toString());
+		ctx.close();
 	}
 
 	@Override

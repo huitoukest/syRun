@@ -30,15 +30,17 @@ public abstract class HeartBeatHelper {
        synchronized (heartMsgKey){
            if(!isInit){
                new Thread(()->{
-                   synchronized (heartMsgKey){
-                       for(Channel channel: channelList){
-                           writeMsg(channel,heartMsg);
+                   while (true){
+                       synchronized (heartMsgKey){
+                           for(Channel channel: channelList){
+                               writeMsg(channel,heartMsg);
+                           }
                        }
-                   }
-                   try {
-                       Thread.sleep(sendInterval);
-                   } catch (InterruptedException e) {
-                       logger.error("send hearbeat msg Interrupted",e);
+                       try {
+                           Thread.sleep(sendInterval);
+                       } catch (InterruptedException e) {
+                           logger.error("send hearbeat msg Interrupted",e);
+                       }
                    }
                }).start();
            }

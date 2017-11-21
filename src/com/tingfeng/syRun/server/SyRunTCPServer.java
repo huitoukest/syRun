@@ -54,18 +54,24 @@ public class SyRunTCPServer {
 	private static boolean isInited = false;
 
     public static void main(String[] args) throws InterruptedException {
-    	init(ConfigEntity.getInstance().getServerIp(),ConfigEntity.getInstance().getServerTcpPort());
+           /* new Thread(()->{
+                try {
+                    Thread.sleep(8000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                shutdown();
+            }).start();*/
+    	    init(ConfigEntity.getInstance().getServerIp(), ConfigEntity.getInstance().getServerTcpPort());
     }
 
     public synchronized static void init(String serverIp,int serverPort) throws InterruptedException {
         if(!isInited){
             try {
-               // EventLoopGroup bossGroup = new NioEventLoopGroup(); // (1)
-               // EventLoopGroup workerGroup = new NioEventLoopGroup();
-                ServerBootstrap b = new ServerBootstrap();
-                b.group(bossGroup, workerGroup);
-                b.channel(NioServerSocketChannel.class);
-                b.childHandler(new ChannelInitializer<SocketChannel>() {
+                ServerBootstrap bootstrap = new ServerBootstrap();
+                bootstrap.group(bossGroup, workerGroup);
+                bootstrap.channel(NioServerSocketChannel.class);
+                bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     public void initChannel(SocketChannel ch) throws Exception {//ChannelInitializer 是一个特殊的处理类，他的目的是帮助使用者配置一个新的 Channel
                         ChannelPipeline pipeline = ch.pipeline();
@@ -73,13 +79,12 @@ public class SyRunTCPServer {
                         //pipeline.addLast("frameEncoder", new LengthFieldPrepender(2));//此对象为 netty默认支持protocolbuf的编解码器
                         //pipeline.addLast("frameDecoder",new DelimiterBasedFrameDecoder(81920, Delimiters.lineDelimiter()));
                         //pipeline.addLast("frameEncoder",new DelimiterBasedFrameDecoder(81920, Delimiters.lineDelimiter()));
-                        pipeline.addLast(new IdleStateHandler(ConfigEntity.getInstance().getTimeServerIdle()/1000, 0, 0));
+
+                        pipeline.addLast(new IdleStateHandler(ConfigEntity.getInstance().getTimeServerIdle()/1000, 0, 0));//心跳机制 10秒查看一次在线的客户端channel是否空闲
                         pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(81920));
                         pipeline.addLast("decoder", new StringDecoder(CharsetUtil.UTF_8));
                         pipeline.addLast("encoder", new StringEncoder(CharsetUtil.UTF_8));
                         pipeline.addLast("frameEncoder", new LineEncoder(LineSeparator.WINDOWS,CharsetUtil.UTF_8));
-                        //pipeline.addLast("timeout", new IdleStateHandler(timer, 10, 10, 0));//此两项为添加心跳机制 10秒查看一次在线的客户端channel是否空闲，IdleStateHandler为netty jar包中提供的类
-                        //pipeline.addLast("hearbeat", new Heartbeat());//此类 实现了IdleStateAwareChannelHandler接口
                         pipeline.addLast(SyRunSeverHandler.getInstance());
                     }
                 });
@@ -87,18 +92,21 @@ public class SyRunTCPServer {
                  * option() 是提供给NioServerSocketChannel 用来接收进来的连接。
                  * childOption() 是提供给由父管道 ServerChannel 接收到的连接
                  */
-                b.option(ChannelOption.SO_BACKLOG, 128);//指定的 Channel 实现的配置参数
-                b.childOption(ChannelOption.SO_KEEPALIVE, true); // (6)
-                b.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);//使用PooledByteBufAllocator内存池
-                b.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);//关键是这句
+                bootstrap.option(ChannelOption.SO_BACKLOG, 1024); // 连接数
+                //bootstrap.option(ChannelOption.TCP_NODELAY, true); // 不延迟，消息立即发送
+                bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true); // 长连接
+                bootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);//使用PooledByteBufAllocator内存池
                 // 绑定端口，同步等待成功
-                ChannelFuture channelFuture = b.bind(serverIp, serverPort).sync();
-
-                logger.info("TCP服务器已启动");
-                // 等待服务器 socket 关闭 。
-                Channel channel = channelFuture.channel();
-                channel.closeFuture().sync();
-                isInited = true;
+                ChannelFuture channelFuture = bootstrap.bind(serverIp, serverPort).sync();
+                if(channelFuture.isSuccess()){
+                    logger.info("TCP服务器已启动");
+                    // 等待服务器 socket 关闭 。
+                    Channel channel = channelFuture.channel();
+                    isInited = true;
+                    channel.closeFuture().sync();
+                }else{
+                    logger.info("TCP服务器启动失败!");
+                }
             } finally {
                 shutdown();
             }

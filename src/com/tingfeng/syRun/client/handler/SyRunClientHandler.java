@@ -12,6 +12,7 @@ import com.tingfeng.syRun.client.util.SyRunMsgSynchronizeUtil;
 import com.tingfeng.syRun.common.util.RequestUtil;
 import com.tingfeng.syRun.common.ex.OverRunTimeException;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.ReferenceCountUtil;
@@ -25,6 +26,7 @@ import java.util.concurrent.*;
  * 异步handler
  * @author huitoukest
  */
+@ChannelHandler.Sharable
 public class SyRunClientHandler extends SimpleChannelInboundHandler<String> {
 	private static Logger logger = LoggerFactory.getLogger(SyRunClientHandler.class);
 	private static boolean isInit = false;
@@ -65,8 +67,11 @@ public class SyRunClientHandler extends SimpleChannelInboundHandler<String> {
 					writeHelper.write(channel,msg);
 				}
 			};
-			hearBeatHelper.startSendHeartBeatMessage(SyRunTCPClient.getChannel());
 		}
+	}
+
+	public static void startSendHeartBeatMsg(){
+		hearBeatHelper.startSendHeartBeatMessage(SyRunTCPClient.getChannel());
 	}
 
 	@Override
@@ -160,7 +165,7 @@ public class SyRunClientHandler extends SimpleChannelInboundHandler<String> {
 
 	public static void sendMessage(RequestBean<?> requestBean){
 		try {
-			SyRunTCPClient.init(ConfigEntity.getInstance().getServerIp(),ConfigEntity.getInstance().getServerTcpPort());
+			SyRunTCPClient.doConnect(ConfigEntity.getInstance().getServerIp(),ConfigEntity.getInstance().getServerTcpPort());
 		} catch (Exception e) {
 			logger.error("");
 		}
@@ -227,6 +232,19 @@ public class SyRunClientHandler extends SimpleChannelInboundHandler<String> {
 	@Override
 	public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
 		super.userEventTriggered(ctx, evt);
+		logger.info("和服务器连接空闲,准备重连:{}",ctx);
 		hearBeatHelper.userEventTriggered(ctx,evt);
+	}
+
+	@Override
+	public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+		super.channelUnregistered(ctx);
+		logger.info("和服务器连接断开,准备重连:{}",ctx);
+		hearBeatHelper.handleReaderIdle(ctx);
+	}
+
+	@Override
+	public void channelActive(ChannelHandlerContext ctx) throws Exception {
+		super.channelActive(ctx);
 	}
 }
