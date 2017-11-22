@@ -1,6 +1,7 @@
 package com.tingfeng.syRun.client;
 
 import com.tingfeng.syRun.client.handler.SyRunClientHandler;
+import com.tingfeng.syRun.client.util.ClientHandlerUtil;
 import com.tingfeng.syRun.common.ConfigEntity;
 import io.netty.channel.*;
 import io.netty.handler.codec.*;
@@ -81,7 +82,7 @@ public class SyRunTCPClient {
             if(channelFuture.isSuccess()){
                 channel = channelFuture.channel();
                 logger.info("Connect to server:{}:{} successfully!",host,port);
-                SyRunClientHandler.startSendHeartBeatMsg();
+                ClientHandlerUtil.startSendHeartBeatMsg();
                 return channel;
             }else{
                 throw new Exception("client connect to server fail!");

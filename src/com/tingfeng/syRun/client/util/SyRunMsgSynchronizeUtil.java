@@ -59,7 +59,7 @@ public class SyRunMsgSynchronizeUtil {
 		msgResPonseMap.remove(id);
 		CountDownLatch countDownLatch = new CountDownLatch(1);
 		countDownLatchMap.put(id,countDownLatch);
-		SyRunClientHandler.sendMessage(channel,requestBean);
+		ClientHandlerUtil.sendMessage(channel,requestBean);
 		countDownLatch.await();
 		ResponseBean responseBean = msgResPonseMap.get(id);
 		msgResPonseMap.remove(id);

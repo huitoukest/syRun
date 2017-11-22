@@ -35,7 +35,7 @@ public class SyRunMsgAsynchronizeUtil {
 	 */
 	public static void sendMsg(Channel channel,RequestBean<?> requestBean, MsgHandler msgHandler) throws UnsupportedEncodingException {
 		   msgHandlerMap.put(requestBean.getId(),msgHandler);
-		   SyRunClientHandler.sendMessage(channel,requestBean);
+		   ClientHandlerUtil.sendMessage(channel,requestBean);
 	}
 
 	/**

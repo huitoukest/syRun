@@ -7,6 +7,7 @@ import com.tingfeng.syRun.common.bean.response.ResponseBean;
 import com.tingfeng.syRun.common.util.IdWorker;
 import com.tingfeng.syRun.server.handler.SyRunSeverHandler;
 import com.tingfeng.syRun.server.service.impl.SyLockService;
+import com.tingfeng.syRun.server.util.ServerHandleUtil;
 import io.netty.channel.Channel;
 
 /**
@@ -28,7 +29,7 @@ public class SyLockController {
 	 * @return 
 	 */
 	public String lockSyLock(String id,SyLockParam syLockParam) {
-		Channel channel = SyRunSeverHandler.channels.get();
+		Channel channel = ServerHandleUtil.channels.get();
 		String lockId =  syLockService.lockSyLock(channel.id().toString(),id,syLockParam);
 		return lockId;
 	}
@@ -38,7 +39,7 @@ public class SyLockController {
 	 * @return
 	 */
 	public void unlockSyLock(String id,SyLockParam syLockParam) {
-		Channel channel = SyRunSeverHandler.channels.get();
+		Channel channel = ServerHandleUtil.channels.get();
 		syLockService.unlockSyLock(channel.id().toString(),id,syLockParam);
 	}
 

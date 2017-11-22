@@ -77,32 +77,5 @@ public abstract class HeartBeatHelper {
        }
        return null;
     }
-
-    public void userEventTriggered(ChannelHandlerContext ctx, Object evt )
-    {
-        // IdleStateHandler 所产生的 IdleStateEvent 的处理逻辑.
-        if (evt instanceof IdleStateEvent) {
-            IdleStateEvent e = (IdleStateEvent) evt;
-            switch (e.state()) {
-                case READER_IDLE:
-                    handleReaderIdle(ctx);
-                    break;
-                /*case WRITER_IDLE:
-                    handleWriterIdle(ctx);
-                    break;
-                case ALL_IDLE:
-                    handleAllIdle(ctx);
-                    break;*/
-                default:
-                    break;
-            }
-        }
-    }
-
-    /**
-     * 空闲的时候进行处理
-     * @param ctx
-     */
-    abstract  public void handleReaderIdle(ChannelHandlerContext ctx) ;
     abstract  public void writeMsg(Channel channel,String msg) ;
 }
