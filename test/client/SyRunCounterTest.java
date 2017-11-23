@@ -131,14 +131,14 @@ public class SyRunCounterTest{
                  Future<String> future = service.submit(new Callable<String>() {
                     @Override
                     public String call() throws Exception {
-                        for(int i = 0 ;i < 500 ; i++) {
+                        for(int i = 0 ;i < 1000 ; i++) {
                             long re1  = SyRunClientUtil.addCounterValue("redis:hsh:test:count0", 2);
                             long re2  = SyRunClientUtil.addCounterValue("redis:hsh:test:count0", -1);
                             if(i % 1000 == 0){
                                 System.out.println("re1:" + re1 + " ,re2:" + re2);
                             }
                         }
-                         atomicInteger.incrementAndGet();
+						atomicInteger.incrementAndGet();
                         if(atomicInteger.addAndGet(0) == threadPoolSize){
                             System.out.println("complete all!");
                             service.shutdown();

@@ -17,9 +17,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class ClientWriteHelper {
     private  int minBufferSize = 1024;
-    private  int maxBufferSize = 4096;
-    private  int checkTime = 25;//毫秒,空闲后会将剩余缓冲区的消息发送
-    private  int checkSleepTime = 3;//每隔X毫秒检查一次
+    private  int maxBufferSize = 4196;
+    private  int checkTime = 10;//毫秒,空闲后会将剩余缓冲区的消息发送
+    private  int checkSleepTime = 2;//每隔X毫秒检查一次
     private  int removeTime = 100000;//100秒没有消息就会被移出
     private  final String separators = "\r\n";
 
@@ -77,7 +77,7 @@ public abstract class ClientWriteHelper {
     }
 
     public void write(Channel channel,String msg ){
-        write(channel,msg,true);
+        write(channel,msg,false);
     }
 
     public void write(Channel channel,String msg,boolean useCache){
