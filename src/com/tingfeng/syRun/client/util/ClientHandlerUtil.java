@@ -40,11 +40,10 @@ public class ClientHandlerUtil {
                  * 当前消息重发次数超过配置次数时回调
                  *
                  * @param sendMsg
-                 * @param needSplit
                  */
                 @Override
-                public void msgReSendOverCount(String sendMsg, boolean needSplit) {
-                            receiveSendFailMsg(sendMsg,needSplit);
+                public void msgReSendOverCount(String sendMsg) {
+                            receiveSendFailMsg(sendMsg);
                 }
 
                 /**
@@ -72,16 +71,9 @@ public class ClientHandlerUtil {
     /**
      *
      * @param reqMsg
-     * @param needSplit
      */
-    public static void receiveSendFailMsg(String reqMsg,boolean needSplit){
+    public static void receiveSendFailMsg(String reqMsg){
             serviceMsgPool.submit(()-> {
-                if (needSplit) {
-                    String[] msgArray = reqMsg.split(MSG_SPLIT);
-                    for (String str : msgArray) {
-                        receiveSendFailMsg(str, false);
-                    }
-                } else {
                     logger.debug("Client,收到消息: " + reqMsg);
                     if (!HeartBeatHelper.isHeartBeatMessage(reqMsg)) {
                         JSONObject requestObject = JSONObject.parseObject(reqMsg);
@@ -92,36 +84,20 @@ public class ClientHandlerUtil {
                         handleMsg(responseBean);
                     }
                 }
-            });
-    }
-
-    /**
-     * 默认不分割消息
-     * @param msg
-     */
-    public static void receiveMsg(String msg){
-        receiveMsg(msg,false);
+            );
     }
 
     /**
      *
      * @param msg
-     * @param needSplit
      */
-    public static void receiveMsg(String msg,boolean needSplit) {
+    public static void receiveMsg(String msg ) {
         serviceMsgPool.submit(()-> {
-            if (needSplit) {
-                String[] msgArray = msg.split(MSG_SPLIT);
-                for (String str : msgArray) {
-                    receiveMsg(str, false);
-                }
-            } else {
                 logger.debug("Client,收到消息: " + msg);
                 if (!HeartBeatHelper.isHeartBeatMessage(msg)) {
                     ResponseBean responseBean = JSONObject.parseObject(msg, ResponseBean.class);
                     handleMsg(responseBean);
                 }
-            }
         });
     }
 
