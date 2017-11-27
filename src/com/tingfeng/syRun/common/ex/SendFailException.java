@@ -1,4 +1,4 @@
-package com.tingfeng.syRun.common.ex;
+package com.tingfeng.syrun.common.ex;
 
 /**
  * 发送消息失败异常

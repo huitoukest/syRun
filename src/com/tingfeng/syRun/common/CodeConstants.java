@@ -1,4 +1,4 @@
-package com.tingfeng.syRun.common;
+package com.tingfeng.syrun.common;
 
 public class CodeConstants {
 	

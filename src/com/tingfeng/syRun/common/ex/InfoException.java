@@ -1,4 +1,4 @@
-package com.tingfeng.syRun.common.ex;
+package com.tingfeng.syrun.common.ex;
 
 /**
  * 自定义消息异常,用来向上层传递消息之用,一般不用来处理真正的异常

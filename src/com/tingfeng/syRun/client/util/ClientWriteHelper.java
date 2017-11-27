@@ -1,7 +1,7 @@
-package com.tingfeng.syRun.client.util;
+package com.tingfeng.syrun.client.util;
 
 
-import com.tingfeng.syRun.common.ConfigEntity;
+import com.tingfeng.syrun.common.ConfigEntity;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;

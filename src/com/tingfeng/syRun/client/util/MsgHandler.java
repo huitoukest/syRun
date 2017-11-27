@@ -1,6 +1,6 @@
-package com.tingfeng.syRun.client.util;
+package com.tingfeng.syrun.client.util;
 
-import com.tingfeng.syRun.common.bean.response.ResponseBean;
+import com.tingfeng.syrun.common.bean.response.ResponseBean;
 
 import java.io.IOException;
 

@@ -1,4 +1,4 @@
-package com.tingfeng.syRun.server;
+package com.tingfeng.syrun.server;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -27,8 +27,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
-import com.tingfeng.syRun.common.ConfigEntity;
-import com.tingfeng.syRun.server.handler.SyRunSeverHandler;
+import com.tingfeng.syrun.common.ConfigEntity;
+import com.tingfeng.syrun.server.handler.SyRunSeverHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

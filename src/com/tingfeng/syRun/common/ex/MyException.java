@@ -1,4 +1,4 @@
-package com.tingfeng.syRun.common.ex;
+package com.tingfeng.syrun.common.ex;
 
 /**
  * 自定义标记的异常

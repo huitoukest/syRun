@@ -1,4 +1,4 @@
-package com.tingfeng.syRun.client.util;
+package com.tingfeng.syrun.client.util;
 /**
  *
  */

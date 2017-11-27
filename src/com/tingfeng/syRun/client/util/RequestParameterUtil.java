@@ -1,12 +1,12 @@
-package com.tingfeng.syRun.client.util;
+package com.tingfeng.syrun.client.util;
 
-import com.tingfeng.syRun.common.MsgType;
-import com.tingfeng.syRun.common.bean.request.BaseRequestParam;
-import com.tingfeng.syRun.common.bean.request.CounterParam;
-import com.tingfeng.syRun.common.bean.request.RequestBean;
-import com.tingfeng.syRun.common.bean.request.SyLockParam;
-import com.tingfeng.syRun.common.RequestType;
-import com.tingfeng.syRun.common.util.RequestUtil;
+import com.tingfeng.syrun.common.MsgType;
+import com.tingfeng.syrun.common.bean.request.BaseRequestParam;
+import com.tingfeng.syrun.common.bean.request.CounterParam;
+import com.tingfeng.syrun.common.bean.request.RequestBean;
+import com.tingfeng.syrun.common.bean.request.SyLockParam;
+import com.tingfeng.syrun.common.RequestType;
+import com.tingfeng.syrun.common.util.RequestUtil;
 
 /**
  * 根据参数,构建相应的请求参数

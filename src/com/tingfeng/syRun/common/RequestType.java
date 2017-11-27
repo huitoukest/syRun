@@ -1,4 +1,4 @@
-package com.tingfeng.syRun.common;
+package com.tingfeng.syrun.common;
 
 /**
  * 发送和接收的请求类型

@@ -7,15 +7,15 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.alibaba.fastjson.JSONObject;
-import com.tingfeng.syRun.client.SyRunTCPClient;
-import com.tingfeng.syRun.client.util.MsgHandler;
-import com.tingfeng.syRun.common.ResponseStatus;
-import com.tingfeng.syRun.common.bean.response.ResponseBean;
+import com.tingfeng.syrun.client.SyRunTCPClient;
+import com.tingfeng.syrun.client.util.MsgHandler;
+import com.tingfeng.syrun.common.ResponseStatus;
+import com.tingfeng.syrun.common.bean.response.ResponseBean;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.tingfeng.syRun.common.bean.request.SyLockParam;
-import com.tingfeng.syRun.client.util.SyRunClientUtil;
+import com.tingfeng.syrun.common.bean.request.SyLockParam;
+import com.tingfeng.syrun.client.util.SyRunClientUtil;
 
 
 public class SyRunSyLockTest{

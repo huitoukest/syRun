@@ -1,6 +1,6 @@
 import com.alibaba.fastjson.JSONObject;
-import com.tingfeng.syRun.common.bean.request.CounterParam;
-import com.tingfeng.syRun.common.bean.request.RequestBean;
+import com.tingfeng.syrun.common.bean.request.CounterParam;
+import com.tingfeng.syrun.common.bean.request.RequestBean;
 import org.junit.Test;
 
 public class JsonTest {

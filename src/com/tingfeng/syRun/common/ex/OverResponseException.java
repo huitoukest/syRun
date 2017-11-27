@@ -1,4 +1,4 @@
-package com.tingfeng.syRun.common.ex;
+package com.tingfeng.syrun.common.ex;
 
 /**
  * 超时异常,超过最大响应时间

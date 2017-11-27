@@ -1,4 +1,4 @@
-package com.tingfeng.syRun.common.util;
+package com.tingfeng.syrun.common.util;
 
 import java.util.List;
 import java.util.Map;

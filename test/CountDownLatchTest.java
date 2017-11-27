@@ -1,7 +1,7 @@
 import client.SyRunSyLockTest;
-import com.tingfeng.syRun.common.bean.request.RequestBean;
-import com.tingfeng.syRun.common.bean.response.ResponseBean;
-import com.tingfeng.syRun.common.util.IdWorker;
+import com.tingfeng.syrun.common.bean.request.RequestBean;
+import com.tingfeng.syrun.common.bean.response.ResponseBean;
+import com.tingfeng.syrun.common.util.IdWorker;
 import org.junit.Test;
 
 import java.util.concurrent.*;

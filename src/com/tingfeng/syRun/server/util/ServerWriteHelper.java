@@ -1,9 +1,9 @@
-package com.tingfeng.syRun.server.util;
+package com.tingfeng.syrun.server.util;
 
 
 import com.alibaba.fastjson.JSONObject;
-import com.tingfeng.syRun.common.ConfigEntity;
-import com.tingfeng.syRun.common.bean.response.ResponseBean;
+import com.tingfeng.syrun.common.ConfigEntity;
+import com.tingfeng.syrun.common.bean.response.ResponseBean;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;

@@ -1,6 +1,6 @@
-package com.tingfeng.syRun.common.util;
+package com.tingfeng.syrun.common.util;
 
-import com.tingfeng.syRun.common.bean.response.ResponseBean;
+import com.tingfeng.syrun.common.bean.response.ResponseBean;
 import org.slf4j.Logger;
 
 import javax.xml.ws.Response;

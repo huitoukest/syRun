@@ -1,4 +1,4 @@
-package com.tingfeng.syRun.common.bean.request;
+package com.tingfeng.syrun.common.bean.request;
 /**
  * 通用的请求参数
  *

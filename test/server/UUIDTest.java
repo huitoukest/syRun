@@ -1,6 +1,6 @@
 package server;
 
-import com.tingfeng.syRun.common.util.RequestUtil;
+import com.tingfeng.syrun.common.util.RequestUtil;
 import org.junit.Test;
 
 import java.util.HashMap;

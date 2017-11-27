@@ -9,16 +9,16 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.alibaba.fastjson.JSON;
-import com.tingfeng.syRun.client.SyRunTCPClient;
-import com.tingfeng.syRun.client.util.MsgHandler;
-import com.tingfeng.syRun.common.ResponseStatus;
-import com.tingfeng.syRun.common.bean.response.ResponseBean;
+import com.tingfeng.syrun.client.SyRunTCPClient;
+import com.tingfeng.syrun.client.util.MsgHandler;
+import com.tingfeng.syrun.common.ResponseStatus;
+import com.tingfeng.syrun.common.bean.response.ResponseBean;
 import org.junit.Test;
 
-import com.tingfeng.syRun.client.bean.FrequencyBean;
-import com.tingfeng.syRun.client.util.SyRunClientUtil;
-import com.tingfeng.syRun.common.FrequencyControlHelper;
-import com.tingfeng.syRun.common.ex.OverRunTimeException;
+import com.tingfeng.syrun.client.bean.FrequencyBean;
+import com.tingfeng.syrun.client.util.SyRunClientUtil;
+import com.tingfeng.syrun.common.FrequencyControlHelper;
+import com.tingfeng.syrun.common.ex.OverRunTimeException;
 
 
 public class SyRunCounterTest{

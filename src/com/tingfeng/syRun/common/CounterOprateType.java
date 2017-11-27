@@ -1,4 +1,4 @@
-package com.tingfeng.syRun.common;
+package com.tingfeng.syrun.common;
 
 public enum CounterOprateType {
 	initCounter,setCounterValue,setCounterExpireTime,getCounterExpireTime,getCounterValue,addCounterValue;

@@ -8,16 +8,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import com.tingfeng.syRun.common.ResponseStatus;
-import com.tingfeng.syRun.common.util.RequestUtil;
-import com.tingfeng.syRun.common.bean.response.ResponseBean;
+import com.tingfeng.syrun.common.ResponseStatus;
+import com.tingfeng.syrun.common.util.RequestUtil;
+import com.tingfeng.syrun.common.bean.response.ResponseBean;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.alibaba.fastjson.JSONObject;
-import com.tingfeng.syRun.common.bean.request.SyLockParam;
-import com.tingfeng.syRun.common.util.IdWorker;
-import com.tingfeng.syRun.server.controller.SyLockController;
+import com.tingfeng.syrun.common.bean.request.SyLockParam;
+import com.tingfeng.syrun.common.util.IdWorker;
+import com.tingfeng.syrun.server.controller.SyLockController;
 
 public class SyLockTest {
 	private SyLockController syLockController = null;

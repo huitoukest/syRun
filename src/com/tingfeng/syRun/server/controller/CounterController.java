@@ -1,8 +1,8 @@
-package com.tingfeng.syRun.server.controller;
+package com.tingfeng.syrun.server.controller;
 import java.io.IOException;
 
-import com.tingfeng.syRun.server.bean.CounterBean;
-import com.tingfeng.syRun.server.service.impl.CounterService;
+import com.tingfeng.syrun.server.bean.CounterBean;
+import com.tingfeng.syrun.server.service.impl.CounterService;
 
 public class CounterController {
 	private static CounterService counterHelper =  CounterService.getSigleInstance();	

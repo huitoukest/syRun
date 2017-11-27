@@ -1,8 +1,8 @@
-package com.tingfeng.syRun.server.util;
+package com.tingfeng.syrun.server.util;
 
 import java.util.Map;
 
-import com.tingfeng.syRun.common.bean.request.CounterParam;
+import com.tingfeng.syrun.common.bean.request.CounterParam;
 
 public class CounterUtil {
 	/**

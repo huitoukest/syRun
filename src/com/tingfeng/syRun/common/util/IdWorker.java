@@ -1,4 +1,4 @@
-package com.tingfeng.syRun.common.util;
+package com.tingfeng.syrun.common.util;
 /**
  * twitter id 生成器
  */

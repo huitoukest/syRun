@@ -1,12 +1,12 @@
-package com.tingfeng.syRun.client.util;
+package com.tingfeng.syrun.client.util;
 
 import com.alibaba.fastjson.JSONObject;
-import com.tingfeng.syRun.client.SyRunTCPClient;
-import com.tingfeng.syRun.common.*;
-import com.tingfeng.syRun.common.bean.request.RequestBean;
-import com.tingfeng.syRun.common.bean.response.ResponseBean;
-import com.tingfeng.syRun.common.ex.OverRunTimeException;
-import com.tingfeng.syRun.common.util.RequestUtil;
+import com.tingfeng.syrun.client.SyRunTCPClient;
+import com.tingfeng.syrun.common.*;
+import com.tingfeng.syrun.common.bean.request.RequestBean;
+import com.tingfeng.syrun.common.bean.response.ResponseBean;
+import com.tingfeng.syrun.common.ex.OverRunTimeException;
+import com.tingfeng.syrun.common.util.RequestUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;

@@ -1,4 +1,4 @@
-package com.tingfeng.syRun.client.bean;
+package com.tingfeng.syrun.client.bean;
 
 /**
  * 频率信息bean

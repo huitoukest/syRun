@@ -1,4 +1,4 @@
-package com.tingfeng.syRun.common;
+package com.tingfeng.syrun.common;
 
 /**
  * 业务消息的类型

@@ -1,6 +1,6 @@
-package com.tingfeng.syRun.client.handler;
+package com.tingfeng.syrun.client.handler;
 
-import com.tingfeng.syRun.client.util.ClientHandlerUtil;
+import com.tingfeng.syrun.client.util.ClientHandlerUtil;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;

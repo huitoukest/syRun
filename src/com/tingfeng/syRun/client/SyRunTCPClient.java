@@ -1,8 +1,8 @@
-package com.tingfeng.syRun.client;
+package com.tingfeng.syrun.client;
 
-import com.tingfeng.syRun.client.handler.SyRunClientHandler;
-import com.tingfeng.syRun.client.util.ClientHandlerUtil;
-import com.tingfeng.syRun.common.ConfigEntity;
+import com.tingfeng.syrun.client.handler.SyRunClientHandler;
+import com.tingfeng.syrun.client.util.ClientHandlerUtil;
+import com.tingfeng.syrun.common.ConfigEntity;
 import io.netty.channel.*;
 import io.netty.handler.codec.*;
 import io.netty.handler.codec.string.LineEncoder;

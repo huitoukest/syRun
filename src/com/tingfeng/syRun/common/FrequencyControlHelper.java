@@ -1,10 +1,10 @@
-package com.tingfeng.syRun.common;
+package com.tingfeng.syrun.common;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.tingfeng.syRun.client.bean.FrequencyBean;
-import com.tingfeng.syRun.client.util.SingeStepException;
+import com.tingfeng.syrun.client.bean.FrequencyBean;
+import com.tingfeng.syrun.client.util.SingeStepException;
 
 /**
  *  频率检查类

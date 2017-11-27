@@ -1,6 +1,6 @@
-package com.tingfeng.syRun.common.bean.response;
+package com.tingfeng.syrun.common.bean.response;
 
-import com.tingfeng.syRun.common.ResponseStatus;
+import com.tingfeng.syrun.common.ResponseStatus;
 
 import java.io.Serializable;
 

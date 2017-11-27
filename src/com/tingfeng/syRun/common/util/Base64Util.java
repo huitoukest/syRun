@@ -1,4 +1,4 @@
-package com.tingfeng.syRun.common.util;
+package com.tingfeng.syrun.common.util;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
